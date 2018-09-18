@@ -17,8 +17,17 @@ namespace Sisk.SmarterSuit {
         private SuitData _dataFromLastCockpit;
         private IMyIdentity _identity;
         private int _ticks;
+
+        /// <summary>
+        ///     The state that indicates the actions executed after simulation.
+        /// </summary>
         private State State { get; set; }
 
+        /// <summary>
+        ///     Checks if enough oxygen around the given character.
+        /// </summary>
+        /// <param name="character">The character used to check if a helmet is needed.</param>
+        /// <returns>Return true if enough oxygen is available.</returns>
         private static bool CheckHelmetNeeded(IMyCharacter character) {
             bool helmet;
 
@@ -33,6 +42,11 @@ namespace Sisk.SmarterSuit {
             return helmet;
         }
 
+        /// <summary>
+        ///     Gets the medical room that is closest to the given entity.
+        /// </summary>
+        /// <param name="entity">The entity used to find the closest medical room.</param>
+        /// <returns>Return the closest medical room or <see langword="null" />.</returns>
         private static IMyMedicalRoom GetMedialRoom(IMyEntity entity) {
             var sphere = entity.PositionComp.WorldVolume;
             var entities = MyAPIGateway.Entities.GetTopMostEntitiesInSphere(ref sphere).OfType<IMyCubeGrid>().ToList();
@@ -55,6 +69,12 @@ namespace Sisk.SmarterSuit {
             return null;
         }
 
+        /// <summary>
+        ///     Checks if the ground is close by.
+        /// </summary>
+        /// <param name="character">The character used to check distance.</param>
+        /// <param name="gravity">The gravity direction used to determine in which direction we check.</param>
+        /// <returns>Return true if there is ground in 5m distance.</returns>
         private static bool IsGroundInRange(IMyCharacter character, Vector3 gravity) {
             if (gravity.Length() > 0) {
                 var position = character.GetPosition();
@@ -69,6 +89,11 @@ namespace Sisk.SmarterSuit {
             return false;
         }
 
+        /// <summary>
+        ///     Sets suit functions.
+        /// </summary>
+        /// <param name="character">The character which should enable/disable the systems.</param>
+        /// <param name="data">A data structure to check which systems should be enabled/disabled</param>
         private static void SetSuitFunctions(IMyCharacter character, SuitData data) {
             if (character == null) {
                 return;
@@ -95,6 +120,7 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        /// <inheritdoc />
         public override void BeforeStart() {
             if (MyAPIGateway.Utilities.IsDedicated) {
                 return;
@@ -116,6 +142,7 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        /// <inheritdoc />
         public override void UpdateAfterSimulation() {
             if (State == State.None) {
                 return;
@@ -199,6 +226,7 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        /// <inheritdoc />
         protected override void UnloadData() {
             var player = MyAPIGateway.Session.Player;
             if (player != null) {
@@ -216,6 +244,11 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        /// <summary>
+        ///     Called on <see cref="IMyIdentity.CharacterChanged" /> event. Used to check if we respawned.
+        /// </summary>
+        /// <param name="oldCharacter">The old character instance.</param>
+        /// <param name="newCharacter">The new character instance.</param>
         private void OnCharacterChanged(IMyCharacter oldCharacter, IMyCharacter newCharacter) {
             var respawn = oldCharacter != newCharacter;
 
@@ -227,6 +260,12 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        /// <summary>
+        ///     Called on <see cref="IMyPlayer.IdentityChanged" /> event. Used keep track of
+        ///     <see cref="IMyIdentity.CharacterChanged" /> event after identity change.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="identity"></param>
         private void OnIdentityChanged(IMyPlayer player, IMyIdentity identity) {
             _identity.CharacterChanged -= OnCharacterChanged;
 
@@ -234,6 +273,12 @@ namespace Sisk.SmarterSuit {
             _identity.CharacterChanged += OnCharacterChanged;
         }
 
+        /// <summary>
+        ///     Called on <see cref="IMyCharacter.MovementStateChanged" /> event. Used to check if we leave a cockpit.
+        /// </summary>
+        /// <param name="character">The character who triggered this event.</param>
+        /// <param name="oldState">The old movement state.</param>
+        /// <param name="newState">The new movement state.</param>
         private void OnMovementStateChanged(IMyCharacter character, MyCharacterMovementEnum oldState, MyCharacterMovementEnum newState) {
             if (oldState == MyCharacterMovementEnum.Sitting) {
                 var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
@@ -276,10 +321,18 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        /// <summary>
+        ///     Register character events.
+        /// </summary>
+        /// <param name="character">The character.</param>
         private void RegisterEvents(IMyCharacter character) {
             character.MovementStateChanged += OnMovementStateChanged;
         }
 
+        /// <summary>
+        ///     UnRegister character events.
+        /// </summary>
+        /// <param name="character">The character.</param>
         private void UnRegisterEvents(IMyCharacter character) {
             character.MovementStateChanged -= OnMovementStateChanged;
         }

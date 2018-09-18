@@ -9,6 +9,7 @@
 A small suit software update that prevents death due to malfunction of the suit.
 
 The new suit update will now check some parameters when leaving a cockpit or after a respawn to eliminate potential sources of danger.
+In addition, the speed is adjusted relative to the ship.
 
 **helmet**
 * opened when enviroment with oxygen detected.
