@@ -1,5 +1,10 @@
 mode: ContinuousDelivery
-branches: {}
+branches:
+  master:
+    mode: ContinuousDeployment
+  develop:
+    mode: ContinuousDeployment
+  feature:
+    mode: ContinuousDeployment
 ignore:
   sha: []
-
