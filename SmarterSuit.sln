@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4393A9BF-E798-4B28-884B-1942E1E90C86}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		CHANGELOG.md = CHANGELOG.md
 		deploy.cmd = deploy.cmd
 		exclude.txt = exclude.txt
 		GitVersion.yml = GitVersion.yml
