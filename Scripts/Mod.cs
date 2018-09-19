@@ -326,7 +326,9 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         /// <param name="character">The character.</param>
         private void RegisterEvents(IMyCharacter character) {
-            character.MovementStateChanged += OnMovementStateChanged;
+            if (character != null) {
+                character.MovementStateChanged += OnMovementStateChanged;
+            }
         }
 
         /// <summary>
@@ -334,7 +336,9 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         /// <param name="character">The character.</param>
         private void UnRegisterEvents(IMyCharacter character) {
-            character.MovementStateChanged -= OnMovementStateChanged;
+            if (character != null) {
+                character.MovementStateChanged -= OnMovementStateChanged;
+            }
         }
     }
 }
