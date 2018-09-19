@@ -4,7 +4,7 @@
 
 ### Bug Fixes
 
-* fix a prossible NRE when spaning as space suit in a new world ([70bab3b](https://github.com/SiskSjet/SmartSuit/commit/70bab3b))
+* fix a possible NRE when spaning as space suit in a new world ([70bab3b](https://github.com/SiskSjet/SmartSuit/commit/70bab3b))
 
 
 
