@@ -16,6 +16,10 @@ In addition, the speed is adjusted relative to the ship.
 * enabled when ship is not moving or when no ground in range and in an planetary gravity well.
 * disabled when ship is moving.
 
+[h1][b]➤⠀M⠀O⠀D⠀ ⠀S⠀U⠀P⠀P⠀O⠀R⠀T[/b][/H1]
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=782845808] Remove all automatic jetpack activation [/url]. This mod will then not change the jetpack status.
+
 [h1][b]➤⠀C⠀R⠀E⠀D⠀I⠀T⠀S[/b][/H1]
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
 Icons used in my mod:
@@ -54,6 +58,10 @@ Außerdem wird die Geschwindigkeit relativ zum Schiff eingestellt.
 [b]Dampeners[/b]
 * aktiviert, wenn das Shiff steht oder wenn kein Boden in Reichweite ist und Planetarische Schwerkraft festgestellt wurde.
 * deaktiviert, wenn sich das Schiff bewegt.
+
+[h1][b]➤⠀M⠀O⠀D⠀ ⠀S⠀U⠀P⠀P⠀O⠀R⠀T[/b][/H1]
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=782845808] Entfernt jede Form von automatischer Jetpack aktivierung [/url]. Diese Mod ändert dann nicht den Jetpack-Status.
 
 [h1][b]➤⠀C⠀R⠀E⠀D⠀I⠀T⠀S[/b][/H1]
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬

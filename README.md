@@ -23,6 +23,10 @@ In addition, the speed is adjusted relative to the ship.
 * enabled when ship is not moving or when no ground in range and in planetary gravity well.
 * disabled when ship is moving.
 
+## Mod Support
+
+[Remove all automatic jetpack activation](https://steamcommunity.com/sharedfiles/filedetails/?id=782845808) This mod will then not change the jetpack status.
+
 ## Credits
 
 Icons used in this mod:
