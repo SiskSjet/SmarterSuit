@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.ModAPI;
@@ -182,8 +182,11 @@ namespace Sisk.SmarterSuit {
                 }
 
                 var medicalRoom = GetMedialRoom(character);
-                var cubeGrid = medicalRoom.CubeGrid;
+                if (medicalRoom == null) {
+                    return;
+                }
 
+                var cubeGrid = medicalRoom.CubeGrid;
                 var linearVelocity = Vector3.Zero;
                 var angularVelocity = Vector3.Zero;
                 var gravity = character.Physics.Gravity;
