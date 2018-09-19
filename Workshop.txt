@@ -1,4 +1,4 @@
-﻿[h1][b]I⠀N⠀F⠀O[/b][/h1]
+﻿[h1][b]➤⠀I⠀N⠀F⠀O[/b][/h1]
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
 A small suit software update that prevents death due to malfunction of the suit.
 The new suit update will now check some parameters when leaving a cockpit or after a respawn to eliminate potential sources of danger.
@@ -9,12 +9,12 @@ In addition, the speed is adjusted relative to the ship.
 * closed when enviroment without oxygen detected.
 
 [b]Jetpack[/b]
-* enabled when no gravity is detected or when gravity is detected and ground is further away than 5 m.
-* disabled when gravity is detected and ground is just 5 m away.
+* enabled when no gravity detected or gravity detected and no ground in range.
+* disabled when gravity detected and ground is in range.
 
 [b]Dampeners[/b]
-* enabled if gravity is detected.
-* disabled if ship is moving and not in planetary gravity well.
+* enabled when ship is not moving or when no ground in range and in an planetary gravity well.
+* disabled when ship is moving.
 
 [h1][b]➤⠀C⠀R⠀E⠀D⠀I⠀T⠀S[/b][/H1]
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
@@ -37,7 +37,7 @@ If you think some features are missing, try to ask first
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-[h1][b]I⠀N⠀F⠀O[/b][/h1]
+[h1][b]➤⠀I⠀N⠀F⠀O[/b][/h1]
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
 Ein kleines Anzug-Software-Update, dass den Tod durch Fehlfunktion des Anzugs verhindert.
 Das neue Anzug-Update überprüft nun beim Verlassen eines Cockpits oder nach einem Respawn einige Parameter, um mögliche Gefahrenquellen zu eliminieren.
@@ -48,12 +48,12 @@ Außerdem wird die Geschwindigkeit relativ zum Schiff eingestellt.
 * geschlossen wenn Umgebung ohne Sauerstoff erkannt wurde.
 
 [b]Jetpack[/b]
-* aktiviert, wenn keine Schwerkraft festgestellt wurde oder wenn Schwerkraft festgestellt wurde und der Boden weiter als 5 m entfernt ist.
-* deaktiviert, wenn Schwerkraft erkannt wurde und der Boden nur 5 m entfernt ist.
+* aktiviert, wenn keine Schwerkraft festgestellt wurde oder wenn Schwerkraft festgestellt wurde und keine Boden in Reiweite ist.
+* deaktiviert, wenn Schwerkraft erkannt wurde und Boden in Reichweite ist.
 
 [b]Dampeners[/b]
-* aktiviert, wenn Schwerkraft erkannt wurde.
-* deaktiviert, wenn sich das Schiff bewegt und nicht in einer planetarischen Gravitationsquelle ist.
+* aktiviert, wenn das Shiff steht oder wenn kein Boden in Reichweite ist und Planetarische Schwerkraft festgestellt wurde.
+* deaktiviert, wenn sich das Schiff bewegt.
 
 [h1][b]➤⠀C⠀R⠀E⠀D⠀I⠀T⠀S[/b][/H1]
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬

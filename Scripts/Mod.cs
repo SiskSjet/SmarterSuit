@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.ModAPI;
@@ -308,7 +308,7 @@ namespace Sisk.SmarterSuit {
                 if (isGravityDetected) {
                     if (isGroundInRange) {
                         thruster = false;
-                        dampeners = isNotMoving || !isArtificial;
+                        dampeners = isNotMoving;
                     } else {
                         thruster = true;
                         dampeners = isNotMoving || !isArtificial;
