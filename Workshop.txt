@@ -23,6 +23,7 @@ In addition, the speed is adjusted relative to the ship.
 [h1][b]➤⠀C⠀R⠀E⠀D⠀I⠀T⠀S[/b][/H1]
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
 Icons used in my mod:
+All icons were recreated as a vector icon.
 'helmet' icon from [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] by [url=https://www.keenswh.com] Keen Software House [/url]
 'jetpack' icon from [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] by [url=https://www.keenswh.com] Keen Software House [/url]
 'dampener' icon from [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] by [url=https://www.keenswh.com] Keen Software House [/url]
@@ -66,6 +67,7 @@ Außerdem wird die Geschwindigkeit relativ zum Schiff eingestellt.
 [h1][b]➤⠀C⠀R⠀E⠀D⠀I⠀T⠀S[/b][/H1]
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
 Verwendete icons in meiner Mod:
+Alle Icons wurden als Vektor Icon neu erstellt.
 'helmet' icon aus [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] von [url=https://www.keenswh.com] Keen Software House [/url]
 'jetpack' icon aus [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] von [url=https://www.keenswh.com] Keen Software House [/url]
 'dampener' icon aus [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] von [url=https://www.keenswh.com] Keen Software House [/url]

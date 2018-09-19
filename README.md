@@ -30,6 +30,7 @@ In addition, the speed is adjusted relative to the ship.
 ## Credits
 
 Icons used in this mod:
+* All icons were recreated as a vector icon.
 * helmet icon from [SpaceEngineers](https://www.spaceengineersgame.com) by [Keen Software House](https://www.keenswh.com)
 * jetpack icon from [SpaceEngineers](https://www.spaceengineersgame.com) by [Keen Software House](https://www.keenswh.com)
 * dampener icon from [SpaceEngineers](https://www.spaceengineersgame.com) by [Keen Software House](https://www.keenswh.com)
