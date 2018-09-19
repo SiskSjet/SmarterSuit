@@ -16,12 +16,12 @@ In addition, the speed is adjusted relative to the ship.
 * closed when enviroment without oxygen detected.
 
 **jetpack**
-* enabled when no gravity is detected or when gravity is detected and ground is further away than 5m.
-* disabled when gravity is detected and ground is just 5m away.
+* enabled when no gravity detected or gravity detected and no ground in range.
+* disabled when gravity detected and ground is in range.
 
 **dampeners** 
-* enabled if gravity is detected.
-* disabled if ship is moving and not in planetary gravity well.
+* enabled when ship is not moving or when no ground in range and in planetary gravity well.
+* disabled when ship is moving.
 
 ## Credits
 
