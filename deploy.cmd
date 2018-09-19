@@ -4,7 +4,7 @@ setlocal EnableDelayedExpansion
 set mod_dir=%~dp0Mod
 set scripts_dir=%~dp0Scripts
 set artifact_dir=%~dp0bin
-for %%* in (.) do set mod_name=%%~nx*_DEV
+for %%* in (.) do set mod_name=%%~nx*
 set se_mods_dir=%appdata%\SpaceEngineers\Mods
 set se_mod_namespace=Sisk
 set se_mod_path=%se_mods_dir%\%mod_name%
