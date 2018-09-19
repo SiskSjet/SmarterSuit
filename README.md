@@ -16,16 +16,21 @@ In addition, the speed is adjusted relative to the ship.
 * closed when enviroment without oxygen detected.
 
 **jetpack**
-* enabled when no gravity is detected or when gravity is detected and ground is further away than 5m.
-* disabled when gravity is detected and ground is just 5m away.
+* enabled when no gravity detected or gravity detected and no ground in range.
+* disabled when gravity detected and ground is in range.
 
 **dampeners** 
-* enabled if gravity is detected.
-* disabled if ship is moving and not in planetary gravity well.
+* enabled when ship is not moving or when no ground in range and in planetary gravity well.
+* disabled when ship is moving.
+
+## Mod Support
+
+[Remove all automatic jetpack activation](https://steamcommunity.com/sharedfiles/filedetails/?id=782845808) This mod will then not change the jetpack status.
 
 ## Credits
 
 Icons used in this mod:
+* All icons were recreated as a vector icon.
 * helmet icon from [SpaceEngineers](https://www.spaceengineersgame.com) by [Keen Software House](https://www.keenswh.com)
 * jetpack icon from [SpaceEngineers](https://www.spaceengineersgame.com) by [Keen Software House](https://www.keenswh.com)
 * dampener icon from [SpaceEngineers](https://www.spaceengineersgame.com) by [Keen Software House](https://www.keenswh.com)

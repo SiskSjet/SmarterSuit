@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.ModAPI;
@@ -12,11 +12,17 @@ using VRageMath;
 namespace Sisk.SmarterSuit {
     [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
     public class Mod : MySessionComponentBase {
+        private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const float SPEED_TOLERANCE = 0.01f;
         private const int WAIT_TICKS_UTIL_CHECK = 100;
         private SuitData _dataFromLastCockpit;
         private IMyIdentity _identity;
         private int _ticks;
+
+        /// <summary>
+        ///     Indicates if the 'Remove all automatic jetpack activation' is available.
+        /// </summary>
+        private bool RemoveAutomaticJetpackActivation { get; set; }
 
         /// <summary>
         ///     The state that indicates the actions executed after simulation.
@@ -126,6 +132,8 @@ namespace Sisk.SmarterSuit {
                 return;
             }
 
+            RemoveAutomaticJetpackActivation = MyAPIGateway.Session.Mods.Any(x => x.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID);
+
             var player = MyAPIGateway.Session.Player;
             player.IdentityChanged += OnIdentityChanged;
 
@@ -197,7 +205,7 @@ namespace Sisk.SmarterSuit {
                     angularVelocity = physics.AngularVelocity;
                 }
 
-                bool thruster;
+                bool? thruster;
                 bool dampeners;
 
                 var isGravityDetected = gravity.Length() > 0;
@@ -206,14 +214,14 @@ namespace Sisk.SmarterSuit {
 
                 if (isGravityDetected) {
                     if (isGroundInRange) {
-                        thruster = false;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
                         dampeners = isNotMoving;
                     } else {
-                        thruster = true;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                         dampeners = isNotMoving;
                     }
                 } else {
-                    thruster = true;
+                    thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                     dampeners = isNotMoving;
                 }
 
@@ -294,7 +302,7 @@ namespace Sisk.SmarterSuit {
                 var angularVelocity = velocities.AngularVelocity;
                 var helmet = CheckHelmetNeeded(character);
 
-                bool thruster;
+                bool? thruster;
                 bool dampeners;
 
                 var naturalGravity = cockpit.GetNaturalGravity();
@@ -307,14 +315,14 @@ namespace Sisk.SmarterSuit {
 
                 if (isGravityDetected) {
                     if (isGroundInRange) {
-                        thruster = false;
-                        dampeners = isNotMoving || !isArtificial;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
+                        dampeners = isNotMoving;
                     } else {
-                        thruster = true;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                         dampeners = isNotMoving || !isArtificial;
                     }
                 } else {
-                    thruster = true;
+                    thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                     dampeners = isNotMoving;
                 }
 
