@@ -169,6 +169,7 @@ namespace Sisk.SmarterSuit {
 
                 character = MyAPIGateway.Session.Player.Character;
                 helmet = character.EnvironmentOxygenLevel < 0.5;
+
                 SetSuitFunctions(character, new SuitData(null, null, helmet, null, null));
                 State = State.None;
                 return;
@@ -176,9 +177,22 @@ namespace Sisk.SmarterSuit {
 
             character = MyAPIGateway.Session.Player.Character;
 
-            if (State == State.ExitCockpit) {
-                SetSuitFunctions(character, _dataFromLastCockpit);
+            if (!MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
+                helmet = CheckHelmetNeeded(character);
                 State = State.None;
+            } else {
+                helmet = CheckHelmetNeeded(character) ? true : (bool?) null;
+                State = State.CheckOxygenAfterRespawn;
+            }
+
+            if (State == State.ExitCockpit) {
+                var dampeners = _dataFromLastCockpit.Dampeners;
+                var thruster = _dataFromLastCockpit.Thruster;
+                var linearVelocity = _dataFromLastCockpit.LinearVelocity;
+                var angularVelocity = _dataFromLastCockpit.AngularVelocity;
+
+                var data = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
+                SetSuitFunctions(character, data);
                 return;
             }
 
@@ -223,13 +237,6 @@ namespace Sisk.SmarterSuit {
                 } else {
                     thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                     dampeners = isNotMoving;
-                }
-
-                if (!MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
-                    helmet = CheckHelmetNeeded(character);
-                    State = State.None;
-                } else {
-                    State = State.CheckOxygenAfterRespawn;
                 }
 
                 var data = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
@@ -300,7 +307,6 @@ namespace Sisk.SmarterSuit {
                 var velocities = cockpit.GetShipVelocities();
                 var linearVelocity = velocities.LinearVelocity;
                 var angularVelocity = velocities.AngularVelocity;
-                var helmet = CheckHelmetNeeded(character);
 
                 bool? thruster;
                 bool dampeners;
@@ -326,7 +332,7 @@ namespace Sisk.SmarterSuit {
                     dampeners = isNotMoving;
                 }
 
-                _dataFromLastCockpit = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
+                _dataFromLastCockpit = new SuitData(dampeners, thruster, null, linearVelocity, angularVelocity);
 
                 State = State.ExitCockpit;
             }
