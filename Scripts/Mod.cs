@@ -35,16 +35,15 @@ namespace Sisk.SmarterSuit {
         /// <param name="character">The character used to check if a helmet is needed.</param>
         /// <returns>Return true if enough oxygen is available.</returns>
         private static bool CheckHelmetNeeded(IMyCharacter character) {
-            bool helmet;
-
+            float oxygen;
             if (!MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
                 var position = character.GetPosition();
-                var oxygen = MyAPIGateway.Session.OxygenProviderSystem.GetOxygenInPoint(position);
-                helmet = oxygen < 0.5;
+                oxygen = MyAPIGateway.Session.OxygenProviderSystem.GetOxygenInPoint(position);
             } else {
-                helmet = character.EnvironmentOxygenLevel < 0.5;
+                oxygen = character.EnvironmentOxygenLevel;
             }
 
+            var helmet = oxygen < 0.5;
             return helmet;
         }
 
@@ -127,27 +126,12 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <inheritdoc />
-        public override void BeforeStart() {
+        public override void LoadData() {
             if (MyAPIGateway.Utilities.IsDedicated) {
                 return;
             }
 
-            RemoveAutomaticJetpackActivation = MyAPIGateway.Session.Mods.Any(x => x.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID);
-
-            var player = MyAPIGateway.Session.Player;
-            player.IdentityChanged += OnIdentityChanged;
-
-            _identity = player.Identity;
-            if (_identity == null) {
-                return;
-            }
-
-            _identity.CharacterChanged += OnCharacterChanged;
-
-            var character = player.Character;
-            if (character != null) {
-                RegisterEvents(character);
-            }
+            MyAPIGateway.Session.OnSessionReady += OnSessionReady;
         }
 
         /// <inheritdoc />
@@ -335,6 +319,25 @@ namespace Sisk.SmarterSuit {
                 _dataFromLastCockpit = new SuitData(dampeners, thruster, null, linearVelocity, angularVelocity);
 
                 State = State.ExitCockpit;
+            }
+        }
+
+        private void OnSessionReady() {
+            RemoveAutomaticJetpackActivation = MyAPIGateway.Session.Mods.Any(x => x.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID);
+
+            var player = MyAPIGateway.Session.Player;
+            player.IdentityChanged += OnIdentityChanged;
+
+            _identity = player.Identity;
+            if (_identity == null) {
+                return;
+            }
+
+            _identity.CharacterChanged += OnCharacterChanged;
+
+            var character = player.Character;
+            if (character != null) {
+                RegisterEvents(character);
             }
         }
 
