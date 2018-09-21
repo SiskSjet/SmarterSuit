@@ -1,3 +1,14 @@
+<a name="1.1.2"></a>
+# [1.1.2](https://github.com/SiskSjet/SmartSuit/compare/v1.1.1...v1.1.2) (2018-09-21)
+
+
+### Bug Fixes
+
+* fix a mistake that broke the functionality after last update. ([65d15af](https://github.com/SiskSjet/SmartSuit/commit/65d15af))
+* fix an NRE on clients ([1af806b](https://github.com/SiskSjet/SmartSuit/commit/1af806b))
+
+
+
 <a name="1.1.1"></a>
 # [1.1.1](https://github.com/SiskSjet/SmartSuit/compare/v1.1.0...v1.1.1) (2018-09-20)
 
