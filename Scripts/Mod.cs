@@ -35,16 +35,15 @@ namespace Sisk.SmarterSuit {
         /// <param name="character">The character used to check if a helmet is needed.</param>
         /// <returns>Return true if enough oxygen is available.</returns>
         private static bool CheckHelmetNeeded(IMyCharacter character) {
-            bool helmet;
-
+            float oxygen;
             if (!MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
                 var position = character.GetPosition();
-                var oxygen = MyAPIGateway.Session.OxygenProviderSystem.GetOxygenInPoint(position);
-                helmet = oxygen < 0.5;
+                oxygen = MyAPIGateway.Session.OxygenProviderSystem.GetOxygenInPoint(position);
             } else {
-                helmet = character.EnvironmentOxygenLevel < 0.5;
+                oxygen = character.EnvironmentOxygenLevel;
             }
 
+            var helmet = oxygen < 0.5;
             return helmet;
         }
 
@@ -127,27 +126,12 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <inheritdoc />
-        public override void BeforeStart() {
+        public override void LoadData() {
             if (MyAPIGateway.Utilities.IsDedicated) {
                 return;
             }
 
-            RemoveAutomaticJetpackActivation = MyAPIGateway.Session.Mods.Any(x => x.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID);
-
-            var player = MyAPIGateway.Session.Player;
-            player.IdentityChanged += OnIdentityChanged;
-
-            _identity = player.Identity;
-            if (_identity == null) {
-                return;
-            }
-
-            _identity.CharacterChanged += OnCharacterChanged;
-
-            var character = player.Character;
-            if (character != null) {
-                RegisterEvents(character);
-            }
+            MyAPIGateway.Session.OnSessionReady += OnSessionReady;
         }
 
         /// <inheritdoc />
@@ -156,26 +140,79 @@ namespace Sisk.SmarterSuit {
                 return;
             }
 
-            IMyCharacter character;
+            var character = MyAPIGateway.Session.Player.Character;
             bool? helmet = null;
+            bool? thruster = null;
+            bool? dampeners = null;
+            Vector3? linearVelocity = null;
+            Vector3? angularVelocity = null;
 
-            if (State == State.CheckOxygenAfterRespawn) {
-                _ticks++;
-                if (_ticks < WAIT_TICKS_UTIL_CHECK) {
+            switch (State) {
+                case State.CheckOxygenAfterRespawn: {
+                    _ticks++;
+                    if (_ticks < WAIT_TICKS_UTIL_CHECK) {
+                        return;
+                    }
+
+                    _ticks = 0;
+
+                    character = MyAPIGateway.Session.Player.Character;
+                    helmet = character.EnvironmentOxygenLevel < 0.5;
+
+                    SetSuitFunctions(character, new SuitData(null, null, helmet, null, null));
+                    State = State.None;
                     return;
                 }
+                case State.ExitCockpit: {
+                    dampeners = _dataFromLastCockpit.Dampeners;
+                    thruster = _dataFromLastCockpit.Thruster;
+                    linearVelocity = _dataFromLastCockpit.LinearVelocity;
+                    angularVelocity = _dataFromLastCockpit.AngularVelocity;
+                    break;
+                }
+                case State.Respawn: {
+                    var entity = MyAPIGateway.Session.ControlledObject;
+                    var atMedicalRoom = character == entity;
+                    if (!atMedicalRoom) {
+                        return;
+                    }
 
-                _ticks = 0;
+                    var medicalRoom = GetMedialRoom(character);
+                    if (medicalRoom == null) {
+                        return;
+                    }
 
-                character = MyAPIGateway.Session.Player.Character;
-                helmet = character.EnvironmentOxygenLevel < 0.5;
+                    var cubeGrid = medicalRoom.CubeGrid;
+                    linearVelocity = Vector3.Zero;
+                    angularVelocity = Vector3.Zero;
+                    var gravity = character.Physics.Gravity;
 
-                SetSuitFunctions(character, new SuitData(null, null, helmet, null, null));
-                State = State.None;
-                return;
+                    var physics = cubeGrid.Physics;
+                    if (physics != null) {
+                        linearVelocity = physics.LinearVelocity;
+                        angularVelocity = physics.AngularVelocity;
+                    }
+
+                    var isGravityDetected = gravity.Length() > 0;
+                    var isGroundInRange = IsGroundInRange(character, gravity);
+                    var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < SPEED_TOLERANCE && Math.Abs(angularVelocity.Value.Length()) < SPEED_TOLERANCE;
+
+                    if (isGravityDetected) {
+                        if (isGroundInRange) {
+                            thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
+                            dampeners = isNotMoving;
+                        } else {
+                            thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
+                            dampeners = isNotMoving;
+                        }
+                    } else {
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
+                        dampeners = isNotMoving;
+                    }
+
+                    break;
+                }
             }
-
-            character = MyAPIGateway.Session.Player.Character;
 
             if (!MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
                 helmet = CheckHelmetNeeded(character);
@@ -185,63 +222,8 @@ namespace Sisk.SmarterSuit {
                 State = State.CheckOxygenAfterRespawn;
             }
 
-            if (State == State.ExitCockpit) {
-                var dampeners = _dataFromLastCockpit.Dampeners;
-                var thruster = _dataFromLastCockpit.Thruster;
-                var linearVelocity = _dataFromLastCockpit.LinearVelocity;
-                var angularVelocity = _dataFromLastCockpit.AngularVelocity;
-
-                var data = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
-                SetSuitFunctions(character, data);
-                return;
-            }
-
-            if (State == State.Respawn) {
-                var entity = MyAPIGateway.Session.ControlledObject;
-                var atMedicalRoom = character == entity;
-                if (!atMedicalRoom) {
-                    return;
-                }
-
-                var medicalRoom = GetMedialRoom(character);
-                if (medicalRoom == null) {
-                    return;
-                }
-
-                var cubeGrid = medicalRoom.CubeGrid;
-                var linearVelocity = Vector3.Zero;
-                var angularVelocity = Vector3.Zero;
-                var gravity = character.Physics.Gravity;
-
-                var physics = cubeGrid.Physics;
-                if (physics != null) {
-                    linearVelocity = physics.LinearVelocity;
-                    angularVelocity = physics.AngularVelocity;
-                }
-
-                bool? thruster;
-                bool dampeners;
-
-                var isGravityDetected = gravity.Length() > 0;
-                var isGroundInRange = IsGroundInRange(character, gravity);
-                var isNotMoving = Math.Abs(linearVelocity.Length()) < SPEED_TOLERANCE && Math.Abs(angularVelocity.Length()) < SPEED_TOLERANCE;
-
-                if (isGravityDetected) {
-                    if (isGroundInRange) {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
-                        dampeners = isNotMoving;
-                    } else {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
-                        dampeners = isNotMoving;
-                    }
-                } else {
-                    thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
-                    dampeners = isNotMoving;
-                }
-
-                var data = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
-                SetSuitFunctions(character, data);
-            }
+            var data = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
+            SetSuitFunctions(character, data);
         }
 
         /// <inheritdoc />
@@ -335,6 +317,25 @@ namespace Sisk.SmarterSuit {
                 _dataFromLastCockpit = new SuitData(dampeners, thruster, null, linearVelocity, angularVelocity);
 
                 State = State.ExitCockpit;
+            }
+        }
+
+        private void OnSessionReady() {
+            RemoveAutomaticJetpackActivation = MyAPIGateway.Session.Mods.Any(x => x.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID);
+
+            var player = MyAPIGateway.Session.Player;
+            player.IdentityChanged += OnIdentityChanged;
+
+            _identity = player.Identity;
+            if (_identity == null) {
+                return;
+            }
+
+            _identity.CharacterChanged += OnCharacterChanged;
+
+            var character = player.Character;
+            if (character != null) {
+                RegisterEvents(character);
             }
         }
 
