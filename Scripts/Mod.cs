@@ -114,15 +114,15 @@ namespace Sisk.SmarterSuit {
 
             if (data.Thruster != null && character.EnabledThrusts != data.Thruster.Value) {
                 character.SwitchThrusts();
-            }
 
-            if (data.LinearVelocity.HasValue && data.AngularVelocity.HasValue) {
-                character.Physics.SetSpeeds(data.LinearVelocity.Value, data.AngularVelocity.Value);
-            } else if (data.LinearVelocity.HasValue) {
-                character.Physics.SetSpeeds(data.LinearVelocity.Value, Vector3.Zero);
-            } else if (data.AngularVelocity.HasValue) {
-                character.Physics.SetSpeeds(Vector3.Zero, data.AngularVelocity.Value);
-            }
+                if (data.LinearVelocity.HasValue && data.AngularVelocity.HasValue) {
+                    character.Physics.SetSpeeds(data.LinearVelocity.Value, data.AngularVelocity.Value);
+                } else if (data.LinearVelocity.HasValue) {
+                    character.Physics.SetSpeeds(data.LinearVelocity.Value, Vector3.Zero);
+                } else if (data.AngularVelocity.HasValue) {
+                    character.Physics.SetSpeeds(Vector3.Zero, data.AngularVelocity.Value);
+                }
+            }           
         }
 
         /// <inheritdoc />
