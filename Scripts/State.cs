@@ -21,6 +21,6 @@
         /// <summary>
         ///     Extra step after a respawn if Pressurization is enabled
         /// </summary>
-        CheckOxygenAfterRespawn
+        CheckOxygenAfterDelay
     }
 }

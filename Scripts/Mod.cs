@@ -14,7 +14,7 @@ namespace Sisk.SmarterSuit {
     public class Mod : MySessionComponentBase {
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const float SPEED_TOLERANCE = 0.01f;
-        private const int WAIT_TICKS_UTIL_CHECK = 100;
+        private const int TICKS_UNTIL_OXYGEN_CHECK = 100;
         private SuitData _dataFromLastCockpit;
         private IMyIdentity _identity;
         private int _ticks;
@@ -148,9 +148,9 @@ namespace Sisk.SmarterSuit {
             Vector3? angularVelocity = null;
 
             switch (State) {
-                case State.CheckOxygenAfterRespawn: {
+                case State.CheckOxygenAfterDelay: {
                     _ticks++;
-                    if (_ticks < WAIT_TICKS_UTIL_CHECK) {
+                    if (_ticks < TICKS_UNTIL_OXYGEN_CHECK) {
                         return;
                     }
 
@@ -219,7 +219,7 @@ namespace Sisk.SmarterSuit {
                 State = State.None;
             } else {
                 helmet = CheckHelmetNeeded(character) ? true : (bool?) null;
-                State = State.CheckOxygenAfterRespawn;
+                State = State.CheckOxygenAfterDelay;
             }
 
             var data = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
