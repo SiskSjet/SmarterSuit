@@ -19,7 +19,7 @@
         Respawn,
 
         /// <summary>
-        ///     Extra step after a respawn if Pressurization is enabled
+        ///     Extra check for oxygen if Pressurization is enabled, because of false oxygen values for a couple of ticks.
         /// </summary>
         CheckOxygenAfterDelay
     }

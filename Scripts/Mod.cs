@@ -122,7 +122,7 @@ namespace Sisk.SmarterSuit {
                 } else if (data.AngularVelocity.HasValue) {
                     character.Physics.SetSpeeds(Vector3.Zero, data.AngularVelocity.Value);
                 }
-            }           
+            }
         }
 
         /// <inheritdoc />
