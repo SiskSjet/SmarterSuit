@@ -55,13 +55,6 @@ namespace Sisk.SmarterSuit {
         private int _ticks;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="Mod" /> session component.
-        /// </summary>
-        public Mod() {
-            InitializeLogging();
-        }
-
-        /// <summary>
         ///     Mod name to acronym.
         /// </summary>
         public static string Acronym => string.Concat(NAME.Where(char.IsUpper));
@@ -70,6 +63,11 @@ namespace Sisk.SmarterSuit {
         ///     Indicates if local player has permission to change settings.
         /// </summary>
         private bool HasPermission => !MyAPIGateway.Multiplayer.MultiplayerActive || MyAPIGateway.Session.LocalHumanPlayer.PromoteLevel == MyPromoteLevel.Admin;
+
+        /// <summary>
+        ///     Indicates if mod is a dev version.
+        /// </summary>
+        private bool IsDevVersion => ModContext.ModName.EndsWith("_DEV");
 
         /// <summary>
         ///     Logger used for logging.
@@ -249,6 +247,7 @@ namespace Sisk.SmarterSuit {
         ///     Load mod settings, create localizations and initialize network handler.
         /// </summary>
         public override void LoadData() {
+            InitializeLogging();
             LoadTranslation();
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
                 InitializeNetwork();
@@ -445,7 +444,15 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void InitializeLogging() {
             Log = Logger.ForScope<Mod>();
-            Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, 0));
+            if (MyAPIGateway.Multiplayer.MultiplayerActive) {
+                if (MyAPIGateway.Multiplayer.IsServer) {
+                    Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
+                } else if (IsDevVersion) {
+                    Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
+                }
+            } else {
+                Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
+            }
 
             using (Log.BeginMethod(nameof(InitializeLogging))) {
                 Log.Info("Logging initialized");
