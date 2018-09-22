@@ -40,7 +40,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         /// <param name="arguments"></param>
         public void ShowHelp(string arguments) {
-            var sb = new StringBuilder();
+            var sb = new StringBuilder().AppendLine("Usage: /ss [command]");
             var maxArgLen = _commands.Keys.Max(x => x.Length);
             var outputFormat = $"  {{0, -{maxArgLen + 2}}}{{1}}";
             foreach (var command in _commands.Values) {
@@ -48,7 +48,8 @@ namespace Sisk.SmarterSuit {
                 sb.AppendLine();
             }
 
-            MyAPIGateway.Utilities.ShowMissionScreen(Mod.NAME, "", "Help", sb.ToString(), okButtonCaption: "Exit");
+            MyAPIGateway.Utilities.ShowMessage(Mod.NAME, sb.ToString());
+            //MyAPIGateway.Utilities.ShowMissionScreen(Mod.NAME, "", "Help", sb.ToString(), okButtonCaption: "Exit");
         }
 
         /// <summary>

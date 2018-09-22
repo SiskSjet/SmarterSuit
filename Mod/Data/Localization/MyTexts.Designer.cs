@@ -61,7 +61,7 @@ namespace Mod.Data.Localization {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Disables an option ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die [option] Disables an option ähnelt.
         /// </summary>
         internal static string Description_SS_Disable {
             get {
@@ -70,7 +70,7 @@ namespace Mod.Data.Localization {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Enables an option ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die [option] Enables an option ähnelt.
         /// </summary>
         internal static string Description_SS_Enable {
             get {
@@ -97,11 +97,56 @@ namespace Mod.Data.Localization {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You do not have permission to set this option ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die [option] [value] Set an option to value. ähnelt.
         /// </summary>
-        internal static string Description_SS_NoPermission {
+        internal static string Description_SS_Set {
             get {
-                return ResourceManager.GetString("Description_SS_NoPermission", resourceCulture);
+                return ResourceManager.GetString("Description_SS_Set", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Wrong arguments. Expect [option] [value] arguments. ähnelt.
+        /// </summary>
+        internal static string SS_ArgumentError {
+            get {
+                return ResourceManager.GetString("SS_ArgumentError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not convert &apos;{0}&apos; to {1}. ähnelt.
+        /// </summary>
+        internal static string SS_ConvertError {
+            get {
+                return ResourceManager.GetString("SS_ConvertError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You do not have permission to set this option. ähnelt.
+        /// </summary>
+        internal static string SS_NoPermissionError {
+            get {
+                return ResourceManager.GetString("SS_NoPermissionError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Only Boolean options can be used. ähnelt.
+        /// </summary>
+        internal static string SS_OnlyBooleanAllowedError {
+            get {
+                return ResourceManager.GetString("SS_OnlyBooleanAllowedError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Unknown option &apos;{0}&apos;. ähnelt.
+        /// </summary>
+        internal static string SS_UnknownOptionError {
+            get {
+                return ResourceManager.GetString("SS_UnknownOptionError", resourceCulture);
             }
         }
     }

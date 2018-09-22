@@ -98,10 +98,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Description_SS_Enable" xml:space="preserve">
-    <value>Enables an option</value>
+    <value>[option] Enables an option</value>
   </data>
   <data name="Description_SS_Disable" xml:space="preserve">
-    <value>Disables an option</value>
+    <value>[option] Disables an option</value>
   </data>
   <data name="Description_SS_List" xml:space="preserve">
     <value>Lists all options</value>
@@ -109,7 +109,22 @@
   <data name="Description_SS_Help" xml:space="preserve">
     <value>Shows a help page</value>
   </data>
-  <data name="Description_SS_NoPermission" xml:space="preserve">
-    <value>You do not have permission to set this option</value>
+  <data name="SS_NoPermissionError" xml:space="preserve">
+    <value>You do not have permission to set this option.</value>
+  </data>
+  <data name="SS_UnknownOptionError" xml:space="preserve">
+    <value>Unknown option '{0}'.</value>
+  </data>
+  <data name="SS_OnlyBooleanAllowedError" xml:space="preserve">
+    <value>Only Boolean options can be used.</value>
+  </data>
+  <data name="Description_SS_Set" xml:space="preserve">
+    <value>[option] [value] Set an option to value.</value>
+  </data>
+  <data name="SS_ConvertError" xml:space="preserve">
+    <value>Could not convert '{0}' to {1}.</value>
+  </data>
+  <data name="SS_ArgumentError" xml:space="preserve">
+    <value>Wrong arguments. Expect [option] [value] arguments.</value>
   </data>
 </root>

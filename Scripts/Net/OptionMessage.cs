@@ -14,8 +14,4 @@ namespace Sisk.SmarterSuit.Net {
             return MyAPIGateway.Utilities.SerializeToBinary(this);
         }
     }
-
-    public enum Option {
-        AlwaysAutoHelmet
-    }
 }

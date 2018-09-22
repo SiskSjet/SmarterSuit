@@ -118,10 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Description_SS_Enable" xml:space="preserve">
-    <value>Aktiviert eine Option</value>
+    <value>[option] Aktiviert eine Option</value>
   </data>
   <data name="Description_SS_Disable" xml:space="preserve">
-    <value>Deaktiviert eine Option</value>
+    <value>[option] Deaktiviert eine Option</value>
   </data>
   <data name="Description_SS_List" xml:space="preserve">
     <value>Listet alle Optionen auf</value>
@@ -129,7 +129,22 @@
   <data name="Description_SS_Help" xml:space="preserve">
     <value>Zeigt eine Hilfeseite an</value>
   </data>
-  <data name="Description_SS_NoPermission" xml:space="preserve">
-    <value>Sie haben keine Berechtigung, diese Option festzulegen</value>
+  <data name="SS_NoPermissionError" xml:space="preserve">
+    <value>Sie haben keine Berechtigung, diese Option festzulegen.</value>
+  </data>
+  <data name="SS_UnknownOptionError" xml:space="preserve">
+    <value>Unbekannte Option '{0}'.</value>
+  </data>
+  <data name="SS_OnlyBooleanAllowedError" xml:space="preserve">
+    <value>Nur 'Boolean' Optionen können benutzt werden.</value>
+  </data>
+  <data name="Description_SS_Set" xml:space="preserve">
+    <value>[option] [value] Legt eine Option auf den angegebenen Value fest.</value>
+  </data>
+  <data name="SS_ConvertError" xml:space="preserve">
+    <value>Konnte '{0}' nicht in {1} konvertieren.</value>
+  </data>
+  <data name="SS_ArgumentError" xml:space="preserve">
+    <value>Falsche Argumente. Erwartet [option] [value] Argumente.</value>
   </data>
 </root>

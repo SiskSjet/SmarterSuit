@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using Sandbox.Game;
+using Sandbox.Game.Entities.Character.Components;
+using Sandbox.Game.Localization;
 using Sandbox.ModAPI;
+using Sisk.ImprovedTurretBehavior.Extensions;
 using Sisk.SmarterSuit.Localization;
 using Sisk.SmarterSuit.Net;
 using Sisk.SmarterSuit.Settings;
@@ -16,6 +21,8 @@ using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRageMath;
 
+// ReSharper disable InlineOutVariableDeclaration
+
 namespace Sisk.SmarterSuit {
     [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
     public class Mod : MySessionComponentBase {
@@ -29,11 +36,22 @@ namespace Sisk.SmarterSuit {
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const string SETTINGS_FILE = "settings.xml";
         private const float SPEED_TOLERANCE = 0.01f;
+
+        private const int TICKS_UNTIL_FUEL_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 100;
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
         private readonly CommandHandler _commandHandler = new CommandHandler();
+
+        private readonly Dictionary<Option, Type> _optionsDictionary = new Dictionary<Option, Type> {
+            { Option.AlwaysAutoHelmet, typeof(bool) },
+            { Option.AdditionalFuelWarning, typeof(bool) },
+            { Option.FuelThreshold, typeof(float) }
+        };
+
         private SuitData _dataFromLastCockpit;
+        private int _fuelCheckTicks;
         private IMyIdentity _identity;
+        private bool _isFuelUnderThresholdBefore;
         private int _ticks;
 
         /// <summary>
@@ -124,6 +142,30 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Check if fuel for given character is under given threshold.
+        /// </summary>
+        /// <param name="threshold">The threshold.</param>
+        /// <returns>Return true if fuel is under given threshold.</returns>
+        private static bool IsFuelUnderThreshold(float threshold) {
+            if (MyAPIGateway.Session.CreativeMode) {
+                return false;
+            }
+
+            var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+            if (character == null) {
+                return false;
+            }
+
+            var jetpackComponent = character.Components.Get<MyCharacterJetpackComponent>();
+            var oxygenComponent = character.Components.Get<MyCharacterOxygenComponent>();
+            if (jetpackComponent == null || oxygenComponent == null) {
+                return false;
+            }
+
+            return oxygenComponent.GetGasFillLevel(MyCharacterOxygenComponent.HydrogenId) < threshold;
+        }
+
+        /// <summary>
         ///     Checks if the ground is close by.
         /// </summary>
         /// <param name="character">The character used to check distance.</param>
@@ -188,6 +230,22 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Show a 'fuel low' warning.
+        /// </summary>
+        private static void ShowFuelLowWarningNotification() {
+            var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+            if (character == null) {
+                return;
+            }
+
+            MyVisualScriptLogicProvider.RemoveSoundEmitter("HUD");
+            MyVisualScriptLogicProvider.CreateSoundEmitterAtPosition("HUD", character.GetPosition());
+            MyVisualScriptLogicProvider.PlaySound("HUD", "ArcHudVocFuelLow", true);
+
+            MyAPIGateway.Utilities.ShowNotification(MySpaceTexts.NotificationFuelLow.GetString(), 2500, "Red");
+        }
+
+        /// <summary>
         ///     Load mod settings, create localizations and initialize network handler.
         /// </summary>
         public override void LoadData() {
@@ -225,11 +283,24 @@ namespace Sisk.SmarterSuit {
             if (State == State.None) {
                 if (Settings.AlwaysAutoHelmet && MyAPIGateway.Session.SessionSettings.EnableOxygen) {
                     _ticks++;
-                    if (_ticks < TICKS_UNTIL_OXYGEN_CHECK - 1) {
-                        return;
+                    if (_ticks >= TICKS_UNTIL_OXYGEN_CHECK - 1) {
+                        State = State.CheckOxygenAfterDelay;
                     }
+                }
 
-                    State = State.CheckOxygenAfterDelay;
+                if (Settings.AdditionalFuelWarning && MyAPIGateway.Session.ControlledObject != null && MyAPIGateway.Session.ControlledObject is IMyCharacter) {
+                    _fuelCheckTicks++;
+
+                    if (_fuelCheckTicks >= TICKS_UNTIL_FUEL_CHECK) {
+                        _fuelCheckTicks = 0;
+
+                        var isFuelUnderThreshold = IsFuelUnderThreshold(Settings.FuelThreshold);
+                        if (isFuelUnderThreshold && !_isFuelUnderThresholdBefore) {
+                            ShowFuelLowWarningNotification();
+                        }
+
+                        _isFuelUnderThresholdBefore = isFuelUnderThreshold;
+                    }
                 }
 
                 return;
@@ -357,15 +428,24 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        public T CastExamp1<T>(object input) {
+            return (T) input;
+        }
+
+        public T ConvertExamp1<T>(object input) {
+            return (T) Convert.ChangeType(input, typeof(T));
+        }
+
         /// <summary>
         ///     Create commands.
         /// </summary>
         private void CreateCommands() {
             _commandHandler.Prefix = $"/{Acronym}";
-            _commandHandler.Register(new Command { Name = "Enable", Description = ModText.Description_SS_Enable.String, Execute = OnEnableOptionCommand });
-            _commandHandler.Register(new Command { Name = "Disable", Description = ModText.Description_SS_Disable.String, Execute = OnDisableOptionCommand });
-            _commandHandler.Register(new Command { Name = "List", Description = ModText.Description_SS_List.String, Execute = OnListOptionsCommand });
-            _commandHandler.Register(new Command { Name = "Help", Description = ModText.Description_SS_Help.String, Execute = _commandHandler.ShowHelp });
+            _commandHandler.Register(new Command { Name = "Enable", Description = ModText.Description_SS_Enable.GetString(), Execute = OnEnableOptionCommand });
+            _commandHandler.Register(new Command { Name = "Disable", Description = ModText.Description_SS_Disable.GetString(), Execute = OnDisableOptionCommand });
+            _commandHandler.Register(new Command { Name = "Set", Description = ModText.Description_SS_Set.GetString(), Execute = OnSetOptionCommand });
+            _commandHandler.Register(new Command { Name = "List", Description = ModText.Description_SS_List.GetString(), Execute = OnListOptionsCommand });
+            _commandHandler.Register(new Command { Name = "Help", Description = ModText.Description_SS_Help.GetString(), Execute = _commandHandler.ShowHelp });
         }
 
         /// <summary>
@@ -373,7 +453,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void InitializeLogging() {
             Log = Logger.ForScope<Mod>();
-            Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, 25));
+            Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, 0));
 
             using (Log.BeginMethod(nameof(InitializeLogging))) {
                 Log.Info("Logging initialized");
@@ -461,12 +541,19 @@ namespace Sisk.SmarterSuit {
         /// <param name="arguments">The arguments that should contain the option name.</param>
         private void OnDisableOptionCommand(string arguments) {
             if (!HasPermission) {
-                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Description_SS_NoPermission.String);
+                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
                 return;
             }
 
-            if (string.Equals(arguments, nameof(Settings.AlwaysAutoHelmet), StringComparison.CurrentCultureIgnoreCase)) {
-                SetOption(Option.AlwaysAutoHelmet, false, true);
+            Option result;
+            if (Enum.TryParse(arguments, true, out result)) {
+                if (_optionsDictionary[result] == typeof(bool)) {
+                    SetOption(result, false, true);
+                } else {
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_OnlyBooleanAllowedError.GetString());
+                }
+            } else {
+                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_UnknownOptionError.GetString(arguments));
             }
         }
 
@@ -476,12 +563,19 @@ namespace Sisk.SmarterSuit {
         /// <param name="arguments">The arguments that should contain the option name.</param>
         private void OnEnableOptionCommand(string arguments) {
             if (!HasPermission) {
-                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Description_SS_NoPermission.String);
+                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
                 return;
             }
 
-            if (string.Equals(arguments, nameof(Settings.AlwaysAutoHelmet), StringComparison.CurrentCultureIgnoreCase)) {
-                SetOption(Option.AlwaysAutoHelmet, true, true);
+            Option result;
+            if (Enum.TryParse(arguments, true, out result)) {
+                if (_optionsDictionary[result] == typeof(bool)) {
+                    SetOption(result, true, true);
+                } else {
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_OnlyBooleanAllowedError.GetString());
+                }
+            } else {
+                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_UnknownOptionError.GetString(arguments));
             }
         }
 
@@ -503,11 +597,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         /// <param name="arguments">Arguments are ignored in this handler.</param>
         private void OnListOptionsCommand(string arguments) {
-            var options = new List<string> {
-                nameof(Settings.AlwaysAutoHelmet)
-            };
-
-            MyAPIGateway.Utilities.ShowMessage(NAME, string.Join(", ", options));
+            MyAPIGateway.Utilities.ShowMessage(NAME, string.Join(", ", _optionsDictionary.Select(x => $"{x.Key} <{x.Value.Name}>")));
         }
 
         /// <summary>
@@ -581,9 +671,11 @@ namespace Sisk.SmarterSuit {
             try {
                 switch (message.Option) {
                     case Option.AlwaysAutoHelmet:
-                        var value = MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value);
-                        SetOption(Option.AlwaysAutoHelmet, value, Network.IsServer);
-
+                    case Option.AdditionalFuelWarning:
+                        SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value), Network.IsServer);
+                        break;
+                    case Option.FuelThreshold:
+                        SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value), Network.IsServer);
                         break;
                     default:
                         return;
@@ -643,6 +735,47 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Set an option to given value
+        /// </summary>
+        /// <param name="arguments">The arguments that should contain the value.</param>
+        private void OnSetOptionCommand(string arguments) {
+            if (!HasPermission) {
+                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
+                return;
+            }
+
+            var array = arguments.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (array.Length < 2) {
+                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_ArgumentError.GetString(arguments));
+                return;
+            }
+
+            var optionString = array[0];
+            var valueString = array[1];
+            Option result;
+            if (Enum.TryParse(optionString, true, out result)) {
+                var type = _optionsDictionary[result];
+                if (type == typeof(bool)) {
+                    bool value;
+                    if (bool.TryParse(valueString, out value)) {
+                        SetOption(result, value, true);
+                    } else {
+                        MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
+                    }
+                } else if (type == typeof(float)) {
+                    float value;
+                    if (float.TryParse(valueString, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value)) {
+                        SetOption(result, value, true);
+                    } else {
+                        MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
+                    }
+                }
+            } else {
+                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_UnknownOptionError.GetString(optionString));
+            }
+        }
+
+        /// <summary>
         ///     Settings received message handler.
         /// </summary>
         /// <param name="sender">The sender of the message.</param>
@@ -668,7 +801,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void SaveSettings() {
             try {
-                using (var writer = MyAPIGateway.Utilities.WriteBinaryFileInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
+                using (var writer = MyAPIGateway.Utilities.WriteFileInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
                     writer.Write(MyAPIGateway.Utilities.SerializeToXML(Settings));
                 }
             } catch (Exception exception) {
@@ -686,35 +819,36 @@ namespace Sisk.SmarterSuit {
         /// <param name="value">The value for given option.</param>
         /// <param name="sync">Indicates if option should be synced.</param>
         private void SetOption<TValue>(Option option, TValue value, bool sync) {
-            OptionMessage message = null;
-            switch (option) {
-                case Option.AlwaysAutoHelmet:
-                    if (Network != null) {
-                        message = new OptionMessage { Option = Option.AlwaysAutoHelmet, Value = MyAPIGateway.Utilities.SerializeToBinary(value) };
-                    }
-
-                    if (Network == null || Network.IsServer) {
+            if (Network == null || Network.IsServer) {
+                switch (option) {
+                    case Option.AlwaysAutoHelmet:
                         Settings.AlwaysAutoHelmet = (bool) (object) value;
-                    }
+                        break;
+                    case Option.AdditionalFuelWarning:
+                        Settings.AdditionalFuelWarning = (bool) (object) value;
+                        break;
+                    case Option.FuelThreshold:
+                        Settings.FuelThreshold = (float) (object) value;
+                        break;
+                    default:
+                        return;
+                }
 
-                    break;
-                default:
-                    return;
+                SaveSettings();
             }
 
             if (Network != null) {
-                if (message == null || !sync) {
+                if (!sync) {
                     return;
                 }
 
+                var message = new OptionMessage { Option = option, Value = MyAPIGateway.Utilities.SerializeToBinary(value) };
+
                 if (Network.IsServer) {
                     Network.Sync(message);
-                    SaveSettings();
                 } else if (Network.IsClient) {
                     Network.SendToServer(message);
                 }
-            } else {
-                SaveSettings();
             }
         }
 
@@ -727,5 +861,45 @@ namespace Sisk.SmarterSuit {
                 character.MovementStateChanged -= OnMovementStateChanged;
             }
         }
+    }
+
+    public enum MyGuiSounds {
+        HudClick,
+        HudUse,
+        HudRotateBlock,
+        HudPlaceBlock,
+        HudDeleteBlock,
+        HudColorBlock,
+        HudMouseClick,
+        HudMouseOver,
+        HudUnable,
+        PlayDropItem,
+        HudVocInventoryFull,
+        HudVocMeteorInbound,
+        HudVocHealthLow,
+        HudVocHealthCritical,
+        HudVocFuelLow,
+        HudVocFuelCrit,
+        None,
+        HudVocEnergyLow,
+        HudVocStationFuelLow,
+        HudVocShipFuelLow,
+        HudVocEnergyCrit,
+        HudVocStationFuelCrit,
+        HudVocShipFuelCrit,
+        HudVocEnergyNo,
+        HudVocStationFuelNo,
+        HudVocShipFuelNo,
+        HudCraftBarProgressLoop,
+        HudErrorMessage,
+        HudOpenCraftWin,
+        HudOpenInventory,
+        HudItem,
+        PlayTakeItem,
+        HudPlaceItem,
+        HudAntennaOn,
+        HudAntennaOff,
+        HudBrakeOff,
+        HudBrakeOn
     }
 }

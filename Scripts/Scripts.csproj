@@ -98,8 +98,10 @@
   <ItemGroup>
     <Compile Include="Command.cs" />
     <Compile Include="CommandHandler.cs" />
+    <Compile Include="Extensions\MyStringIdExtensions.cs" />
     <Compile Include="Localization\ModText.cs" />
     <Compile Include="Mod.cs" />
+    <Compile Include="Net\Option.cs" />
     <Compile Include="Net\OptionMessage.cs" />
     <Compile Include="Net\RequestSettings.cs" />
     <Compile Include="Net\SettingMessage.cs" />
