@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.ModAPI;
+using Sisk.Utils.Logging;
+using Sisk.Utils.Logging.DefaultHandler;
 using SpaceEngineers.Game.ModAPI;
 using VRage.Game;
 using VRage.Game.Components;
@@ -12,12 +14,31 @@ using VRageMath;
 namespace Sisk.SmarterSuit {
     [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
     public class Mod : MySessionComponentBase {
+        public const string NAME = "Smarter Suit";
+
+        // important: change to info | warning | error or none before publishing this mod.
+        private const LogEventLevel DEFAULT_LOG_EVENT_LEVEL = LogEventLevel.All;
+
+        private const string LOG_FILE_TEMPLATE = "{0}.log";
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const float SPEED_TOLERANCE = 0.01f;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 100;
+        private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
         private SuitData _dataFromLastCockpit;
         private IMyIdentity _identity;
         private int _ticks;
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="Mod" /> session component.
+        /// </summary>
+        public Mod() {
+            InitializeLogging();
+        }
+
+        /// <summary>
+        ///     Logger used for logging.
+        /// </summary>
+        public ILogger Log { get; private set; }
 
         /// <summary>
         ///     Indicates if the 'Remove all automatic jetpack activation' is available.
@@ -92,6 +113,19 @@ namespace Sisk.SmarterSuit {
             }
 
             return false;
+        }
+
+        /// <summary>
+        ///     Used to format the <see cref="LogEvent" /> entries.
+        /// </summary>
+        /// <param name="level">The <see cref="LogEventLevel" /> for current event.</param>
+        /// <param name="message">The <see cref="LogEvent" /> message.</param>
+        /// <param name="timestamp">The timestamp of the <see cref="LogEvent" />.</param>
+        /// <param name="scope">The scope of the <see cref="LogEvent" />.</param>
+        /// <param name="method">The called method of this <see cref="LogEvent" />.</param>
+        /// <returns></returns>
+        private static string LogFormatter(LogEventLevel level, string message, DateTime timestamp, Type scope, string method) {
+            return $"[{timestamp:HH:mm:ss:fff}] [{new string(level.ToString().Take(1).ToArray())}] [{scope}->{method}()]: {message}";
         }
 
         /// <summary>
@@ -244,6 +278,24 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+            if (Log != null) {
+                Log.Info("Logging stopped");
+                Log.Flush();
+                Log.Close();
+                Log = null;
+            }
+        }
+        /// <summary>
+        ///     Initialize the logging system.
+        /// </summary>
+        private void InitializeLogging() {
+            Log = Logger.ForScope<Mod>();
+            Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, 25));
+
+            using (Log.BeginMethod(nameof(InitializeLogging))) {
+                Log.Info("Logging initialized");
+            }
+        }
         /// <summary>
         ///     Called on <see cref="IMyIdentity.CharacterChanged" /> event. Used to check if we respawned.
         /// </summary>
