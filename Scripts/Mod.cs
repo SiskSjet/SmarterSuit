@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -206,24 +206,27 @@ namespace Sisk.SmarterSuit {
                 return;
             }
 
-            if (data.Dampeners != null && character.EnabledDamping != data.Dampeners.Value) {
-                character.SwitchDamping();
+            var jetpackComponent = character.Components.Get<MyCharacterJetpackComponent>();
+            if (jetpackComponent != null) {
+                if (data.Dampeners != null && character.EnabledDamping != data.Dampeners.Value) {
+                    jetpackComponent.SwitchDamping();
+                }
+
+                if (data.Thruster != null && character.EnabledThrusts != data.Thruster.Value) {
+                    jetpackComponent.SwitchThrusts();
+
+                    if (data.LinearVelocity.HasValue && data.AngularVelocity.HasValue) {
+                        character.Physics.SetSpeeds(data.LinearVelocity.Value, data.AngularVelocity.Value);
+                    } else if (data.LinearVelocity.HasValue) {
+                        character.Physics.SetSpeeds(data.LinearVelocity.Value, Vector3.Zero);
+                    } else if (data.AngularVelocity.HasValue) {
+                        character.Physics.SetSpeeds(Vector3.Zero, data.AngularVelocity.Value);
+                    }
+                }
             }
 
             if (data.Helmet != null && character.EnabledHelmet != data.Helmet.Value) {
                 character.SwitchHelmet();
-            }
-
-            if (data.Thruster != null && character.EnabledThrusts != data.Thruster.Value) {
-                character.SwitchThrusts();
-
-                if (data.LinearVelocity.HasValue && data.AngularVelocity.HasValue) {
-                    character.Physics.SetSpeeds(data.LinearVelocity.Value, data.AngularVelocity.Value);
-                } else if (data.LinearVelocity.HasValue) {
-                    character.Physics.SetSpeeds(data.LinearVelocity.Value, Vector3.Zero);
-                } else if (data.AngularVelocity.HasValue) {
-                    character.Physics.SetSpeeds(Vector3.Zero, data.AngularVelocity.Value);
-                }
             }
         }
 
