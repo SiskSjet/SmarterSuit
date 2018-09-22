@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -428,14 +428,6 @@ namespace Sisk.SmarterSuit {
             }
         }
 
-        public T CastExamp1<T>(object input) {
-            return (T) input;
-        }
-
-        public T ConvertExamp1<T>(object input) {
-            return (T) Convert.ChangeType(input, typeof(T));
-        }
-
         /// <summary>
         ///     Create commands.
         /// </summary>
@@ -861,45 +853,5 @@ namespace Sisk.SmarterSuit {
                 character.MovementStateChanged -= OnMovementStateChanged;
             }
         }
-    }
-
-    public enum MyGuiSounds {
-        HudClick,
-        HudUse,
-        HudRotateBlock,
-        HudPlaceBlock,
-        HudDeleteBlock,
-        HudColorBlock,
-        HudMouseClick,
-        HudMouseOver,
-        HudUnable,
-        PlayDropItem,
-        HudVocInventoryFull,
-        HudVocMeteorInbound,
-        HudVocHealthLow,
-        HudVocHealthCritical,
-        HudVocFuelLow,
-        HudVocFuelCrit,
-        None,
-        HudVocEnergyLow,
-        HudVocStationFuelLow,
-        HudVocShipFuelLow,
-        HudVocEnergyCrit,
-        HudVocStationFuelCrit,
-        HudVocShipFuelCrit,
-        HudVocEnergyNo,
-        HudVocStationFuelNo,
-        HudVocShipFuelNo,
-        HudCraftBarProgressLoop,
-        HudErrorMessage,
-        HudOpenCraftWin,
-        HudOpenInventory,
-        HudItem,
-        PlayTakeItem,
-        HudPlaceItem,
-        HudAntennaOn,
-        HudAntennaOff,
-        HudBrakeOff,
-        HudBrakeOn
     }
 }
