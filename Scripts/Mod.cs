@@ -188,7 +188,7 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
-        ///     Load mod settings.
+        ///     Load mod settings, create localizations and initialize network handler.
         /// </summary>
         public override void LoadData() {
             LoadTranslation();
