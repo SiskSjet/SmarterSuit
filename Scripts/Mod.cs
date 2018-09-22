@@ -1,10 +1,15 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.ModAPI;
+using Sisk.SmarterSuit.Localization;
+using Sisk.SmarterSuit.Net;
+using Sisk.SmarterSuit.Settings;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Logging.DefaultHandler;
+using Sisk.Utils.Net;
 using SpaceEngineers.Game.ModAPI;
+using VRage;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
@@ -12,7 +17,7 @@ using VRage.ModAPI;
 using VRageMath;
 
 namespace Sisk.SmarterSuit {
-    [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
+    [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
     public class Mod : MySessionComponentBase {
         public const string NAME = "Smarter Suit";
 
@@ -20,10 +25,13 @@ namespace Sisk.SmarterSuit {
         private const LogEventLevel DEFAULT_LOG_EVENT_LEVEL = LogEventLevel.All;
 
         private const string LOG_FILE_TEMPLATE = "{0}.log";
+        private const ushort NETWORK_ID = 51501;
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
+        private const string SETTINGS_FILE = "settings.xml";
         private const float SPEED_TOLERANCE = 0.01f;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 100;
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
+        private readonly CommandHandler _commandHandler = new CommandHandler();
         private SuitData _dataFromLastCockpit;
         private IMyIdentity _identity;
         private int _ticks;
@@ -36,14 +44,34 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Mod name to acronym.
+        /// </summary>
+        public static string Acronym => string.Concat(NAME.Where(char.IsUpper));
+
+        /// <summary>
+        ///     Indicates if local player has permission to change settings.
+        /// </summary>
+        private bool HasPermission => !MyAPIGateway.Multiplayer.MultiplayerActive || MyAPIGateway.Session.LocalHumanPlayer.PromoteLevel == MyPromoteLevel.Admin;
+
+        /// <summary>
         ///     Logger used for logging.
         /// </summary>
         public ILogger Log { get; private set; }
 
         /// <summary>
+        ///     Network to handle syncing.
+        /// </summary>
+        public Network Network { get; private set; }
+
+        /// <summary>
         ///     Indicates if the 'Remove all automatic jetpack activation' is available.
         /// </summary>
         private bool RemoveAutomaticJetpackActivation { get; set; }
+
+        /// <summary>
+        ///     The Mod Settings.
+        /// </summary>
+        public ModSettings Settings { get; private set; }
 
         /// <summary>
         ///     The state that indicates the actions executed after simulation.
@@ -159,18 +187,51 @@ namespace Sisk.SmarterSuit {
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        ///     Load mod settings.
+        /// </summary>
         public override void LoadData() {
-            if (MyAPIGateway.Utilities.IsDedicated) {
-                return;
+            LoadTranslation();
+            if (MyAPIGateway.Multiplayer.MultiplayerActive) {
+                InitializeNetwork();
+
+                if (Network != null) {
+                    if (Network.IsServer) {
+                        LoadSettings();
+                        Network.Register<RequestSettingsMessage>(OnRequestSettingsMessage);
+                        if (Network.IsDedicated) {
+                            return;
+                        }
+                    }
+
+                    if (Network.IsClient) {
+                        Network.Register<SettingMessage>(OnSettingReceived);
+                    }
+
+                    Network.Register<OptionMessage>(OnOptionMessageReceived);
+                }
+            } else {
+                LoadSettings();
             }
 
+            CreateCommands();
             MyAPIGateway.Session.OnSessionReady += OnSessionReady;
+            MyAPIGateway.Utilities.MessageEntered += OnMessageEntered;
+            SetUpdateOrder(MyUpdateOrder.AfterSimulation);
         }
 
         /// <inheritdoc />
         public override void UpdateAfterSimulation() {
             if (State == State.None) {
+                if (Settings.AlwaysAutoHelmet && MyAPIGateway.Session.SessionSettings.EnableOxygen) {
+                    _ticks++;
+                    if (_ticks < TICKS_UNTIL_OXYGEN_CHECK - 1) {
+                        return;
+                    }
+
+                    State = State.CheckOxygenAfterDelay;
+                }
+
                 return;
             }
 
@@ -262,6 +323,11 @@ namespace Sisk.SmarterSuit {
 
         /// <inheritdoc />
         protected override void UnloadData() {
+            Log?.EnterMethod(nameof(UnloadData));
+
+            MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
+            MyAPIGateway.Utilities.MessageEntered -= OnMessageEntered;
+
             var player = MyAPIGateway.Session.Player;
             if (player != null) {
                 player.IdentityChanged -= OnIdentityChanged;
@@ -276,7 +342,12 @@ namespace Sisk.SmarterSuit {
             if (character != null) {
                 UnRegisterEvents(character);
             }
-        }
+
+            if (Network != null) {
+                Log?.Info("Cap network connections");
+                Network.Close();
+                Network = null;
+            }
 
             if (Log != null) {
                 Log.Info("Logging stopped");
@@ -285,6 +356,18 @@ namespace Sisk.SmarterSuit {
                 Log = null;
             }
         }
+
+        /// <summary>
+        ///     Create commands.
+        /// </summary>
+        private void CreateCommands() {
+            _commandHandler.Prefix = $"/{Acronym}";
+            _commandHandler.Register(new Command { Name = "Enable", Description = ModText.Description_SS_Enable.String, Execute = OnEnableOptionCommand });
+            _commandHandler.Register(new Command { Name = "Disable", Description = ModText.Description_SS_Disable.String, Execute = OnDisableOptionCommand });
+            _commandHandler.Register(new Command { Name = "List", Description = ModText.Description_SS_List.String, Execute = OnListOptionsCommand });
+            _commandHandler.Register(new Command { Name = "Help", Description = ModText.Description_SS_Help.String, Execute = _commandHandler.ShowHelp });
+        }
+
         /// <summary>
         ///     Initialize the logging system.
         /// </summary>
@@ -296,6 +379,66 @@ namespace Sisk.SmarterSuit {
                 Log.Info("Logging initialized");
             }
         }
+
+        /// <summary>
+        ///     Initialize the network system.
+        /// </summary>
+        private void InitializeNetwork() {
+            using (Log.BeginMethod(nameof(InitializeNetwork))) {
+                Log.Info("Initialize Network");
+                Network = new Network(NETWORK_ID);
+                Log.Info($"IsClient {Network.IsClient}, IsServer: {Network.IsServer}, IsDedicated: {Network.IsDedicated}");
+                Log.Info("Network initialized");
+            }
+        }
+
+        /// <summary>
+        ///     Load mod settings.
+        /// </summary>
+        private void LoadSettings() {
+            ModSettings settings = null;
+            try {
+                if (MyAPIGateway.Utilities.FileExistsInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
+                    using (var reader = MyAPIGateway.Utilities.ReadFileInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
+                        settings = MyAPIGateway.Utilities.SerializeFromXML<ModSettings>(reader.ReadToEnd());
+                    }
+                }
+            } catch (Exception exception) {
+                using (Log.BeginMethod(nameof(LoadSettings))) {
+                    Log.Error(exception);
+                }
+            }
+
+            if (settings != null) {
+                if (settings.Version < ModSettings.VERSION) {
+                    // todo: merge old and new settings in future versions.
+                }
+            } else {
+                settings = new ModSettings();
+            }
+
+            Settings = settings;
+        }
+
+        /// <summary>
+        ///     Load translations for this mod.
+        /// </summary>
+        private void LoadTranslation() {
+            using (Log.BeginMethod(nameof(LoadTranslation))) {
+                var currentLanguage = MyAPIGateway.Session.Config.Language;
+                var supportedLanguages = new HashSet<MyLanguagesEnum>();
+
+                MyTexts.LoadSupportedLanguages($"{ModContext.ModPathData}\\Localization", supportedLanguages);
+                if (supportedLanguages.Contains(currentLanguage)) {
+                    MyTexts.LoadTexts($"{ModContext.ModPathData}\\Localization", MyTexts.Languages[currentLanguage].CultureName);
+                    Log.Info($"Loaded {MyTexts.Languages[currentLanguage].FullCultureName} translations.");
+                } else if (supportedLanguages.Contains(MyLanguagesEnum.English)) {
+                    MyTexts.LoadTexts($"{ModContext.ModPathData}\\Localization", MyTexts.Languages[MyLanguagesEnum.English].CultureName);
+                    Log.Warning($"No {MyTexts.Languages[currentLanguage].FullCultureName} translations found. Fall back to {MyTexts.Languages[MyLanguagesEnum.English].FullCultureName} translations.");
+                }
+            }
+        }
+
         /// <summary>
         ///     Called on <see cref="IMyIdentity.CharacterChanged" /> event. Used to check if we respawned.
         /// </summary>
@@ -313,6 +456,36 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Called on Disable option command.
+        /// </summary>
+        /// <param name="arguments">The arguments that should contain the option name.</param>
+        private void OnDisableOptionCommand(string arguments) {
+            if (!HasPermission) {
+                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Description_SS_NoPermission.String);
+                return;
+            }
+
+            if (string.Equals(arguments, nameof(Settings.AlwaysAutoHelmet), StringComparison.CurrentCultureIgnoreCase)) {
+                SetOption(Option.AlwaysAutoHelmet, false, true);
+            }
+        }
+
+        /// <summary>
+        ///     Called on Enable command received.
+        /// </summary>
+        /// <param name="arguments">The arguments that should contain the option name.</param>
+        private void OnEnableOptionCommand(string arguments) {
+            if (!HasPermission) {
+                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Description_SS_NoPermission.String);
+                return;
+            }
+
+            if (string.Equals(arguments, nameof(Settings.AlwaysAutoHelmet), StringComparison.CurrentCultureIgnoreCase)) {
+                SetOption(Option.AlwaysAutoHelmet, true, true);
+            }
+        }
+
+        /// <summary>
         ///     Called on <see cref="IMyPlayer.IdentityChanged" /> event. Used keep track of
         ///     <see cref="IMyIdentity.CharacterChanged" /> event after identity change.
         /// </summary>
@@ -323,6 +496,29 @@ namespace Sisk.SmarterSuit {
 
             _identity = identity;
             _identity.CharacterChanged += OnCharacterChanged;
+        }
+
+        /// <summary>
+        ///     Called on List command received.
+        /// </summary>
+        /// <param name="arguments">Arguments are ignored in this handler.</param>
+        private void OnListOptionsCommand(string arguments) {
+            var options = new List<string> {
+                nameof(Settings.AlwaysAutoHelmet)
+            };
+
+            MyAPIGateway.Utilities.ShowMessage(NAME, string.Join(", ", options));
+        }
+
+        /// <summary>
+        ///     Message event handler.
+        /// </summary>
+        /// <param name="messageText">The received message text.</param>
+        /// <param name="sendToOthers">Indicates if message should be send to others.</param>
+        private void OnMessageEntered(string messageText, ref bool sendToOthers) {
+            if (_commandHandler.TryHandle(messageText.Trim())) {
+                sendToOthers = false;
+            }
         }
 
         /// <summary>
@@ -372,7 +568,62 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        /// <summary>
+        ///     Option message handler.
+        /// </summary>
+        /// <param name="sender">The sender who send the option message.</param>
+        /// <param name="message">The option message received.</param>
+        private void OnOptionMessageReceived(ulong sender, OptionMessage message) {
+            if (message?.Option == null) {
+                return;
+            }
+
+            try {
+                switch (message.Option) {
+                    case Option.AlwaysAutoHelmet:
+                        var value = MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value);
+                        SetOption(Option.AlwaysAutoHelmet, value, Network.IsServer);
+
+                        break;
+                    default:
+                        return;
+                }
+            } catch (Exception exception) {
+                using (Log.BeginMethod(nameof(OnOptionMessageReceived))) {
+                    Log.Error(exception);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Request Settings message handler.
+        /// </summary>
+        /// <param name="sender">The sender who requested settings.</param>
+        /// <param name="message">The message from the requester.</param>
+        private void OnRequestSettingsMessage(ulong sender, RequestSettingsMessage message) {
+            if (Settings == null) {
+                return;
+            }
+
+            try {
+                var response = new SettingMessage {
+                    Settings = Settings,
+                    SteamId = message.SteamId
+                };
+
+                Network.Send(response, sender);
+            } catch (Exception exception) {
+                using (Log.BeginMethod(nameof(OnRequestSettingsMessage))) {
+                    Log.Error(exception);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Executed if Session is ready.
+        /// </summary>
         private void OnSessionReady() {
+            MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
             RemoveAutomaticJetpackActivation = MyAPIGateway.Session.Mods.Any(x => x.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID);
 
             var player = MyAPIGateway.Session.Player;
@@ -392,12 +643,78 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Settings received message handler.
+        /// </summary>
+        /// <param name="sender">The sender of the message.</param>
+        /// <param name="message">The message.</param>
+        private void OnSettingReceived(ulong sender, SettingMessage message) {
+            if (message.Settings != null) {
+                Settings = message.Settings;
+            }
+        }
+
+        /// <summary>
         ///     Register character events.
         /// </summary>
         /// <param name="character">The character.</param>
         private void RegisterEvents(IMyCharacter character) {
             if (character != null) {
                 character.MovementStateChanged += OnMovementStateChanged;
+            }
+        }
+
+        /// <summary>
+        ///     Save settings.
+        /// </summary>
+        private void SaveSettings() {
+            try {
+                using (var writer = MyAPIGateway.Utilities.WriteBinaryFileInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
+                    writer.Write(MyAPIGateway.Utilities.SerializeToXML(Settings));
+                }
+            } catch (Exception exception) {
+                using (Log.BeginMethod(nameof(SaveSettings))) {
+                    Log.Error(exception);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Set a given option to given value.
+        /// </summary>
+        /// <typeparam name="TValue">The value type.</typeparam>
+        /// <param name="option">Which option should be set.</param>
+        /// <param name="value">The value for given option.</param>
+        /// <param name="sync">Indicates if option should be synced.</param>
+        private void SetOption<TValue>(Option option, TValue value, bool sync) {
+            OptionMessage message = null;
+            switch (option) {
+                case Option.AlwaysAutoHelmet:
+                    if (Network != null) {
+                        message = new OptionMessage { Option = Option.AlwaysAutoHelmet, Value = MyAPIGateway.Utilities.SerializeToBinary(value) };
+                    }
+
+                    if (Network == null || Network.IsServer) {
+                        Settings.AlwaysAutoHelmet = (bool) (object) value;
+                    }
+
+                    break;
+                default:
+                    return;
+            }
+
+            if (Network != null) {
+                if (message == null || !sync) {
+                    return;
+                }
+
+                if (Network.IsServer) {
+                    Network.Sync(message);
+                    SaveSettings();
+                } else if (Network.IsClient) {
+                    Network.SendToServer(message);
+                }
+            } else {
+                SaveSettings();
             }
         }
 
