@@ -103,7 +103,7 @@
     <Compile Include="Mod.cs" />
     <Compile Include="Data\Option.cs" />
     <Compile Include="Net\Messages\OptionMessage.cs" />
-    <Compile Include="Net\Messages\RequestSettings.cs" />
+    <Compile Include="Net\Messages\RequestSettingsMessage.cs" />
     <Compile Include="Net\Messages\SettingMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\ModSettings.cs" />
