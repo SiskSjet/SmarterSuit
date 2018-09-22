@@ -316,69 +316,69 @@ namespace Sisk.SmarterSuit {
 
             switch (State) {
                 case State.CheckOxygenAfterDelay: {
-                    _ticks++;
-                    if (_ticks < TICKS_UNTIL_OXYGEN_CHECK) {
+                        _ticks++;
+                        if (_ticks < TICKS_UNTIL_OXYGEN_CHECK) {
+                            return;
+                        }
+
+                        _ticks = 0;
+
+                        character = MyAPIGateway.Session.Player.Character;
+                        helmet = character.EnvironmentOxygenLevel < 0.5;
+
+                        SetSuitFunctions(character, new SuitData(null, null, helmet, null, null));
+                        State = State.None;
                         return;
                     }
-
-                    _ticks = 0;
-
-                    character = MyAPIGateway.Session.Player.Character;
-                    helmet = character.EnvironmentOxygenLevel < 0.5;
-
-                    SetSuitFunctions(character, new SuitData(null, null, helmet, null, null));
-                    State = State.None;
-                    return;
-                }
                 case State.ExitCockpit: {
-                    dampeners = _dataFromLastCockpit.Dampeners;
-                    thruster = _dataFromLastCockpit.Thruster;
-                    linearVelocity = _dataFromLastCockpit.LinearVelocity;
-                    angularVelocity = _dataFromLastCockpit.AngularVelocity;
-                    break;
-                }
+                        dampeners = _dataFromLastCockpit.Dampeners;
+                        thruster = _dataFromLastCockpit.Thruster;
+                        linearVelocity = _dataFromLastCockpit.LinearVelocity;
+                        angularVelocity = _dataFromLastCockpit.AngularVelocity;
+                        break;
+                    }
                 case State.Respawn: {
-                    var entity = MyAPIGateway.Session.ControlledObject;
-                    var atMedicalRoom = character == entity;
-                    if (!atMedicalRoom) {
-                        return;
-                    }
+                        var entity = MyAPIGateway.Session.ControlledObject;
+                        var atMedicalRoom = character == entity;
+                        if (!atMedicalRoom) {
+                            return;
+                        }
 
-                    var medicalRoom = GetMedialRoom(character);
-                    if (medicalRoom == null) {
-                        return;
-                    }
+                        var medicalRoom = GetMedialRoom(character);
+                        if (medicalRoom == null) {
+                            return;
+                        }
 
-                    var cubeGrid = medicalRoom.CubeGrid;
-                    linearVelocity = Vector3.Zero;
-                    angularVelocity = Vector3.Zero;
-                    var gravity = character.Physics.Gravity;
+                        var cubeGrid = medicalRoom.CubeGrid;
+                        linearVelocity = Vector3.Zero;
+                        angularVelocity = Vector3.Zero;
+                        var gravity = character.Physics.Gravity;
 
-                    var physics = cubeGrid.Physics;
-                    if (physics != null) {
-                        linearVelocity = physics.LinearVelocity;
-                        angularVelocity = physics.AngularVelocity;
-                    }
+                        var physics = cubeGrid.Physics;
+                        if (physics != null) {
+                            linearVelocity = physics.LinearVelocity;
+                            angularVelocity = physics.AngularVelocity;
+                        }
 
-                    var isGravityDetected = gravity.Length() > 0;
-                    var isGroundInRange = IsGroundInRange(character, gravity);
-                    var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < SPEED_TOLERANCE && Math.Abs(angularVelocity.Value.Length()) < SPEED_TOLERANCE;
+                        var isGravityDetected = gravity.Length() > 0;
+                        var isGroundInRange = IsGroundInRange(character, gravity);
+                        var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < SPEED_TOLERANCE && Math.Abs(angularVelocity.Value.Length()) < SPEED_TOLERANCE;
 
-                    if (isGravityDetected) {
-                        if (isGroundInRange) {
-                            thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
-                            dampeners = isNotMoving;
+                        if (isGravityDetected) {
+                            if (isGroundInRange) {
+                                thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
+                                dampeners = isNotMoving;
+                            } else {
+                                thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
+                                dampeners = isNotMoving;
+                            }
                         } else {
                             thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                             dampeners = isNotMoving;
                         }
-                    } else {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
-                        dampeners = isNotMoving;
-                    }
 
-                    break;
-                }
+                        break;
+                    }
             }
 
             if (!MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
@@ -734,7 +734,7 @@ namespace Sisk.SmarterSuit {
             }
 
             if (!IsServerAdmin(message.SteamId)) {
-                var response = new SetOptionResponseMessage { Result = Result.NoPermission };
+                var response = new SetOptionResponseMessage { Result = Result.NoPermission, Option = message.Option, Value = message.Value };
                 Network.Send(response, sender);
                 return;
             }
@@ -750,13 +750,13 @@ namespace Sisk.SmarterSuit {
                         break;
                 }
 
-                var response = new SetOptionResponseMessage { Result = Result.Success };
+                var response = new SetOptionResponseMessage { Result = Result.Success, Option = message.Option, Value = message.Value };
                 Network.Send(response, sender);
             } catch (Exception exception) {
                 using (Log.BeginMethod(nameof(OnSetOptionMessage))) {
                     Log.Error(exception);
 
-                    var response = new SetOptionResponseMessage { Result = Result.Error };
+                    var response = new SetOptionResponseMessage { Result = Result.Error, Option = message.Option, Value = message.Value };
                     Network.Send(response, sender);
                 }
             }
