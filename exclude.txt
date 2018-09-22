@@ -13,3 +13,5 @@
 .sln
 
 App.config
+
+MyTexts.Designer.cs
