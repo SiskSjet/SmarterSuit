@@ -274,7 +274,9 @@ namespace Sisk.SmarterSuit {
             CreateCommands();
             MyAPIGateway.Session.OnSessionReady += OnSessionReady;
             MyAPIGateway.Utilities.MessageEntered += OnMessageEntered;
-            SetUpdateOrder(MyUpdateOrder.AfterSimulation);
+            if (Settings != null) {
+                SetUpdateOrder(MyUpdateOrder.AfterSimulation);
+            }
         }
 
         /// <inheritdoc />
@@ -782,6 +784,7 @@ namespace Sisk.SmarterSuit {
         private void OnSettingReceived(ulong sender, SettingMessage message) {
             if (message.Settings != null) {
                 Settings = message.Settings;
+                SetUpdateOrder(MyUpdateOrder.AfterSimulation);
             }
         }
 
