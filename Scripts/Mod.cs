@@ -55,13 +55,6 @@ namespace Sisk.SmarterSuit {
         private int _ticks;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="Mod" /> session component.
-        /// </summary>
-        public Mod() {
-            InitializeLogging();
-        }
-
-        /// <summary>
         ///     Mod name to acronym.
         /// </summary>
         public static string Acronym => string.Concat(NAME.Where(char.IsUpper));
@@ -70,6 +63,11 @@ namespace Sisk.SmarterSuit {
         ///     Indicates if local player has permission to change settings.
         /// </summary>
         private bool HasPermission => !MyAPIGateway.Multiplayer.MultiplayerActive || MyAPIGateway.Session.LocalHumanPlayer.PromoteLevel == MyPromoteLevel.Admin;
+
+        /// <summary>
+        ///     Indicates if mod is a dev version.
+        /// </summary>
+        private bool IsDevVersion => ModContext.ModName.EndsWith("_DEV");
 
         /// <summary>
         ///     Logger used for logging.
@@ -208,24 +206,27 @@ namespace Sisk.SmarterSuit {
                 return;
             }
 
-            if (data.Dampeners != null && character.EnabledDamping != data.Dampeners.Value) {
-                character.SwitchDamping();
+            var jetpackComponent = character.Components.Get<MyCharacterJetpackComponent>();
+            if (jetpackComponent != null) {
+                if (data.Dampeners != null && character.EnabledDamping != data.Dampeners.Value) {
+                    jetpackComponent.SwitchDamping();
+                }
+
+                if (data.Thruster != null && character.EnabledThrusts != data.Thruster.Value) {
+                    jetpackComponent.SwitchThrusts();
+
+                    if (data.LinearVelocity.HasValue && data.AngularVelocity.HasValue) {
+                        character.Physics.SetSpeeds(data.LinearVelocity.Value, data.AngularVelocity.Value);
+                    } else if (data.LinearVelocity.HasValue) {
+                        character.Physics.SetSpeeds(data.LinearVelocity.Value, Vector3.Zero);
+                    } else if (data.AngularVelocity.HasValue) {
+                        character.Physics.SetSpeeds(Vector3.Zero, data.AngularVelocity.Value);
+                    }
+                }
             }
 
             if (data.Helmet != null && character.EnabledHelmet != data.Helmet.Value) {
                 character.SwitchHelmet();
-            }
-
-            if (data.Thruster != null && character.EnabledThrusts != data.Thruster.Value) {
-                character.SwitchThrusts();
-
-                if (data.LinearVelocity.HasValue && data.AngularVelocity.HasValue) {
-                    character.Physics.SetSpeeds(data.LinearVelocity.Value, data.AngularVelocity.Value);
-                } else if (data.LinearVelocity.HasValue) {
-                    character.Physics.SetSpeeds(data.LinearVelocity.Value, Vector3.Zero);
-                } else if (data.AngularVelocity.HasValue) {
-                    character.Physics.SetSpeeds(Vector3.Zero, data.AngularVelocity.Value);
-                }
             }
         }
 
@@ -249,6 +250,7 @@ namespace Sisk.SmarterSuit {
         ///     Load mod settings, create localizations and initialize network handler.
         /// </summary>
         public override void LoadData() {
+            InitializeLogging();
             LoadTranslation();
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
                 InitializeNetwork();
@@ -275,7 +277,9 @@ namespace Sisk.SmarterSuit {
             CreateCommands();
             MyAPIGateway.Session.OnSessionReady += OnSessionReady;
             MyAPIGateway.Utilities.MessageEntered += OnMessageEntered;
-            SetUpdateOrder(MyUpdateOrder.AfterSimulation);
+            if (Settings != null) {
+                SetUpdateOrder(MyUpdateOrder.AfterSimulation);
+            }
         }
 
         /// <inheritdoc />
@@ -428,14 +432,6 @@ namespace Sisk.SmarterSuit {
             }
         }
 
-        public T CastExamp1<T>(object input) {
-            return (T) input;
-        }
-
-        public T ConvertExamp1<T>(object input) {
-            return (T) Convert.ChangeType(input, typeof(T));
-        }
-
         /// <summary>
         ///     Create commands.
         /// </summary>
@@ -453,7 +449,15 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void InitializeLogging() {
             Log = Logger.ForScope<Mod>();
-            Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, 0));
+            if (MyAPIGateway.Multiplayer.MultiplayerActive) {
+                if (MyAPIGateway.Multiplayer.IsServer) {
+                    Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
+                } else if (IsDevVersion) {
+                    Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
+                }
+            } else {
+                Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
+            }
 
             using (Log.BeginMethod(nameof(InitializeLogging))) {
                 Log.Info("Logging initialized");
@@ -783,6 +787,7 @@ namespace Sisk.SmarterSuit {
         private void OnSettingReceived(ulong sender, SettingMessage message) {
             if (message.Settings != null) {
                 Settings = message.Settings;
+                SetUpdateOrder(MyUpdateOrder.AfterSimulation);
             }
         }
 
@@ -861,45 +866,5 @@ namespace Sisk.SmarterSuit {
                 character.MovementStateChanged -= OnMovementStateChanged;
             }
         }
-    }
-
-    public enum MyGuiSounds {
-        HudClick,
-        HudUse,
-        HudRotateBlock,
-        HudPlaceBlock,
-        HudDeleteBlock,
-        HudColorBlock,
-        HudMouseClick,
-        HudMouseOver,
-        HudUnable,
-        PlayDropItem,
-        HudVocInventoryFull,
-        HudVocMeteorInbound,
-        HudVocHealthLow,
-        HudVocHealthCritical,
-        HudVocFuelLow,
-        HudVocFuelCrit,
-        None,
-        HudVocEnergyLow,
-        HudVocStationFuelLow,
-        HudVocShipFuelLow,
-        HudVocEnergyCrit,
-        HudVocStationFuelCrit,
-        HudVocShipFuelCrit,
-        HudVocEnergyNo,
-        HudVocStationFuelNo,
-        HudVocShipFuelNo,
-        HudCraftBarProgressLoop,
-        HudErrorMessage,
-        HudOpenCraftWin,
-        HudOpenInventory,
-        HudItem,
-        PlayTakeItem,
-        HudPlaceItem,
-        HudAntennaOn,
-        HudAntennaOff,
-        HudBrakeOff,
-        HudBrakeOn
     }
 }
