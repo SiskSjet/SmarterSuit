@@ -6,9 +6,11 @@ using Sandbox.Game;
 using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.Localization;
 using Sandbox.ModAPI;
+using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
 using Sisk.SmarterSuit.Net;
+using Sisk.SmarterSuit.Net.Messages;
 using Sisk.SmarterSuit.Settings;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Logging.DefaultHandler;
@@ -53,6 +55,18 @@ namespace Sisk.SmarterSuit {
         private IMyIdentity _identity;
         private bool _isFuelUnderThresholdBefore;
         private int _ticks;
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="Mod" /> session component.
+        /// </summary>
+        public Mod() {
+            Static = this;
+        }
+
+        /// <summary>
+        ///     The static instance.
+        /// </summary>
+        public static Mod Static { get; private set; }
 
         /// <summary>
         ///     Mod name to acronym.

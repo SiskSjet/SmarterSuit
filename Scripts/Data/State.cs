@@ -1,4 +1,4 @@
-﻿namespace Sisk.SmarterSuit {
+﻿namespace Sisk.SmarterSuit.Data {
     /// <summary>
     ///     States to determine which actions should executed.
     /// </summary>
