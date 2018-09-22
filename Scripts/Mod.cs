@@ -9,7 +9,6 @@ using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
-using Sisk.SmarterSuit.Net;
 using Sisk.SmarterSuit.Net.Messages;
 using Sisk.SmarterSuit.Settings;
 using Sisk.Utils.Logging;
@@ -57,26 +56,9 @@ namespace Sisk.SmarterSuit {
         private int _ticks;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="Mod" /> session component.
-        /// </summary>
-        public Mod() {
-            Static = this;
-        }
-
-        /// <summary>
-        ///     The static instance.
-        /// </summary>
-        public static Mod Static { get; private set; }
-
-        /// <summary>
         ///     Mod name to acronym.
         /// </summary>
         public static string Acronym => string.Concat(NAME.Where(char.IsUpper));
-
-        /// <summary>
-        ///     Indicates if local player has permission to change settings.
-        /// </summary>
-        private bool HasPermission => !MyAPIGateway.Multiplayer.MultiplayerActive || MyAPIGateway.Session.LocalHumanPlayer.PromoteLevel == MyPromoteLevel.Admin;
 
         /// <summary>
         ///     Indicates if mod is a dev version.
@@ -272,17 +254,18 @@ namespace Sisk.SmarterSuit {
                 if (Network != null) {
                     if (Network.IsServer) {
                         LoadSettings();
-                        Network.Register<RequestSettingsMessage>(OnRequestSettingsMessage);
+                        Network.Register<SettingsRequestMessage>(OnSettingsRequestMessage);
+                        Network.Register<SetOptionMessage>(OnSetOptionMessage);
                         if (Network.IsDedicated) {
                             return;
                         }
                     }
 
                     if (Network.IsClient) {
-                        Network.Register<SettingMessage>(OnSettingReceived);
+                        Network.Register<SettingsResponseMessage>(OnSettingsResponseMessage);
+                        Network.Register<SetOptionResponseMessage>(OnSetOptionResponseMessage);
+                        Network.Register<SetOptionSyncMessage>(OnSetOptionsSyncMessage);
                     }
-
-                    Network.Register<OptionMessage>(OnOptionMessageReceived);
                 }
             } else {
                 LoadSettings();
@@ -447,6 +430,21 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        /// </summary>
+        /// <param name="steamId"></param>
+        /// <returns></returns>
+        public bool IsServerAdmin(ulong steamId) {
+            if (Network == null) {
+                return true;
+            }
+
+            var admins = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(admins, x => x != null && x.PromoteLevel == MyPromoteLevel.Admin);
+            var admin = admins.FirstOrDefault(x => x.SteamUserId == steamId);
+            return admin != null;
+        }
+
+        /// <summary>
         ///     Create commands.
         /// </summary>
         private void CreateCommands() {
@@ -558,11 +556,6 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         /// <param name="arguments">The arguments that should contain the option name.</param>
         private void OnDisableOptionCommand(string arguments) {
-            if (!HasPermission) {
-                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
-                return;
-            }
-
             Option result;
             if (Enum.TryParse(arguments, true, out result)) {
                 if (_optionsDictionary[result] == typeof(bool)) {
@@ -580,11 +573,6 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         /// <param name="arguments">The arguments that should contain the option name.</param>
         private void OnEnableOptionCommand(string arguments) {
-            if (!HasPermission) {
-                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
-                return;
-            }
-
             Option result;
             if (Enum.TryParse(arguments, true, out result)) {
                 if (_optionsDictionary[result] == typeof(bool)) {
@@ -677,59 +665,6 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
-        ///     Option message handler.
-        /// </summary>
-        /// <param name="sender">The sender who send the option message.</param>
-        /// <param name="message">The option message received.</param>
-        private void OnOptionMessageReceived(ulong sender, OptionMessage message) {
-            if (message?.Option == null) {
-                return;
-            }
-
-            try {
-                switch (message.Option) {
-                    case Option.AlwaysAutoHelmet:
-                    case Option.AdditionalFuelWarning:
-                        SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value), Network.IsServer);
-                        break;
-                    case Option.FuelThreshold:
-                        SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value), Network.IsServer);
-                        break;
-                    default:
-                        return;
-                }
-            } catch (Exception exception) {
-                using (Log.BeginMethod(nameof(OnOptionMessageReceived))) {
-                    Log.Error(exception);
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Request Settings message handler.
-        /// </summary>
-        /// <param name="sender">The sender who requested settings.</param>
-        /// <param name="message">The message from the requester.</param>
-        private void OnRequestSettingsMessage(ulong sender, RequestSettingsMessage message) {
-            if (Settings == null) {
-                return;
-            }
-
-            try {
-                var response = new SettingMessage {
-                    Settings = Settings,
-                    SteamId = message.SteamId
-                };
-
-                Network.Send(response, sender);
-            } catch (Exception exception) {
-                using (Log.BeginMethod(nameof(OnRequestSettingsMessage))) {
-                    Log.Error(exception);
-                }
-            }
-        }
-
-        /// <summary>
         ///     Executed if Session is ready.
         /// </summary>
         private void OnSessionReady() {
@@ -757,11 +692,6 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         /// <param name="arguments">The arguments that should contain the value.</param>
         private void OnSetOptionCommand(string arguments) {
-            if (!HasPermission) {
-                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
-                return;
-            }
-
             var array = arguments.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             if (array.Length < 2) {
                 MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_ArgumentError.GetString(arguments));
@@ -794,11 +724,121 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Set option message handler.
+        /// </summary>
+        /// <param name="sender">The sender who send the option message.</param>
+        /// <param name="message">The option message received.</param>
+        private void OnSetOptionMessage(ulong sender, SetOptionMessage message) {
+            if (message?.Option == null) {
+                return;
+            }
+
+            if (!IsServerAdmin(message.SteamId)) {
+                var response = new SetOptionResponseMessage { Result = Result.NoPermission };
+                Network.Send(response, sender);
+                return;
+            }
+
+            try {
+                switch (message.Option) {
+                    case Option.AlwaysAutoHelmet:
+                    case Option.AdditionalFuelWarning:
+                        SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value), Network.IsServer);
+                        break;
+                    case Option.FuelThreshold:
+                        SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value), Network.IsServer);
+                        break;
+                }
+
+                var response = new SetOptionResponseMessage { Result = Result.Success };
+                Network.Send(response, sender);
+            } catch (Exception exception) {
+                using (Log.BeginMethod(nameof(OnSetOptionMessage))) {
+                    Log.Error(exception);
+
+                    var response = new SetOptionResponseMessage { Result = Result.Error };
+                    Network.Send(response, sender);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Set option response handler.
+        /// </summary>
+        /// <param name="sender">The sender who send the option message.</param>
+        /// <param name="message">The option message received.</param>
+        private void OnSetOptionResponseMessage(ulong sender, SetOptionResponseMessage message) {
+            object value = null;
+            switch (message.Option) {
+                case Option.AlwaysAutoHelmet:
+                case Option.AdditionalFuelWarning:
+                    value = MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value);
+                    break;
+                case Option.FuelThreshold:
+                    value = MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value);
+                    break;
+            }
+
+            switch (message.Result) {
+                case Result.NoPermission:
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
+                    break;
+                case Result.Error:
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionError.GetString(message.Option, value));
+                    break;
+                case Result.Success:
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionSuccess.GetString(message.Option, value));
+                    break;
+            }
+        }
+
+        /// <summary>
+        ///     Set option sync message.
+        /// </summary>
+        /// <param name="sender">The sender who send the option message.</param>
+        /// <param name="message">The option message received.</param>
+        private void OnSetOptionsSyncMessage(ulong sender, SetOptionSyncMessage message) {
+            switch (message.Option) {
+                case Option.AlwaysAutoHelmet:
+                case Option.AdditionalFuelWarning:
+                    SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value), false);
+                    break;
+                case Option.FuelThreshold:
+                    SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value), false);
+                    break;
+            }
+        }
+
+        /// <summary>
+        ///     Request Settings message handler.
+        /// </summary>
+        /// <param name="sender">The sender who requested settings.</param>
+        /// <param name="message">The message from the requester.</param>
+        private void OnSettingsRequestMessage(ulong sender, SettingsRequestMessage message) {
+            if (Settings == null) {
+                return;
+            }
+
+            try {
+                var response = new SettingsResponseMessage {
+                    Settings = Settings,
+                    SteamId = message.SteamId
+                };
+
+                Network.Send(response, sender);
+            } catch (Exception exception) {
+                using (Log.BeginMethod(nameof(OnSettingsRequestMessage))) {
+                    Log.Error(exception);
+                }
+            }
+        }
+
+        /// <summary>
         ///     Settings received message handler.
         /// </summary>
         /// <param name="sender">The sender of the message.</param>
         /// <param name="message">The message.</param>
-        private void OnSettingReceived(ulong sender, SettingMessage message) {
+        private void OnSettingsResponseMessage(ulong sender, SettingsResponseMessage message) {
             if (message.Settings != null) {
                 Settings = message.Settings;
                 SetUpdateOrder(MyUpdateOrder.AfterSimulation);
@@ -838,6 +878,11 @@ namespace Sisk.SmarterSuit {
         /// <param name="value">The value for given option.</param>
         /// <param name="sync">Indicates if option should be synced.</param>
         private void SetOption<TValue>(Option option, TValue value, bool sync) {
+            if (Network == null) {
+                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
+                return;
+            }
+
             if (Network == null || Network.IsServer) {
                 switch (option) {
                     case Option.AlwaysAutoHelmet:
@@ -861,11 +906,12 @@ namespace Sisk.SmarterSuit {
                     return;
                 }
 
-                var message = new OptionMessage { Option = option, Value = MyAPIGateway.Utilities.SerializeToBinary(value) };
-
                 if (Network.IsServer) {
+                    var message = new SetOptionSyncMessage { Option = option, Value = MyAPIGateway.Utilities.SerializeToBinary(value) };
                     Network.Sync(message);
                 } else if (Network.IsClient) {
+                    var steamUserId = MyAPIGateway.Session.LocalHumanPlayer.SteamUserId;
+                    var message = new SetOptionMessage { SteamId = steamUserId, Option = option, Value = MyAPIGateway.Utilities.SerializeToBinary(value) };
                     Network.SendToServer(message);
                 }
             }

@@ -147,4 +147,10 @@
   <data name="SS_ArgumentError" xml:space="preserve">
     <value>Falsche Argumente. Erwartet [option] [value] Argumente.</value>
   </data>
+  <data name="SS_SetOptionSuccess" xml:space="preserve">
+    <value>{0} erfolgreich auf {1} festgelegt.</value>
+  </data>
+  <data name="SS_SetOptionError" xml:space="preserve">
+    <value>Fehler beim Festlegen von {0} auf {1}.</value>
+  </data>
 </root>

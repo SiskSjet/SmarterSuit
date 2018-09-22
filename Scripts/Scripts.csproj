@@ -102,9 +102,12 @@
     <Compile Include="Localization\ModText.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Data\Option.cs" />
-    <Compile Include="Net\Messages\OptionMessage.cs" />
+    <Compile Include="Net\Messages\SetOptionMessage.cs" />
+    <Compile Include="Net\Messages\SetOptionResponseMessage.cs" />
+    <Compile Include="Net\Messages\SetOptionSyncMessage.cs" />
     <Compile Include="Net\Messages\SettingsRequestMessage.cs" />
     <Compile Include="Net\Messages\SettingsResponseMessage.cs" />
+    <Compile Include="Net\Messages\Result.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\ModSettings.cs" />
     <Compile Include="Data\State.cs" />

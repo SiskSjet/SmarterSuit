@@ -127,4 +127,10 @@
   <data name="SS_ArgumentError" xml:space="preserve">
     <value>Wrong arguments. Expect [option] [value] arguments.</value>
   </data>
+  <data name="SS_SetOptionSuccess" xml:space="preserve">
+    <value>{0} successfully set to {1}.</value>
+  </data>
+  <data name="SS_SetOptionError" xml:space="preserve">
+    <value>Failed to set {0} to {1}.</value>
+  </data>
 </root>
