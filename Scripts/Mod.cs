@@ -316,69 +316,69 @@ namespace Sisk.SmarterSuit {
 
             switch (State) {
                 case State.CheckOxygenAfterDelay: {
-                        _ticks++;
-                        if (_ticks < TICKS_UNTIL_OXYGEN_CHECK) {
-                            return;
-                        }
-
-                        _ticks = 0;
-
-                        character = MyAPIGateway.Session.Player.Character;
-                        helmet = character.EnvironmentOxygenLevel < 0.5;
-
-                        SetSuitFunctions(character, new SuitData(null, null, helmet, null, null));
-                        State = State.None;
+                    _ticks++;
+                    if (_ticks < TICKS_UNTIL_OXYGEN_CHECK) {
                         return;
                     }
+
+                    _ticks = 0;
+
+                    character = MyAPIGateway.Session.Player.Character;
+                    helmet = character.EnvironmentOxygenLevel < 0.5;
+
+                    SetSuitFunctions(character, new SuitData(null, null, helmet, null, null));
+                    State = State.None;
+                    return;
+                }
                 case State.ExitCockpit: {
-                        dampeners = _dataFromLastCockpit.Dampeners;
-                        thruster = _dataFromLastCockpit.Thruster;
-                        linearVelocity = _dataFromLastCockpit.LinearVelocity;
-                        angularVelocity = _dataFromLastCockpit.AngularVelocity;
-                        break;
-                    }
+                    dampeners = _dataFromLastCockpit.Dampeners;
+                    thruster = _dataFromLastCockpit.Thruster;
+                    linearVelocity = _dataFromLastCockpit.LinearVelocity;
+                    angularVelocity = _dataFromLastCockpit.AngularVelocity;
+                    break;
+                }
                 case State.Respawn: {
-                        var entity = MyAPIGateway.Session.ControlledObject;
-                        var atMedicalRoom = character == entity;
-                        if (!atMedicalRoom) {
-                            return;
-                        }
+                    var entity = MyAPIGateway.Session.ControlledObject;
+                    var atMedicalRoom = character == entity;
+                    if (!atMedicalRoom) {
+                        return;
+                    }
 
-                        var medicalRoom = GetMedialRoom(character);
-                        if (medicalRoom == null) {
-                            return;
-                        }
+                    var medicalRoom = GetMedialRoom(character);
+                    if (medicalRoom == null) {
+                        return;
+                    }
 
-                        var cubeGrid = medicalRoom.CubeGrid;
-                        linearVelocity = Vector3.Zero;
-                        angularVelocity = Vector3.Zero;
-                        var gravity = character.Physics.Gravity;
+                    var cubeGrid = medicalRoom.CubeGrid;
+                    linearVelocity = Vector3.Zero;
+                    angularVelocity = Vector3.Zero;
+                    var gravity = character.Physics.Gravity;
 
-                        var physics = cubeGrid.Physics;
-                        if (physics != null) {
-                            linearVelocity = physics.LinearVelocity;
-                            angularVelocity = physics.AngularVelocity;
-                        }
+                    var physics = cubeGrid.Physics;
+                    if (physics != null) {
+                        linearVelocity = physics.LinearVelocity;
+                        angularVelocity = physics.AngularVelocity;
+                    }
 
-                        var isGravityDetected = gravity.Length() > 0;
-                        var isGroundInRange = IsGroundInRange(character, gravity);
-                        var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < SPEED_TOLERANCE && Math.Abs(angularVelocity.Value.Length()) < SPEED_TOLERANCE;
+                    var isGravityDetected = gravity.Length() > 0;
+                    var isGroundInRange = IsGroundInRange(character, gravity);
+                    var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < SPEED_TOLERANCE && Math.Abs(angularVelocity.Value.Length()) < SPEED_TOLERANCE;
 
-                        if (isGravityDetected) {
-                            if (isGroundInRange) {
-                                thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
-                                dampeners = isNotMoving;
-                            } else {
-                                thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
-                                dampeners = isNotMoving;
-                            }
+                    if (isGravityDetected) {
+                        if (isGroundInRange) {
+                            thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
+                            dampeners = isNotMoving;
                         } else {
                             thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                             dampeners = isNotMoving;
                         }
-
-                        break;
+                    } else {
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
+                        dampeners = isNotMoving;
                     }
+
+                    break;
+                }
             }
 
             if (!MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
@@ -438,10 +438,11 @@ namespace Sisk.SmarterSuit {
                 return true;
             }
 
-            var admins = new List<IMyPlayer>();
-            MyAPIGateway.Players.GetPlayers(admins, x => x != null && x.PromoteLevel == MyPromoteLevel.Admin);
-            var admin = admins.FirstOrDefault(x => x.SteamUserId == steamId);
-            return admin != null;
+            if (Network.IsDedicated) {
+                return MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(steamId.ToString());
+            }
+
+            return MyAPIGateway.Session.LocalHumanPlayer.SteamUserId == steamId;
         }
 
         /// <summary>
@@ -779,17 +780,7 @@ namespace Sisk.SmarterSuit {
                     break;
             }
 
-            switch (message.Result) {
-                case Result.NoPermission:
-                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
-                    break;
-                case Result.Error:
-                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionError.GetString(message.Option, value));
-                    break;
-                case Result.Success:
-                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionSuccess.GetString(message.Option, value));
-                    break;
-            }
+            ShowResultMessage(message.Option, value, message.Result);
         }
 
         /// <summary>
@@ -878,11 +869,6 @@ namespace Sisk.SmarterSuit {
         /// <param name="value">The value for given option.</param>
         /// <param name="sync">Indicates if option should be synced.</param>
         private void SetOption<TValue>(Option option, TValue value, bool sync) {
-            if (Network == null) {
-                MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
-                return;
-            }
-
             if (Network == null || Network.IsServer) {
                 switch (option) {
                     case Option.AlwaysAutoHelmet:
@@ -896,6 +882,10 @@ namespace Sisk.SmarterSuit {
                         break;
                     default:
                         return;
+                }
+
+                if (Network == null) {
+                    ShowResultMessage(option, value, Result.Success);
                 }
 
                 SaveSettings();
@@ -914,6 +904,27 @@ namespace Sisk.SmarterSuit {
                     var message = new SetOptionMessage { SteamId = steamUserId, Option = option, Value = MyAPIGateway.Utilities.SerializeToBinary(value) };
                     Network.SendToServer(message);
                 }
+            }
+        }
+
+        /// <summary>
+        ///     Shows a result message in chat window.
+        /// </summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="option"></param>
+        /// <param name="value"></param>
+        /// <param name="result"></param>
+        private void ShowResultMessage<TValue>(Option option, TValue value, Result result) {
+            switch (result) {
+                case Result.NoPermission:
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
+                    break;
+                case Result.Error:
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionError.GetString(option, value));
+                    break;
+                case Result.Success:
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionSuccess.GetString(option, value));
+                    break;
             }
         }
 
