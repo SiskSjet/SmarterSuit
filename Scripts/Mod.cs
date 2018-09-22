@@ -6,7 +6,7 @@ using Sandbox.Game;
 using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.Localization;
 using Sandbox.ModAPI;
-using Sisk.ImprovedTurretBehavior.Extensions;
+using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
 using Sisk.SmarterSuit.Net;
 using Sisk.SmarterSuit.Settings;
