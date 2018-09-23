@@ -6,8 +6,12 @@
 \Properties
 \packages
 
+\Profiler
+
 .csproj
 .git
 .sln
 
 App.config
+
+MyTexts.Designer.cs
