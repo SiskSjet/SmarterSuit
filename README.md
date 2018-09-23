@@ -28,6 +28,7 @@ In addition, the speed is adjusted relative to the ship.
 * **AlwaysAutoHelmet/AAH** (*boolean*) - Will check everytime if helmet is needed. I don't recomend this setting for multiplayer with airthigness enabled, because of an bug with cockpits.
 * **AdditionalFuelWarning/AFW** (*boolean*) - Will play a additional fuel warning at given threshold.
 * **FuelThreshold/FT** (*float*) - The fuel threshold used for additional fuel warnings. Default is 0.25. Range is 0-1.
+* **DisableAutoDampener/DAD** (*byte*) - Option to disable automatic dampener changes. 0 = Disabled | 1 = only mod changes disabled | 2 All dampener changes disabled.
 
 ## Commands
 
