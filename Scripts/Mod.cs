@@ -51,6 +51,8 @@ namespace Sisk.SmarterSuit {
         private bool _hasWaitedATick;
         private IMyIdentity _identity;
         private bool _isFuelUnderThresholdBefore;
+
+        private bool _lastDampenerState;
         private NetworkHandlerBase _networkHandler;
         private int _ticks;
 
@@ -389,6 +391,10 @@ namespace Sisk.SmarterSuit {
                         dampeners = isNotMoving;
                     }
 
+                    if (Settings.DisableAutoDampener != DisableAutoDamenerOption.Disable) {
+                        dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?) _lastDampenerState : null;
+                    }
+
                     break;
             }
 
@@ -469,6 +475,9 @@ namespace Sisk.SmarterSuit {
                     break;
                 case Option.FuelThreshold:
                     Settings.FuelThreshold = (float) (object) value;
+                    break;
+                case Option.DisableAutoDampener:
+                    Settings.DisableAutoDampener = (DisableAutoDamenerOption) (object) value;
                     break;
                 default:
                     return;
@@ -593,6 +602,10 @@ namespace Sisk.SmarterSuit {
         /// <param name="oldState">The old movement state.</param>
         /// <param name="newState">The new movement state.</param>
         private void OnMovementStateChanged(IMyCharacter character, MyCharacterMovementEnum oldState, MyCharacterMovementEnum newState) {
+            if (Settings.DisableAutoDampener == DisableAutoDamenerOption.All && (newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
+                _lastDampenerState = character.EnabledDamping;
+            }
+
             if (oldState == MyCharacterMovementEnum.Sitting) {
                 var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
                 if (cockpit == null) {
@@ -604,7 +617,7 @@ namespace Sisk.SmarterSuit {
                 var angularVelocity = velocities.AngularVelocity;
 
                 bool? thruster;
-                bool dampeners;
+                bool? dampeners;
 
                 var naturalGravity = cockpit.GetNaturalGravity();
                 var gravity = cockpit.GetTotalGravity();
@@ -625,6 +638,10 @@ namespace Sisk.SmarterSuit {
                 } else {
                     thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                     dampeners = isNotMoving;
+                }
+
+                if (Settings.DisableAutoDampener != DisableAutoDamenerOption.Disable) {
+                    dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?) _lastDampenerState : null;
                 }
 
                 _dataFromLastCockpit = new SuitData(dampeners, thruster, null, linearVelocity, angularVelocity);

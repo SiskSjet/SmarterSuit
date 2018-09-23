@@ -1,4 +1,5 @@
-﻿using Sandbox.ModAPI;
+﻿using System;
+using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Net.Messages;
 using Sisk.Utils.Logging;
@@ -41,6 +42,9 @@ namespace Sisk.SmarterSuit.Net {
                     break;
                 case Option.FuelThreshold:
                     value = MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value);
+                    break;
+                case Option.DisableAutoDampener:
+                    value = MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value);
                     break;
             }
 
