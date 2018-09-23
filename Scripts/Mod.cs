@@ -199,10 +199,6 @@ namespace Sisk.SmarterSuit {
                 }
             }
 
-            using (Static.Log.BeginMethod(nameof(IsFuelUnderThreshold))) {
-                Static.Log.Debug($"Bottles: {bottleFillLevel}");
-            }
-
             return oxygenComponent.GetGasFillLevel(MyCharacterOxygenComponent.HydrogenId) < threshold && bottleFillLevel < 0.1;
         }
 
@@ -391,11 +387,6 @@ namespace Sisk.SmarterSuit {
                     } else {
                         thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                         dampeners = isNotMoving;
-                    }
-
-                    using (Log.BeginMethod(nameof(OnMovementStateChanged))) {
-                        Log.Debug($"Thruster: {thruster}, Gravity: {gravity.Length()}, Ground: {isGroundInRange}, Halted: {isNotMoving}");
-                        Log.Debug($"Dampeners: {dampeners}");
                     }
 
                     break;
@@ -638,11 +629,6 @@ namespace Sisk.SmarterSuit {
 
                 _dataFromLastCockpit = new SuitData(dampeners, thruster, null, linearVelocity, angularVelocity);
 
-                using (Log.BeginMethod(nameof(OnMovementStateChanged))) {
-                    Log.Debug($"Thruster: {thruster}, Gravity: {gravity.Length()}, Artificial: {isArtificial}, Ground: {isGroundInRange}, Halted: {isNotMoving}");
-                    Log.Debug($"Dampeners: {dampeners}");
-                }
-
                 State = State.ExitCockpit;
             }
         }
@@ -727,14 +713,6 @@ namespace Sisk.SmarterSuit {
 
             if (data.Helmet != null && character.EnabledHelmet != data.Helmet.Value) {
                 character.SwitchHelmet();
-            }
-
-            using (Log.BeginMethod(nameof(SetSuitFunctions))) {
-                Log.Debug($"Thruster: {character.EnabledThrusts}, {data.Thruster != null && data.Thruster.Value}");
-                Log.Debug($"Dampener: {character.EnabledDamping}, {data.Dampeners != null && data.Dampeners.Value}");
-                Log.Debug($"Helmet: {character.EnabledHelmet}, {data.Helmet != null && data.Helmet.Value}");
-                Log.Debug($"LinearVelocity: {character.Physics.LinearVelocity.Length()}, {character.EnabledThrusts && data.LinearVelocity.HasValue},{(data.LinearVelocity ?? Vector3.Zero).Length()}");
-                Log.Debug($"AngularVelocity: {character.Physics.AngularVelocity.Length()}, {character.EnabledThrusts && data.AngularVelocity.HasValue}, {(data.AngularVelocity ?? Vector3.Zero).Length()}");
             }
         }
 

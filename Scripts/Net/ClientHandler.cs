@@ -62,13 +62,6 @@ namespace Sisk.SmarterSuit.Net {
                     Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                     break;
             }
-
-            using (Log.BeginMethod(nameof(OnSetOptionsSyncMessage))) {
-                Log.Debug($"Sync: {message.Option} option");
-                Log.Debug($"AlwaysAutoHelmet: {Mod.Static.Settings.AlwaysAutoHelmet}");
-                Log.Debug($"AdditionalFuelWarning: {Mod.Static.Settings.AdditionalFuelWarning}");
-                Log.Debug($"FuelThreshold: {Mod.Static.Settings.FuelThreshold}");
-            }
         }
 
         /// <summary>
