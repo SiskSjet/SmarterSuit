@@ -96,18 +96,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChatHandler.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="CommandHandler.cs" />
     <Compile Include="Extensions\MyStringIdExtensions.cs" />
     <Compile Include="Localization\ModText.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Data\Option.cs" />
+    <Compile Include="Net\ClientHandler.cs" />
     <Compile Include="Net\Messages\SetOptionMessage.cs" />
     <Compile Include="Net\Messages\SetOptionResponseMessage.cs" />
     <Compile Include="Net\Messages\SetOptionSyncMessage.cs" />
     <Compile Include="Net\Messages\SettingsRequestMessage.cs" />
     <Compile Include="Net\Messages\SettingsResponseMessage.cs" />
     <Compile Include="Data\Result.cs" />
+    <Compile Include="Net\NetworkHandlerBase.cs" />
+    <Compile Include="Net\ServerHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\ModSettings.cs" />
     <Compile Include="Data\State.cs" />

@@ -7,9 +7,6 @@ using Sisk.Utils.Net.Messages;
 namespace Sisk.SmarterSuit.Net.Messages {
     [ProtoContract]
     public class SettingsRequestMessage : IMessage {
-        [ProtoMember(1)]
-        public ulong SteamId { get; set; }
-
         public byte[] Serialize() {
             return MyAPIGateway.Utilities.SerializeToBinary(this);
         }
