@@ -1,7 +1,8 @@
 ﻿namespace Sisk.SmarterSuit.Data {
-    public enum Option {
+    public enum Option : byte {
         AlwaysAutoHelmet,
         AdditionalFuelWarning,
-        FuelThreshold
+        FuelThreshold,
+        DisableAutoDampener
     }
 }

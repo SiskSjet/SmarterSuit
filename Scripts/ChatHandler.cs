@@ -17,7 +17,8 @@ namespace Sisk.SmarterSuit {
         private readonly Dictionary<string, Option> _alias = new Dictionary<string, Option>(StringComparer.CurrentCultureIgnoreCase) {
             { Acronym(nameof(Option.AlwaysAutoHelmet)), Option.AlwaysAutoHelmet },
             { Acronym(nameof(Option.AdditionalFuelWarning)), Option.AdditionalFuelWarning },
-            { Acronym(nameof(Option.FuelThreshold)), Option.FuelThreshold }
+            { Acronym(nameof(Option.FuelThreshold)), Option.FuelThreshold },
+            { Acronym(nameof(Option.DisableAutoDampener)), Option.DisableAutoDampener }
         };
 
         private readonly CommandHandler _commandHandler;
@@ -25,7 +26,8 @@ namespace Sisk.SmarterSuit {
         private readonly Dictionary<Option, Type> _options = new Dictionary<Option, Type> {
             { Option.AlwaysAutoHelmet, typeof(bool) },
             { Option.AdditionalFuelWarning, typeof(bool) },
-            { Option.FuelThreshold, typeof(float) }
+            { Option.FuelThreshold, typeof(float) },
+            { Option.DisableAutoDampener, typeof(byte) }
         };
 
         public ChatHandler(ILogger log, Network network, NetworkHandlerBase networkHandler) {
@@ -152,6 +154,13 @@ namespace Sisk.SmarterSuit {
                 } else if (type == typeof(float)) {
                     float value;
                     if (float.TryParse(valueString, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value)) {
+                        SetOption(result, value);
+                    } else {
+                        MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
+                    }
+                } else if (type == typeof(byte)) {
+                    byte value;
+                    if (byte.TryParse(valueString, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value)) {
                         SetOption(result, value);
                     } else {
                         MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
