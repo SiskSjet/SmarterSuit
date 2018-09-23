@@ -1,3 +1,19 @@
+<a name="1.2.0"></a>
+# [1.2.0](https://github.com/SiskSjet/SmartSuit/compare/v1.1.2...v1.2.0) (2018-09-23)
+
+
+### Bug Fixes
+
+* fix multiple bug in multiplayer. ([4da4a5](https://github.com/SiskSjet/SmartSuit/commit/4da4a5))
+
+### Features
+
+* add an optional feature for to always check if helmet is needed ([ba1aa38](https://github.com/SiskSjet/SmartSuit/commit/ba1aa38))
+* add an optional feature to enable an additional fuel warning ([fe533dc](https://github.com/SiskSjet/SmartSuit/commit/fe533dc))
+* set speed only if jetpack is enabled ([17aa04e](https://github.com/SiskSjet/SmartSuit/commit/17aa04e))
+
+
+
 <a name="1.1.2"></a>
 # [1.1.2](https://github.com/SiskSjet/SmartSuit/compare/v1.1.1...v1.1.2) (2018-09-21)
 
