@@ -1,3 +1,13 @@
+<a name="1.2.1"></a>
+# [1.2.1](https://github.com/SiskSjet/SmartSuit/compare/v1.1.1...v1.2.1) (2018-09-23)
+
+
+### Features
+
+* add option to disable auto dampener change ([5c0b01b](https://github.com/SiskSjet/SmartSuit/commit/5c0b01b))
+
+
+
 <a name="1.2.0"></a>
 # [1.2.0](https://github.com/SiskSjet/SmartSuit/compare/v1.1.2...v1.2.0) (2018-09-23)
 
