@@ -49,6 +49,9 @@ namespace Sisk.SmarterSuit.Net {
                     case Option.FuelThreshold:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                         break;
+                    case Option.DisableAutoDampener:
+                        SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value));
+                        break;
                 }
 
                 var response = new SetOptionResponseMessage { Result = Result.Success, Option = message.Option, Value = message.Value };
