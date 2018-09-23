@@ -20,10 +20,8 @@ using VRage;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
-using VRage.Game.ModAPI.Ingame;
+using VRage.ModAPI;
 using VRageMath;
-using IMyCubeGrid = VRage.Game.ModAPI.IMyCubeGrid;
-using IMyEntity = VRage.ModAPI.IMyEntity;
 
 // ReSharper disable UsePatternMatching
 
@@ -193,7 +191,7 @@ namespace Sisk.SmarterSuit {
             float bottleFillLevel = 0;
             var items = character.GetInventory().GetItems();
             foreach (var item in items) {
-                if (item.GetDefinitionId().ToString() == HYDROGEN_BOTTLE_ID) {
+                if (item.Content.ToString() == HYDROGEN_BOTTLE_ID) {
                     var bottle = item.Content as MyObjectBuilder_GasContainerObject;
                     if (bottle != null) {
                         bottleFillLevel += bottle.GasLevel;
