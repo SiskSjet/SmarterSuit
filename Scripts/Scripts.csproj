@@ -100,7 +100,9 @@
     <Compile Include="Command.cs" />
     <Compile Include="CommandHandler.cs" />
     <Compile Include="Extensions\MyStringIdExtensions.cs" />
+    <Compile Include="Localization\Lang.cs" />
     <Compile Include="Localization\ModText.cs" />
+    <Compile Include="Localization\Texts.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Data\Option.cs" />
     <Compile Include="Net\ClientHandler.cs" />
