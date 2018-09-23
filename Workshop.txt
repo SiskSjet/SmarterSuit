@@ -19,6 +19,7 @@ In addition, the speed is adjusted relative to the ship.
 [h1][b]➤⠀O⠀P⠀T⠀I⠀O⠀N⠀A⠀L[/b][/h1]
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
 You can enable optional features by typing a command in your chat box.
+In multiplayer only server admins can set options. All options are synced.
 
 [b]Options[/b]:
 [table]
@@ -135,6 +136,7 @@ Außerdem wird die Geschwindigkeit relativ zum Schiff eingestellt.
 [h1][b]➤⠀O⠀P⠀T⠀I⠀O⠀N⠀A⠀L[/b][/h1]
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
 Sie können optionale Funktionen aktivieren, indem Sie einen Befehl in Ihre Chat-Box eingeben.
+Im Multiplayer können nur Serveradministratoren Optionen festlegen. Alle Optionen werden synchronisiert.
 
 [b]Options[/b]:
 [table]
