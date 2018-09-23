@@ -1,6 +1,8 @@
 ﻿using VRageMath;
 
-namespace Sisk.SmarterSuit {
+// ReSharper disable ExplicitCallerInfoArgument
+
+namespace Sisk.SmarterSuit.Data {
     /// <summary>
     ///     A simple data structure which holds information which suit system should be enabled/disabled.
     /// </summary>

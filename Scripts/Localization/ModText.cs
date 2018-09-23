@@ -14,5 +14,7 @@ namespace Sisk.SmarterSuit.Localization {
         public static readonly MyStringId SS_NoPermissionError = MyStringId.GetOrCompute(nameof(SS_NoPermissionError));
         public static readonly MyStringId SS_OnlyBooleanAllowedError = MyStringId.GetOrCompute(nameof(SS_OnlyBooleanAllowedError));
         public static readonly MyStringId SS_UnknownOptionError = MyStringId.GetOrCompute(nameof(SS_UnknownOptionError));
+        public static readonly MyStringId SS_SetOptionSuccess = MyStringId.GetOrCompute(nameof(SS_SetOptionSuccess));
+        public static readonly MyStringId SS_SetOptionError = MyStringId.GetOrCompute(nameof(SS_SetOptionError));
     }
 }

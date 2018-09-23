@@ -1,4 +1,4 @@
-﻿namespace Sisk.SmarterSuit.Net {
+﻿namespace Sisk.SmarterSuit.Data {
     public enum Option {
         AlwaysAutoHelmet,
         AdditionalFuelWarning,

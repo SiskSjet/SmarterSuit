@@ -1,18 +1,20 @@
 ﻿using ProtoBuf;
 using Sandbox.ModAPI;
-using Sisk.SmarterSuit.Settings;
+using Sisk.SmarterSuit.Data;
 using Sisk.Utils.Net.Messages;
 
 // ReSharper disable ExplicitCallerInfoArgument
 
-namespace Sisk.SmarterSuit.Net {
+namespace Sisk.SmarterSuit.Net.Messages {
     [ProtoContract]
-    public class SettingMessage : IMessage {
-        [ProtoMember(2)]
-        public ModSettings Settings { get; set; }
+    public class SetOptionResponseMessage : IMessage {
+        [ProtoMember(2)] public Option Option;
 
         [ProtoMember(1)]
-        public ulong SteamId { get; set; }
+        public Result Result { get; set; }
+
+        [ProtoMember(3)]
+        public byte[] Value { get; set; }
 
         public byte[] Serialize() {
             return MyAPIGateway.Utilities.SerializeToBinary(this);

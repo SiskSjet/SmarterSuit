@@ -142,6 +142,24 @@ namespace Mod.Data.Localization {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Failed to set {0} to {1}. ähnelt.
+        /// </summary>
+        internal static string SS_SetOptionError {
+            get {
+                return ResourceManager.GetString("SS_SetOptionError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} successfully set to {1}. ähnelt.
+        /// </summary>
+        internal static string SS_SetOptionSuccess {
+            get {
+                return ResourceManager.GetString("SS_SetOptionSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Unknown option &apos;{0}&apos;. ähnelt.
         /// </summary>
         internal static string SS_UnknownOptionError {
