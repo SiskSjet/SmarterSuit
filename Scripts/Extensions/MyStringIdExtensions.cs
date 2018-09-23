@@ -1,4 +1,6 @@
-﻿using VRage;
+﻿
+
+using Sisk.SmarterSuit.Localization;
 using VRage.Utils;
 
 namespace Sisk.SmarterSuit.Extensions {
@@ -9,7 +11,7 @@ namespace Sisk.SmarterSuit.Extensions {
         /// <param name="stringId">The stringId that identifies the localized <see cref="MyStringId" />.</param>
         /// <returns>Returns the localized <see cref="string" />.</returns>
         public static string GetString(this MyStringId stringId) {
-            return MyTexts.GetString(stringId);
+            return Texts.GetString(stringId);
         }
 
         /// <summary>
@@ -20,7 +22,7 @@ namespace Sisk.SmarterSuit.Extensions {
         /// <param name="args">The arguments used by <see cref="string.Format(string,object)" />.</param>
         /// <returns>Returns the localized and formatted string.</returns>
         public static string GetString(this MyStringId stringId, params object[] args) {
-            return string.Format(MyTexts.GetString(stringId), args);
+            return string.Format(Texts.GetString(stringId), args);
         }
     }
 }

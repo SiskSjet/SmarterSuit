@@ -14,9 +14,15 @@ using Sisk.Utils.Net;
 
 namespace Sisk.SmarterSuit {
     public class ChatHandler {
+        private readonly Dictionary<string, Option> _alias = new Dictionary<string, Option>(StringComparer.CurrentCultureIgnoreCase) {
+            { Acronym(nameof(Option.AlwaysAutoHelmet)), Option.AlwaysAutoHelmet },
+            { Acronym(nameof(Option.AdditionalFuelWarning)), Option.AdditionalFuelWarning },
+            { Acronym(nameof(Option.FuelThreshold)), Option.FuelThreshold }
+        };
+
         private readonly CommandHandler _commandHandler;
 
-        private readonly Dictionary<Option, Type> _optionsDictionary = new Dictionary<Option, Type> {
+        private readonly Dictionary<Option, Type> _options = new Dictionary<Option, Type> {
             { Option.AlwaysAutoHelmet, typeof(bool) },
             { Option.AdditionalFuelWarning, typeof(bool) },
             { Option.FuelThreshold, typeof(float) }
@@ -49,6 +55,10 @@ namespace Sisk.SmarterSuit {
 
         private NetworkHandlerBase NetworkHandler { get; }
 
+        private static string Acronym(string name) {
+            return string.Concat(name.Where(char.IsUpper));
+        }
+
         /// <summary>
         ///     Close the network message handler.
         /// </summary>
@@ -69,8 +79,8 @@ namespace Sisk.SmarterSuit {
         /// <param name="arguments">The arguments that should contain the option name.</param>
         private void OnDisableOptionCommand(string arguments) {
             Option result;
-            if (Enum.TryParse(arguments, true, out result)) {
-                if (_optionsDictionary[result] == typeof(bool)) {
+            if (TryGetOption(arguments, out result)) {
+                if (_options[result] == typeof(bool)) {
                     SetOption(result, false);
                 } else {
                     MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_OnlyBooleanAllowedError.GetString());
@@ -86,8 +96,8 @@ namespace Sisk.SmarterSuit {
         /// <param name="arguments">The arguments that should contain the option name.</param>
         private void OnEnableOptionCommand(string arguments) {
             Option result;
-            if (Enum.TryParse(arguments, true, out result)) {
-                if (_optionsDictionary[result] == typeof(bool)) {
+            if (TryGetOption(arguments, out result)) {
+                if (_options[result] == typeof(bool)) {
                     SetOption(result, true);
                 } else {
                     MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_OnlyBooleanAllowedError.GetString());
@@ -102,7 +112,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         /// <param name="arguments">Arguments are ignored in this handler.</param>
         private void OnListOptionsCommand(string arguments) {
-            MyAPIGateway.Utilities.ShowMessage(Mod.NAME, string.Join(", ", _optionsDictionary.Select(x => $"{x.Key} <{x.Value.Name}>")));
+            MyAPIGateway.Utilities.ShowMessage(Mod.NAME, string.Join(", ", _options.Select(x => $"{x.Key} <{x.Value.Name}>")));
         }
 
         /// <summary>
@@ -130,8 +140,8 @@ namespace Sisk.SmarterSuit {
             var optionString = array[0];
             var valueString = array[1];
             Option result;
-            if (Enum.TryParse(optionString, true, out result)) {
-                var type = _optionsDictionary[result];
+            if (TryGetOption(optionString, out result)) {
+                var type = _options[result];
                 if (type == typeof(bool)) {
                     bool value;
                     if (bool.TryParse(valueString, out value)) {
@@ -164,6 +174,25 @@ namespace Sisk.SmarterSuit {
             } else {
                 NetworkHandler.SyncOption(option, value);
             }
+        }
+
+        /// <summary>
+        ///     Try to resolve given string to an option.
+        /// </summary>
+        /// <param name="arguments">The string that gets checked.</param>
+        /// <param name="result">The Option returned.</param>
+        /// <returns>Returns true if an option is resolved.</returns>
+        private bool TryGetOption(string arguments, out Option result) {
+            if (_alias.ContainsKey(arguments)) {
+                result = _alias[arguments];
+                return true;
+            }
+
+            if (Enum.TryParse(arguments, true, out result)) {
+                return true;
+            }
+
+            return false;
         }
     }
 }

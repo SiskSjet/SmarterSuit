@@ -555,13 +555,13 @@ namespace Sisk.SmarterSuit {
                 var currentLanguage = MyAPIGateway.Session.Config.Language;
                 var supportedLanguages = new HashSet<MyLanguagesEnum>();
 
-                MyTexts.LoadSupportedLanguages($"{ModContext.ModPathData}\\Localization", supportedLanguages);
+                Texts.LoadSupportedLanguages(supportedLanguages);
                 if (supportedLanguages.Contains(currentLanguage)) {
-                    MyTexts.LoadTexts($"{ModContext.ModPathData}\\Localization", MyTexts.Languages[currentLanguage].CultureName);
-                    Log.Info($"Loaded {MyTexts.Languages[currentLanguage].FullCultureName} translations.");
+                    Texts.LoadTexts(currentLanguage);
+                    Log.Info($"Loaded {currentLanguage} translations.");
                 } else if (supportedLanguages.Contains(MyLanguagesEnum.English)) {
-                    MyTexts.LoadTexts($"{ModContext.ModPathData}\\Localization", MyTexts.Languages[MyLanguagesEnum.English].CultureName);
-                    Log.Warning($"No {MyTexts.Languages[currentLanguage].FullCultureName} translations found. Fall back to {MyTexts.Languages[MyLanguagesEnum.English].FullCultureName} translations.");
+                    Texts.LoadTexts(MyLanguagesEnum.English);
+                    Log.Warning($"No {currentLanguage} translations found. Fall back to {MyLanguagesEnum.English} translations.");
                 }
             }
         }
