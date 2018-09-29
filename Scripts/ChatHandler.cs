@@ -29,7 +29,7 @@ namespace Sisk.SmarterSuit {
             { Option.AdditionalFuelWarning, typeof(bool) },
             { Option.FuelThreshold, typeof(float) },
             { Option.DisableAutoDampener, typeof(byte) },
-            { Option.AdditionalFuelWarning, typeof(float) }
+            { Option.HaltedSpeedTolerance, typeof(float) }
         };
 
         public ChatHandler(ILogger log, Network network, NetworkHandlerBase networkHandler) {
