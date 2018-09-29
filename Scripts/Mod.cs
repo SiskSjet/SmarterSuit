@@ -29,9 +29,7 @@ namespace Sisk.SmarterSuit {
     [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
     public class Mod : MySessionComponentBase {
         public const string NAME = "Smarter Suit";
-
-        // important: change to info | warning | error or none before publishing this mod.
-        private const LogEventLevel DEFAULT_LOG_EVENT_LEVEL = LogEventLevel.All;
+        private const LogEventLevel DEFAULT_LOG_EVENT_LEVEL = LogEventLevel.Info | LogEventLevel.Warning | LogEventLevel.Error;
 
         private const float GRAVITY = 9.81f;
         private const string HYDROGEN_BOTTLE_ID = "MyObjectBuilder_GasContainerObject/HydrogenBottle";
