@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -33,6 +33,7 @@ namespace Sisk.SmarterSuit {
         // important: change to info | warning | error or none before publishing this mod.
         private const LogEventLevel DEFAULT_LOG_EVENT_LEVEL = LogEventLevel.All;
 
+        private const float GRAVITY = 9.81f;
         private const string HYDROGEN_BOTTLE_ID = "MyObjectBuilder_GasContainerObject/HydrogenBottle";
 
         private const string LOG_FILE_TEMPLATE = "{0}.log";
@@ -212,10 +213,15 @@ namespace Sisk.SmarterSuit {
         /// <returns>Return true if there is ground in 5m distance.</returns>
         private static bool IsGroundInRange(IMyCharacter character, Vector3 gravity) {
             if (gravity.Length() > 0) {
-                var position = character.GetPosition();
+                var position = character.WorldAABB.Center;
                 var from = position;
+
+                var offset = Vector3D.Distance(character.GetPosition(), position);
+                var strength = gravity.Length() / GRAVITY;
+                var length = (float) offset + 5 / (strength > 1 ? strength : 1);
+
                 gravity.Normalize();
-                var to = position + gravity * 5;
+                var to = position + gravity * length;
                 var results = new List<IHitInfo>();
                 MyAPIGateway.Physics.CastRay(from, to, results);
                 return results.Any();
