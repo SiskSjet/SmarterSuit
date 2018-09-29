@@ -345,7 +345,12 @@ namespace Sisk.SmarterSuit {
 
                     State = State.None;
 
-                    return;
+                    break;
+                case State.ExitCockpit:
+                    SetSuitFunctions(character, _dataFromLastCockpit);
+                    State = State.None;
+
+                    break;
                 case State.Respawn:
                     if (!_hasWaitedATick) {
                         _hasWaitedATick = true;
@@ -658,10 +663,8 @@ namespace Sisk.SmarterSuit {
                     dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?) _lastDampenerState : null;
                 }
 
-                _dataFromLastCockpit = new SuitData(dampeners, thruster, null, linearVelocity, angularVelocity);
-                var data = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
-                SetSuitFunctions(character, data);
-                State = State.None;
+                _dataFromLastCockpit = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
+                State = State.ExitCockpit;
             }
         }
 
