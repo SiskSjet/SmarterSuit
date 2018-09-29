@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Net.Messages;
@@ -47,6 +47,7 @@ namespace Sisk.SmarterSuit.Net {
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value));
                         break;
                     case Option.FuelThreshold:
+                    case Option.HaltedSpeedTolerance:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                         break;
                     case Option.DisableAutoDampener:

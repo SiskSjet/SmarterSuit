@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -39,7 +39,6 @@ namespace Sisk.SmarterSuit {
         private const ushort NETWORK_ID = 51501;
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const string SETTINGS_FILE = "settings.xml";
-        private const float SPEED_TOLERANCE = 0.01f;
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 100;
 
@@ -381,7 +380,7 @@ namespace Sisk.SmarterSuit {
 
                     var isGravityDetected = gravity.Length() > 0;
                     var isGroundInRange = IsGroundInRange(character, gravity);
-                    var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < SPEED_TOLERANCE && Math.Abs(angularVelocity.Value.Length()) < SPEED_TOLERANCE;
+                    var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < Settings.HaltedSpeedTolerance && Math.Abs(angularVelocity.Value.Length()) < Settings.HaltedSpeedTolerance;
 
                     if (isGravityDetected) {
                         if (isGroundInRange) {
@@ -482,6 +481,9 @@ namespace Sisk.SmarterSuit {
                     break;
                 case Option.DisableAutoDampener:
                     Settings.DisableAutoDampener = (DisableAutoDamenerOption) (object) value;
+                    break;
+                case Option.HaltedSpeedTolerance:
+                    Settings.HaltedSpeedTolerance = (float) (object) value;
                     break;
                 default:
                     using (Log.BeginMethod(nameof(SetOption))) {
@@ -637,7 +639,7 @@ namespace Sisk.SmarterSuit {
                 var isGravityDetected = gravity.Length() > 0;
                 var isArtificial = !(naturalGravity.Length() > 0);
                 var isGroundInRange = IsGroundInRange(character, gravity);
-                var isNotMoving = Math.Abs(linearVelocity.Length()) < SPEED_TOLERANCE && Math.Abs(angularVelocity.Length()) < SPEED_TOLERANCE;
+                var isNotMoving = Math.Abs(linearVelocity.Length()) < Settings.HaltedSpeedTolerance && Math.Abs(angularVelocity.Length()) < Settings.HaltedSpeedTolerance;
 
                 if (isGravityDetected) {
                     if (isGroundInRange) {

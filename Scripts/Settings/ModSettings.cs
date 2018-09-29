@@ -13,6 +13,7 @@ namespace Sisk.SmarterSuit.Settings {
         private const bool AUTO_HELMET_EVERYWHERE = false;
         private const DisableAutoDamenerOption DISABLE_AUTO_DAMPENER = DisableAutoDamenerOption.Disable;
         private const float FUEL_THRESHOLD = 0.25f;
+        private const float HALTED_SPEED_TOLERANCE = 0.01f;
 
         [ProtoMember(3)]
         [DefaultValue(ADDITIONAL_FUEL_WARNING)]
@@ -33,6 +34,11 @@ namespace Sisk.SmarterSuit.Settings {
         [DefaultValue(FUEL_THRESHOLD)]
         [XmlElement(Order = 4)]
         public float FuelThreshold { get; set; } = FUEL_THRESHOLD;
+
+        [ProtoMember(6)]
+        [DefaultValue(HALTED_SPEED_TOLERANCE)]
+        [XmlElement(Order = 6)]
+        public float HaltedSpeedTolerance { get; set; } = HALTED_SPEED_TOLERANCE;
 
         [ProtoMember(1)]
         [XmlElement(Order = 1)]

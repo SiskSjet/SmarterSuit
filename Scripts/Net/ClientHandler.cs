@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Net.Messages;
@@ -41,6 +41,7 @@ namespace Sisk.SmarterSuit.Net {
                     value = MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value);
                     break;
                 case Option.FuelThreshold:
+                case Option.HaltedSpeedTolerance:
                     value = MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value);
                     break;
                 case Option.DisableAutoDampener:
@@ -49,7 +50,7 @@ namespace Sisk.SmarterSuit.Net {
                 default:
                     using (Log.BeginMethod(nameof(OnSetOptionResponseMessage))) {
                         Log.Error(new ArgumentOutOfRangeException(nameof(message.Option), "Unknown option"));
-            }
+                    }
 
                     return;
             }
@@ -69,6 +70,7 @@ namespace Sisk.SmarterSuit.Net {
                     Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value));
                     break;
                 case Option.FuelThreshold:
+                case Option.HaltedSpeedTolerance:
                     Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                     break;
                 case Option.DisableAutoDampener:
@@ -77,10 +79,10 @@ namespace Sisk.SmarterSuit.Net {
                 default:
                     using (Log.BeginMethod(nameof(OnSetOptionSyncMessage))) {
                         Log.Error(new ArgumentOutOfRangeException(nameof(message.Option), "Unknown option"));
-            }
+                    }
 
                     return;
-        }
+            }
         }
 
         /// <summary>

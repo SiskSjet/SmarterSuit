@@ -18,7 +18,8 @@ namespace Sisk.SmarterSuit {
             { Acronym(nameof(Option.AlwaysAutoHelmet)), Option.AlwaysAutoHelmet },
             { Acronym(nameof(Option.AdditionalFuelWarning)), Option.AdditionalFuelWarning },
             { Acronym(nameof(Option.FuelThreshold)), Option.FuelThreshold },
-            { Acronym(nameof(Option.DisableAutoDampener)), Option.DisableAutoDampener }
+            { Acronym(nameof(Option.DisableAutoDampener)), Option.DisableAutoDampener },
+            { Acronym(nameof(Option.HaltedSpeedTolerance)), Option.HaltedSpeedTolerance }
         };
 
         private readonly CommandHandler _commandHandler;
@@ -27,7 +28,8 @@ namespace Sisk.SmarterSuit {
             { Option.AlwaysAutoHelmet, typeof(bool) },
             { Option.AdditionalFuelWarning, typeof(bool) },
             { Option.FuelThreshold, typeof(float) },
-            { Option.DisableAutoDampener, typeof(byte) }
+            { Option.DisableAutoDampener, typeof(byte) },
+            { Option.AdditionalFuelWarning, typeof(float) }
         };
 
         public ChatHandler(ILogger log, Network network, NetworkHandlerBase networkHandler) {

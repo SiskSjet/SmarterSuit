@@ -3,6 +3,7 @@
         AlwaysAutoHelmet,
         AdditionalFuelWarning,
         FuelThreshold,
-        DisableAutoDampener
+        DisableAutoDampener,
+        HaltedSpeedTolerance
     }
 }
