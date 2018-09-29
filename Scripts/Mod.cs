@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -35,7 +35,6 @@ namespace Sisk.SmarterSuit {
 
         private const float GRAVITY = 9.81f;
         private const string HYDROGEN_BOTTLE_ID = "MyObjectBuilder_GasContainerObject/HydrogenBottle";
-
         private const string LOG_FILE_TEMPLATE = "{0}.log";
         private const ushort NETWORK_ID = 51501;
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
