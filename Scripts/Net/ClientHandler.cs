@@ -1,5 +1,4 @@
-﻿using System;
-using Sandbox.ModAPI;
+﻿using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Net.Messages;
 using Sisk.Utils.Logging;
@@ -49,7 +48,7 @@ namespace Sisk.SmarterSuit.Net {
                     break;
                 default:
                     using (Log.BeginMethod(nameof(OnSetOptionResponseMessage))) {
-                        Log.Error(new ArgumentOutOfRangeException(nameof(message.Option), "Unknown option"));
+                        Log.Error($"Unknown option '{nameof(message.Option)}'");
                     }
 
                     return;
@@ -78,7 +77,7 @@ namespace Sisk.SmarterSuit.Net {
                     break;
                 default:
                     using (Log.BeginMethod(nameof(OnSetOptionSyncMessage))) {
-                        Log.Error(new ArgumentOutOfRangeException(nameof(message.Option), "Unknown option"));
+                        Log.Error($"Unknown option '{nameof(message.Option)}'");
                     }
 
                     return;

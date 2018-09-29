@@ -487,7 +487,7 @@ namespace Sisk.SmarterSuit {
                     break;
                 default:
                     using (Log.BeginMethod(nameof(SetOption))) {
-                        Log.Error(new ArgumentOutOfRangeException(nameof(option), "Unknown option"));
+                        Log.Error($"Unknown option '{nameof(option)}'");
                     }
 
                     return;

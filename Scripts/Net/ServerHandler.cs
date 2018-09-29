@@ -55,7 +55,7 @@ namespace Sisk.SmarterSuit.Net {
                         break;
                     default:
                         using (Log.BeginMethod(nameof(OnSetOptionMessage))) {
-                            Log.Error(new ArgumentOutOfRangeException(nameof(message.Option), "Unknown option"));
+                            Log.Error($"Unknown option '{nameof(message.Option)}'");
                         }
 
                         return;
