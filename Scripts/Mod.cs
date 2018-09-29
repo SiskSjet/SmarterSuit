@@ -259,7 +259,7 @@ namespace Sisk.SmarterSuit {
             MyVisualScriptLogicProvider.CreateSoundEmitterAtPosition("HUD", character.GetPosition());
             MyVisualScriptLogicProvider.PlaySound("HUD", "ArcHudVocFuelLow", true);
 
-            MyAPIGateway.Utilities.ShowNotification(MySpaceTexts.NotificationFuelLow.GetString(), 2500, "Red");
+            MyAPIGateway.Utilities.ShowNotification(MyTexts.GetString(MySpaceTexts.NotificationFuelLow), 2500, "Red");
         }
 
         /// <summary>
