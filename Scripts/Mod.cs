@@ -29,17 +29,14 @@ namespace Sisk.SmarterSuit {
     [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
     public class Mod : MySessionComponentBase {
         public const string NAME = "Smarter Suit";
+        private const LogEventLevel DEFAULT_LOG_EVENT_LEVEL = LogEventLevel.Info | LogEventLevel.Warning | LogEventLevel.Error;
 
-        // important: change to info | warning | error or none before publishing this mod.
-        private const LogEventLevel DEFAULT_LOG_EVENT_LEVEL = LogEventLevel.All;
-
+        private const float GRAVITY = 9.81f;
         private const string HYDROGEN_BOTTLE_ID = "MyObjectBuilder_GasContainerObject/HydrogenBottle";
-
         private const string LOG_FILE_TEMPLATE = "{0}.log";
         private const ushort NETWORK_ID = 51501;
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const string SETTINGS_FILE = "settings.xml";
-        private const float SPEED_TOLERANCE = 0.01f;
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 100;
 
@@ -111,6 +108,10 @@ namespace Sisk.SmarterSuit {
         /// <param name="value"></param>
         /// <param name="result"></param>
         public static void ShowResultMessage<TValue>(Option option, TValue value, Result result) {
+            if (MyAPIGateway.Multiplayer.MultiplayerActive && MyAPIGateway.Utilities.IsDedicated) {
+                return;
+            }
+
             switch (result) {
                 case Result.NoPermission:
                     MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
@@ -122,24 +123,6 @@ namespace Sisk.SmarterSuit {
                     MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionSuccess.GetString(option, value));
                     break;
             }
-        }
-
-        /// <summary>
-        ///     Checks if enough oxygen around the given character.
-        /// </summary>
-        /// <param name="character">The character used to check if a helmet is needed.</param>
-        /// <returns>Return true if enough oxygen is available.</returns>
-        private static bool CheckHelmetNeeded(IMyCharacter character) {
-            float oxygen;
-            if (!MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
-                var position = character.GetPosition();
-                oxygen = MyAPIGateway.Session.OxygenProviderSystem.GetOxygenInPoint(position);
-            } else {
-                oxygen = character.EnvironmentOxygenLevel;
-            }
-
-            var helmet = oxygen < 0.5;
-            return helmet;
         }
 
         /// <summary>
@@ -212,16 +195,40 @@ namespace Sisk.SmarterSuit {
         /// <returns>Return true if there is ground in 5m distance.</returns>
         private static bool IsGroundInRange(IMyCharacter character, Vector3 gravity) {
             if (gravity.Length() > 0) {
-                var position = character.GetPosition();
+                var position = character.WorldAABB.Center;
                 var from = position;
+
+                var offset = Vector3D.Distance(character.GetPosition(), position);
+                var strength = gravity.Length() / GRAVITY;
+                var length = (float) offset + 5 / (strength > 1 ? strength : 1);
+
                 gravity.Normalize();
-                var to = position + gravity * 5;
+                var to = position + gravity * length;
                 var results = new List<IHitInfo>();
                 MyAPIGateway.Physics.CastRay(from, to, results);
                 return results.Any();
             }
 
             return false;
+        }
+
+        /// <summary>
+        ///     Checks if enough oxygen around the given character.
+        /// </summary>
+        /// <param name="character">The character used to check if a helmet is needed.</param>
+        /// <returns>Return true if enough oxygen is available.</returns>
+        private static bool IsHelmetNeeded(IMyCharacter character) {
+            float oxygen;
+            if (!MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
+                var position = character.GetPosition();
+                oxygen = MyAPIGateway.Session.OxygenProviderSystem.GetOxygenInPoint(position);
+            } else {
+                var stat = character.Components.Get<MyCharacterOxygenComponent>();
+                oxygen = stat?.OxygenLevelAtCharacterLocation ?? character.EnvironmentOxygenLevel;
+            }
+
+            var helmet = oxygen < 0.5;
+            return helmet;
         }
 
         /// <summary>
@@ -250,7 +257,7 @@ namespace Sisk.SmarterSuit {
             MyVisualScriptLogicProvider.CreateSoundEmitterAtPosition("HUD", character.GetPosition());
             MyVisualScriptLogicProvider.PlaySound("HUD", "ArcHudVocFuelLow", true);
 
-            MyAPIGateway.Utilities.ShowNotification(MySpaceTexts.NotificationFuelLow.GetString(), 2500, "Red");
+            MyAPIGateway.Utilities.ShowNotification(MyTexts.GetString(MySpaceTexts.NotificationFuelLow), 2500, "Red");
         }
 
         /// <summary>
@@ -331,19 +338,17 @@ namespace Sisk.SmarterSuit {
 
                     _ticks = 0;
 
-                    helmet = character.EnvironmentOxygenLevel < 0.5;
+                    helmet = IsHelmetNeeded(character);
                     SetSuitFunctions(character, new SuitData(null, null, helmet, null, null));
 
                     State = State.None;
-                    return;
 
-                case State.ExitCockpit:
-                    dampeners = _dataFromLastCockpit.Dampeners;
-                    thruster = _dataFromLastCockpit.Thruster;
-                    linearVelocity = _dataFromLastCockpit.LinearVelocity;
-                    angularVelocity = _dataFromLastCockpit.AngularVelocity;
                     break;
+                case State.ExitCockpit:
+                    SetSuitFunctions(character, _dataFromLastCockpit);
+                    State = State.None;
 
+                    break;
                 case State.Respawn:
                     if (!_hasWaitedATick) {
                         _hasWaitedATick = true;
@@ -355,11 +360,13 @@ namespace Sisk.SmarterSuit {
                     var entity = MyAPIGateway.Session.ControlledObject;
                     var atMedicalRoom = character == entity;
                     if (!atMedicalRoom) {
+                        State = State.None;
                         return;
                     }
 
                     var medicalRoom = GetMedialRoom(character);
                     if (medicalRoom == null) {
+                        State = State.None;
                         return;
                     }
 
@@ -376,7 +383,7 @@ namespace Sisk.SmarterSuit {
 
                     var isGravityDetected = gravity.Length() > 0;
                     var isGroundInRange = IsGroundInRange(character, gravity);
-                    var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < SPEED_TOLERANCE && Math.Abs(angularVelocity.Value.Length()) < SPEED_TOLERANCE;
+                    var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < Settings.HaltedSpeedTolerance && Math.Abs(angularVelocity.Value.Length()) < Settings.HaltedSpeedTolerance;
 
                     if (isGravityDetected) {
                         if (isGroundInRange) {
@@ -395,19 +402,18 @@ namespace Sisk.SmarterSuit {
                         dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?) _lastDampenerState : null;
                     }
 
+                    if (MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
+                        State = State.CheckOxygenAfterDelay;
+                    } else {
+                        helmet = IsHelmetNeeded(character);
+                        State = State.None;
+                    }
+
+                    var data = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
+                    SetSuitFunctions(character, data);
+
                     break;
             }
-
-            if (!MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
-                helmet = CheckHelmetNeeded(character);
-                State = State.None;
-            } else {
-                helmet = CheckHelmetNeeded(character) ? true : (bool?) null;
-                State = State.CheckOxygenAfterDelay;
-            }
-
-            var data = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
-            SetSuitFunctions(character, data);
         }
 
         /// <inheritdoc />
@@ -479,12 +485,21 @@ namespace Sisk.SmarterSuit {
                 case Option.DisableAutoDampener:
                     Settings.DisableAutoDampener = (DisableAutoDamenerOption) (object) value;
                     break;
+                case Option.HaltedSpeedTolerance:
+                    Settings.HaltedSpeedTolerance = (float) (object) value;
+                    break;
                 default:
+                    using (Log.BeginMethod(nameof(SetOption))) {
+                        Log.Error($"Unknown option '{nameof(option)}'");
+                    }
+
                     return;
             }
 
-            SaveSettings();
-            ShowResultMessage(option, value, Result.Success);
+            if (Network == null || Network.IsServer) {
+                ShowResultMessage(option, value, Result.Success);
+                SaveSettings();
+            }
         }
 
         /// <summary>
@@ -612,6 +627,8 @@ namespace Sisk.SmarterSuit {
                     return;
                 }
 
+                var helmet = IsHelmetNeeded(character);
+
                 var velocities = cockpit.GetShipVelocities();
                 var linearVelocity = velocities.LinearVelocity;
                 var angularVelocity = velocities.AngularVelocity;
@@ -625,7 +642,7 @@ namespace Sisk.SmarterSuit {
                 var isGravityDetected = gravity.Length() > 0;
                 var isArtificial = !(naturalGravity.Length() > 0);
                 var isGroundInRange = IsGroundInRange(character, gravity);
-                var isNotMoving = Math.Abs(linearVelocity.Length()) < SPEED_TOLERANCE && Math.Abs(angularVelocity.Length()) < SPEED_TOLERANCE;
+                var isNotMoving = Math.Abs(linearVelocity.Length()) < Settings.HaltedSpeedTolerance && Math.Abs(angularVelocity.Length()) < Settings.HaltedSpeedTolerance;
 
                 if (isGravityDetected) {
                     if (isGroundInRange) {
@@ -644,8 +661,7 @@ namespace Sisk.SmarterSuit {
                     dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?) _lastDampenerState : null;
                 }
 
-                _dataFromLastCockpit = new SuitData(dampeners, thruster, null, linearVelocity, angularVelocity);
-
+                _dataFromLastCockpit = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
                 State = State.ExitCockpit;
             }
         }

@@ -1,3 +1,22 @@
+<a name="1.2.2"></a>
+# [1.2.2](https://github.com/SiskSjet/SmartSuit/compare/v1.2.1...v1.2.2) (2018-09-29)
+
+
+### Bug Fixes
+
+* fix 'DisableAutoDampener' option not synchronized correctly ([58a7d60](https://github.com/SiskSjet/SmartSuit/commit/58a7d60))
+* fix duplicate set option result message ([ea3621e](https://github.com/SiskSjet/SmartSuit/commit/ea3621e))
+* fix missing translation for low fuel warning ([9389828](https://github.com/SiskSjet/SmartSuit/commit/9389828))
+* fix possible deaths with ground detection and with high gravity ([ace1b54](https://github.com/SiskSjet/SmartSuit/commit/ace1b54))
+* remove 'is helmet needed' check delay when leaving cockpits ([bc0b45b](https://github.com/SiskSjet/SmartSuit/commit/bc0b45b))
+
+
+### Features
+
+* add an `HALTED_SPEED_TOLERANCE` option ([1f4ab28](https://github.com/SiskSjet/SmartSuit/commit/1f4ab28))
+
+
+
 <a name="1.2.1"></a>
 # [1.2.1](https://github.com/SiskSjet/SmartSuit/compare/v1.1.1...v1.2.1) (2018-09-23)
 

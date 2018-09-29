@@ -51,7 +51,18 @@ In multiplayer only server admins can set options. All options are synced.
 	[td]DisableAutoDampener[/td]
 	[td]DAD[/td]
 	[td]byte[/td]
-	[td]Option to disable automatic dampener changes. 0 = Disabled | 1 = only mod changes disabled | 2 All dampener changes disabled.[/td]
+	[td]Option to disable automatic dampener changes. 
+	[b]Default: 1 (Disabled)[/b]
+		0 = Disabled | 
+		1 = only mod changes disabled | 
+		2 All dampener changes disabled.[/td]
+[/tr]
+[tr]
+	[td]HaltedSpeedTolerance[/td]
+	[td]HST[/td]
+	[td]float[/td]
+	[td]Option to adjust the speed tolerance that declares a ship specifies as not moving. 
+	[b]Default: 0.01[/b][/td]
 [/tr]
 [/table]
 
@@ -175,6 +186,13 @@ Im Multiplayer können nur Serveradministratoren Optionen festlegen. Alle Option
 	[td]DAD[/td]
 	[td]byte[/td]
 	[td]Option zur Deaktivierung automatischer Dampeneränderungen. 0 = Deaktiviert | 1 = Nur Änderungen von dieser Mods deaktivert | 2 Alle Dampeneränderungen deaktiviert.[/td]
+[/tr]
+[tr]
+	[td]HaltedSpeedTolerance[/td]
+	[td]HST[/td]
+	[td]float[/td]
+	[td]Option zum Anpassen der Geschwindigkeitstoleranz hinzu, die angibt ob sich ein Shiff nicht bewegt.
+	[b]Default: 0.01[/b][/td]
 [/tr]
 [/table]
 

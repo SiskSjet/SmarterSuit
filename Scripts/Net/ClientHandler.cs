@@ -1,5 +1,4 @@
-﻿using System;
-using Sandbox.ModAPI;
+﻿using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Net.Messages;
 using Sisk.Utils.Logging;
@@ -10,14 +9,14 @@ namespace Sisk.SmarterSuit.Net {
         public ClientHandler(ILogger log, Network network) : base(log.ForScope<ClientHandler>(), network) {
             Network.Register<SettingsResponseMessage>(OnSettingsResponseMessage);
             Network.Register<SetOptionResponseMessage>(OnSetOptionResponseMessage);
-            Network.Register<SetOptionSyncMessage>(OnSetOptionsSyncMessage);
+            Network.Register<SetOptionSyncMessage>(OnSetOptionSyncMessage);
         }
 
         /// <inheritdoc />
         public override void Close() {
             Network.Unregister<SettingsResponseMessage>(OnSettingsResponseMessage);
             Network.Unregister<SetOptionResponseMessage>(OnSetOptionResponseMessage);
-            Network.Unregister<SetOptionSyncMessage>(OnSetOptionsSyncMessage);
+            Network.Unregister<SetOptionSyncMessage>(OnSetOptionSyncMessage);
             base.Close();
         }
 
@@ -41,11 +40,18 @@ namespace Sisk.SmarterSuit.Net {
                     value = MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value);
                     break;
                 case Option.FuelThreshold:
+                case Option.HaltedSpeedTolerance:
                     value = MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value);
                     break;
                 case Option.DisableAutoDampener:
                     value = MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value);
                     break;
+                default:
+                    using (Log.BeginMethod(nameof(OnSetOptionResponseMessage))) {
+                        Log.Error($"Unknown option '{nameof(message.Option)}'");
+                    }
+
+                    return;
             }
 
             Mod.ShowResultMessage(message.Option, value, message.Result);
@@ -56,15 +62,25 @@ namespace Sisk.SmarterSuit.Net {
         /// </summary>
         /// <param name="sender">The sender who send the option message.</param>
         /// <param name="message">The option message received.</param>
-        private void OnSetOptionsSyncMessage(ulong sender, SetOptionSyncMessage message) {
+        private void OnSetOptionSyncMessage(ulong sender, SetOptionSyncMessage message) {
             switch (message.Option) {
                 case Option.AlwaysAutoHelmet:
                 case Option.AdditionalFuelWarning:
                     Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value));
                     break;
                 case Option.FuelThreshold:
+                case Option.HaltedSpeedTolerance:
                     Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                     break;
+                case Option.DisableAutoDampener:
+                    Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value));
+                    break;
+                default:
+                    using (Log.BeginMethod(nameof(OnSetOptionSyncMessage))) {
+                        Log.Error($"Unknown option '{nameof(message.Option)}'");
+                    }
+
+                    return;
             }
         }
 

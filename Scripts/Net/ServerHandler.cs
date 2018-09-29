@@ -47,11 +47,18 @@ namespace Sisk.SmarterSuit.Net {
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value));
                         break;
                     case Option.FuelThreshold:
+                    case Option.HaltedSpeedTolerance:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                         break;
                     case Option.DisableAutoDampener:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value));
                         break;
+                    default:
+                        using (Log.BeginMethod(nameof(OnSetOptionMessage))) {
+                            Log.Error($"Unknown option '{nameof(message.Option)}'");
+                        }
+
+                        return;
                 }
 
                 var response = new SetOptionResponseMessage { Result = Result.Success, Option = message.Option, Value = message.Value };
