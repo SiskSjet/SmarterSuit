@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -111,6 +111,10 @@ namespace Sisk.SmarterSuit {
         /// <param name="value"></param>
         /// <param name="result"></param>
         public static void ShowResultMessage<TValue>(Option option, TValue value, Result result) {
+            if (MyAPIGateway.Multiplayer.MultiplayerActive && MyAPIGateway.Utilities.IsDedicated) {
+                return;
+            }
+
             switch (result) {
                 case Result.NoPermission:
                     MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
@@ -480,11 +484,17 @@ namespace Sisk.SmarterSuit {
                     Settings.DisableAutoDampener = (DisableAutoDamenerOption) (object) value;
                     break;
                 default:
+                    using (Log.BeginMethod(nameof(SetOption))) {
+                        Log.Error(new ArgumentOutOfRangeException(nameof(option), "Unknown option"));
+                    }
+
                     return;
             }
 
-            SaveSettings();
-            ShowResultMessage(option, value, Result.Success);
+            if (Network == null || Network.IsServer) {
+                ShowResultMessage(option, value, Result.Success);
+                SaveSettings();
+            }
         }
 
         /// <summary>

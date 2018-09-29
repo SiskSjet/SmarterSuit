@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Net.Messages;
@@ -52,6 +52,12 @@ namespace Sisk.SmarterSuit.Net {
                     case Option.DisableAutoDampener:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value));
                         break;
+                    default:
+                        using (Log.BeginMethod(nameof(OnSetOptionMessage))) {
+                            Log.Error(new ArgumentOutOfRangeException(nameof(message.Option), "Unknown option"));
+                        }
+
+                        return;
                 }
 
                 var response = new SetOptionResponseMessage { Result = Result.Success, Option = message.Option, Value = message.Value };

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Net.Messages;
@@ -10,14 +10,14 @@ namespace Sisk.SmarterSuit.Net {
         public ClientHandler(ILogger log, Network network) : base(log.ForScope<ClientHandler>(), network) {
             Network.Register<SettingsResponseMessage>(OnSettingsResponseMessage);
             Network.Register<SetOptionResponseMessage>(OnSetOptionResponseMessage);
-            Network.Register<SetOptionSyncMessage>(OnSetOptionsSyncMessage);
+            Network.Register<SetOptionSyncMessage>(OnSetOptionSyncMessage);
         }
 
         /// <inheritdoc />
         public override void Close() {
             Network.Unregister<SettingsResponseMessage>(OnSettingsResponseMessage);
             Network.Unregister<SetOptionResponseMessage>(OnSetOptionResponseMessage);
-            Network.Unregister<SetOptionSyncMessage>(OnSetOptionsSyncMessage);
+            Network.Unregister<SetOptionSyncMessage>(OnSetOptionSyncMessage);
             base.Close();
         }
 
@@ -46,6 +46,12 @@ namespace Sisk.SmarterSuit.Net {
                 case Option.DisableAutoDampener:
                     value = MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value);
                     break;
+                default:
+                    using (Log.BeginMethod(nameof(OnSetOptionResponseMessage))) {
+                        Log.Error(new ArgumentOutOfRangeException(nameof(message.Option), "Unknown option"));
+            }
+
+                    return;
             }
 
             Mod.ShowResultMessage(message.Option, value, message.Result);
@@ -56,7 +62,7 @@ namespace Sisk.SmarterSuit.Net {
         /// </summary>
         /// <param name="sender">The sender who send the option message.</param>
         /// <param name="message">The option message received.</param>
-        private void OnSetOptionsSyncMessage(ulong sender, SetOptionSyncMessage message) {
+        private void OnSetOptionSyncMessage(ulong sender, SetOptionSyncMessage message) {
             switch (message.Option) {
                 case Option.AlwaysAutoHelmet:
                 case Option.AdditionalFuelWarning:
@@ -65,7 +71,13 @@ namespace Sisk.SmarterSuit.Net {
                 case Option.FuelThreshold:
                     Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                     break;
+                default:
+                    using (Log.BeginMethod(nameof(OnSetOptionSyncMessage))) {
+                        Log.Error(new ArgumentOutOfRangeException(nameof(message.Option), "Unknown option"));
             }
+
+                    return;
+        }
         }
 
         /// <summary>
