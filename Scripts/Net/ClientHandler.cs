@@ -71,6 +71,9 @@ namespace Sisk.SmarterSuit.Net {
                 case Option.FuelThreshold:
                     Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                     break;
+                case Option.DisableAutoDampener:
+                    Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value));
+                    break;
                 default:
                     using (Log.BeginMethod(nameof(OnSetOptionSyncMessage))) {
                         Log.Error(new ArgumentOutOfRangeException(nameof(message.Option), "Unknown option"));
