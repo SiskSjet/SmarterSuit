@@ -1,3 +1,14 @@
+<a name="1.3.0"></a>
+# [1.3.0](https://github.com/SiskSjet/SmartSuit/compare/v1.2.1...v1.3.0) (2018-10-24)
+
+
+### Features
+
+* add support for relative dampening on cockpit exit ([63eb2b6](https://github.com/SiskSjet/SmartSuit/commit/63eb2b6))
+* enable always auto helmet by default. ([8b1dcb7](https://github.com/SiskSjet/SmartSuit/commit/8b1dcb7))
+
+
+
 <a name="1.2.2"></a>
 # [1.2.2](https://github.com/SiskSjet/SmartSuit/compare/v1.2.1...v1.2.2) (2018-09-29)
 

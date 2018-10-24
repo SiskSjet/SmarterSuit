@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Extensions;
@@ -116,7 +117,16 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         /// <param name="arguments">Arguments are ignored in this handler.</param>
         private void OnListOptionsCommand(string arguments) {
-            MyAPIGateway.Utilities.ShowMessage(Mod.NAME, string.Join(", ", _options.Select(x => $"{x.Key} <{x.Value.Name}>")));
+            var sb = new StringBuilder("Option | Alias | Type").AppendLine();
+            foreach (var pair in _options) {
+                var option = pair.Key;
+                var type = pair.Value;
+                sb.Append(option).Append(" | ");
+                sb.AppendFormat("({0})", string.Join(",", _alias.Where(x => x.Value == option).Select(x => x.Key))).Append(" | ");
+                sb.Append($"<{type.Name}>").AppendLine();
+            }
+
+            MyAPIGateway.Utilities.ShowMessage(Mod.NAME, sb.ToString());
         }
 
         /// <summary>
