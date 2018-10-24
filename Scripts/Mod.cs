@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -634,34 +634,22 @@ namespace Sisk.SmarterSuit {
                 var angularVelocity = velocities.AngularVelocity;
 
                 bool? thruster;
-                bool? dampeners;
 
-                var naturalGravity = cockpit.GetNaturalGravity();
                 var gravity = cockpit.GetTotalGravity();
-
                 var isGravityDetected = gravity.Length() > 0;
-                var isArtificial = !(naturalGravity.Length() > 0);
                 var isGroundInRange = IsGroundInRange(character, gravity);
-                var isNotMoving = Math.Abs(linearVelocity.Length()) < Settings.HaltedSpeedTolerance && Math.Abs(angularVelocity.Length()) < Settings.HaltedSpeedTolerance;
 
                 if (isGravityDetected) {
                     if (isGroundInRange) {
                         thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
-                        dampeners = isNotMoving;
                     } else {
                         thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
-                        dampeners = isNotMoving || !isArtificial;
                     }
                 } else {
                     thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
-                    dampeners = isNotMoving;
                 }
 
-                if (Settings.DisableAutoDampener != DisableAutoDamenerOption.Disable) {
-                    dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?) _lastDampenerState : null;
-                }
-
-                _dataFromLastCockpit = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
+                _dataFromLastCockpit = new SuitData(null, thruster, helmet, linearVelocity, angularVelocity);
                 State = State.ExitCockpit;
             }
         }
