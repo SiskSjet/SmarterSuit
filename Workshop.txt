@@ -4,7 +4,11 @@ A small suit software update that prevents death due to malfunction of the suit.
 The new suit update will now check some parameters when leaving a cockpit or after a respawn to eliminate potential sources of danger.
 In addition, the speed is adjusted relative to the ship.
 
-[b]Helmet[/b]
+In update 1.188 we received a suit update from Keen, thank you by the way. 
+It introduces the relative inertia dampeners. This works great and because of that this mod will no longer change the dampener state when exiting a cockpit.
+It also seems to fix most issues with oxygen readouts. Now 'AlwaysAutoHelmet' option is enabled by default.
+
+[b]Helmet[/b] ([i]will check every 30 ticks[/i]) 
 * opened when enviroment with oxygen detected.
 * closed when enviroment without oxygen detected.
 
@@ -12,7 +16,7 @@ In addition, the speed is adjusted relative to the ship.
 * enabled when no gravity detected or gravity detected and no ground in range.
 * disabled when gravity detected and ground is in range.
 
-[b]Dampeners[/b]
+[b]Dampeners[/b] ([i]only after respawn in the medical room[/i])
 * enabled when ship is not moving or when no ground in range and in an planetary gravity well.
 * disabled when ship is moving.
 
@@ -33,29 +37,33 @@ In multiplayer only server admins can set options. All options are synced.
 	[td]AlwaysAutoHelmet[/td]
 	[td]AAH[/td]
 	[td]boolean[/td]
-	[td]Will check every time if helmet is needed. I don't recommend this setting for multiplayer with air tightness enabled, because of a bug with cockpits.[/td]
+	[td]Will check every time if helmet is needed. I don't recommend this setting for multiplayer with air tightness enabled, because of a bug with cockpits.
+	[b]Default: true[/b][/td]
 [/tr]
 [tr]
 	[td]AdditionalFuelWarning[/td]
 	[td]AFW[/td]
 	[td]boolean[/td]
-	[td]Will play an additional fuel warning at given threshold.[/td]
+	[td]Will play an additional fuel warning at given threshold.
+	[b]Default: false[/b][/td]
 [/tr]
 [tr]
 	[td]FuelThreshold[/td]
 	[td]FT[/td]
 	[td]float[/td]
-	[td]The fuel threshold used for additional fuel warnings. Default is 0.25. Range is 0-1.[/td]
+	[td]The fuel threshold used for additional fuel warnings.
+	[b]Default: 0.25[/b]
+		Range is 0-1[/td]
 [/tr]
 [tr]
 	[td]DisableAutoDampener[/td]
 	[td]DAD[/td]
 	[td]byte[/td]
 	[td]Option to disable automatic dampener changes. 
-	[b]Default: 1 (Disabled)[/b]
-		0 = Disabled | 
-		1 = only mod changes disabled | 
-		2 All dampener changes disabled.[/td]
+	[b]Default: 0 (Disabled)[/b]
+		0 = Disabled
+		1 = only mod changes disabled
+		2 = All dampener changes disabled[/td]
 [/tr]
 [tr]
 	[td]HaltedSpeedTolerance[/td]
@@ -138,7 +146,11 @@ Ein kleines Anzug-Software-Update, dass den Tod durch Fehlfunktion des Anzugs ve
 Das neue Anzug-Update überprüft nun beim Verlassen eines Cockpits oder nach einem Respawn einige Parameter, um mögliche Gefahrenquellen zu eliminieren.
 Außerdem wird die Geschwindigkeit relativ zum Schiff eingestellt.
 
-[b]Helm[/b]
+In Update 1.188 haben wir von Keen ein Anzug Update erhalten, danke übrigens.
+Es führt die relativen Trägheitsdämpfer ein. Das funktioniert super und dadurch wird diese Mod den Dämpferzustand beim Verlassen eines Cockpits nicht mehr ändern.
+Es scheint auch die meisten Probleme mit Sauerstoffanzeigen zu beheben. Jetzt ist die Option "AlwaysAutoHelmet" standardmäßig aktiviert.
+
+[b]Helm[/b] ([i]überprüft alle 30 Ticks[/i])
 * offen wenn Umgebung mit Sauerstoff erkannt wurde.
 * geschlossen wenn Umgebung ohne Sauerstoff erkannt wurde.
 
@@ -146,7 +158,7 @@ Außerdem wird die Geschwindigkeit relativ zum Schiff eingestellt.
 * aktiviert, wenn keine Schwerkraft festgestellt wurde oder wenn Schwerkraft festgestellt wurde und keine Boden in Reiweite ist.
 * deaktiviert, wenn Schwerkraft erkannt wurde und Boden in Reichweite ist.
 
-[b]Dampeners[/b]
+[b]Dampeners[/b] ([i]nur nach einem respawn im Medical Room (bin mir grade nicht sicher wie der Block im Spiel auf deutsch heißt. Spiele immer in englisch)[/i])
 * aktiviert, wenn das Shiff steht oder wenn kein Boden in Reichweite ist und Planetarische Schwerkraft festgestellt wurde.
 * deaktiviert, wenn sich das Schiff bewegt.
 
@@ -167,32 +179,40 @@ Im Multiplayer können nur Serveradministratoren Optionen festlegen. Alle Option
 	[td]AlwaysAutoHelmet[/td]
 	[td]AAH[/td]
 	[td]boolean[/td]
-	[td]Wird jedes Mal prüfen, ob ein Helm benötigt wird. Ich empfehle diese Einstellung nicht für Multiplayer mit air tightness aktiviert, wegen eines Bugs mit Cockpits.[/td]
+	[td]Wird jedes Mal prüfen, ob ein Helm benötigt wird. Ich empfehle diese Einstellung nicht für Multiplayer mit air tightness aktiviert, wegen eines Bugs mit Cockpits.
+	[b]Standard: true[/b][/td]
 [/tr]
 [tr]
 	[td]AdditionalFuelWarning[/td]
 	[td]AFW[/td]
 	[td]boolean[/td]
-	[td]Wird bei gegebener Schwelle eine zusätzliche Kraftstoffwarnung ausgeben.[/td]
+	[td]Wird bei gegebener Schwelle eine zusätzliche Kraftstoffwarnung ausgeben.
+	[b]Standard: false[/b][/td]
 [/tr]
 [tr]
 	[td]FuelThreshold[/td]
 	[td]FT[/td]
 	[td]float[/td]
-	[td]Die Kraftstoffschwelle für zusätzliche Kraftstoffwarnungen. Standard ist 0,25. Bereich ist 0-1.[/td]
+	[td]Die Kraftstoffschwelle für zusätzliche Kraftstoffwarnungen. 
+	[b]Standard: 0,25[/b]
+		Bereich ist 0-1[/td]
 [/tr]
 [tr]
 	[td]DisableAutoDampener[/td]
 	[td]DAD[/td]
 	[td]byte[/td]
-	[td]Option zur Deaktivierung automatischer Dampeneränderungen. 0 = Deaktiviert | 1 = Nur Änderungen von dieser Mods deaktivert | 2 Alle Dampeneränderungen deaktiviert.[/td]
+	[td]Option zur Deaktivierung automatischer Dampeneränderungen. 
+	[b]Standard: 0 (Deaktiviert)[/b]
+		0 = Deaktiviert
+		1 = Nur Änderungen von dieser Mods deaktivert
+		2 = Alle Dampeneränderungen deaktiviert[/td]
 [/tr]
 [tr]
 	[td]HaltedSpeedTolerance[/td]
 	[td]HST[/td]
 	[td]float[/td]
 	[td]Option zum Anpassen der Geschwindigkeitstoleranz, die angibt ob sich ein Shiff nicht bewegt.
-	[b]Default: 0.01[/b][/td]
+	[b]Standard: 0,01[/b][/td]
 [/tr]
 [/table]
 
