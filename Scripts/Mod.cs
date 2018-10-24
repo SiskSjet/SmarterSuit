@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -38,7 +38,7 @@ namespace Sisk.SmarterSuit {
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const string SETTINGS_FILE = "settings.xml";
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
-        private const int TICKS_UNTIL_OXYGEN_CHECK = 100;
+        private const int TICKS_UNTIL_OXYGEN_CHECK = 30;
 
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
         private ChatHandler _chatHandler;
@@ -223,8 +223,7 @@ namespace Sisk.SmarterSuit {
                 var position = character.GetPosition();
                 oxygen = MyAPIGateway.Session.OxygenProviderSystem.GetOxygenInPoint(position);
             } else {
-                var stat = character.Components.Get<MyCharacterOxygenComponent>();
-                oxygen = stat?.OxygenLevelAtCharacterLocation ?? character.EnvironmentOxygenLevel;
+                oxygen = character.OxygenLevel;
             }
 
             var helmet = oxygen < 0.5;

@@ -10,7 +10,7 @@ namespace Sisk.SmarterSuit.Settings {
     public class ModSettings {
         public const int VERSION = 1;
         private const bool ADDITIONAL_FUEL_WARNING = false;
-        private const bool AUTO_HELMET_EVERYWHERE = false;
+        private const bool AUTO_HELMET_EVERYWHERE = true;
         private const DisableAutoDamenerOption DISABLE_AUTO_DAMPENER = DisableAutoDamenerOption.Disable;
         private const float FUEL_THRESHOLD = 0.25f;
         private const float HALTED_SPEED_TOLERANCE = 0.01f;
