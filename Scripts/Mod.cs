@@ -323,10 +323,6 @@ namespace Sisk.SmarterSuit {
             }
 
             bool? helmet = null;
-            bool? thruster = null;
-            bool? dampeners = null;
-            Vector3? linearVelocity = null;
-            Vector3? angularVelocity = null;
 
             switch (State) {
                 case State.CheckOxygenAfterDelay:
@@ -369,11 +365,13 @@ namespace Sisk.SmarterSuit {
                         return;
                     }
 
-                    var cubeGrid = medicalRoom.CubeGrid;
-                    linearVelocity = Vector3.Zero;
-                    angularVelocity = Vector3.Zero;
-                    var gravity = character.Physics.Gravity;
+                    bool? thruster;
+                    bool? dampeners;
+                    Vector3? linearVelocity = Vector3.Zero;
+                    Vector3? angularVelocity = Vector3.Zero;
 
+                    var cubeGrid = medicalRoom.CubeGrid;
+                    var gravity = character.Physics.Gravity;
                     var physics = cubeGrid.Physics;
                     if (physics != null) {
                         linearVelocity = physics.LinearVelocity;
@@ -383,7 +381,7 @@ namespace Sisk.SmarterSuit {
                     var isGravityDetected = gravity.Length() > 0;
                     var isGroundInRange = IsGroundInRange(character, gravity);
                     var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < Settings.HaltedSpeedTolerance && Math.Abs(angularVelocity.Value.Length()) < Settings.HaltedSpeedTolerance;
-
+                    
                     if (isGravityDetected) {
                         if (isGroundInRange) {
                             thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
@@ -572,7 +570,7 @@ namespace Sisk.SmarterSuit {
                     Texts.LoadTexts(currentLanguage);
                     Log.Info($"Loaded {currentLanguage} translations.");
                 } else if (supportedLanguages.Contains(MyLanguagesEnum.English)) {
-                    Texts.LoadTexts(MyLanguagesEnum.English);
+                    Texts.LoadTexts();
                     Log.Warning($"No {currentLanguage} translations found. Fall back to {MyLanguagesEnum.English} translations.");
                 }
             }
