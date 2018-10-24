@@ -191,7 +191,7 @@ Im Multiplayer können nur Serveradministratoren Optionen festlegen. Alle Option
 	[td]HaltedSpeedTolerance[/td]
 	[td]HST[/td]
 	[td]float[/td]
-	[td]Option zum Anpassen der Geschwindigkeitstoleranz hinzu, die angibt ob sich ein Shiff nicht bewegt.
+	[td]Option zum Anpassen der Geschwindigkeitstoleranz, die angibt ob sich ein Shiff nicht bewegt.
 	[b]Default: 0.01[/b][/td]
 [/tr]
 [/table]

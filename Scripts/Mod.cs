@@ -38,7 +38,7 @@ namespace Sisk.SmarterSuit {
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const string SETTINGS_FILE = "settings.xml";
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
-        private const int TICKS_UNTIL_OXYGEN_CHECK = 100;
+        private const int TICKS_UNTIL_OXYGEN_CHECK = 30;
 
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
         private ChatHandler _chatHandler;
@@ -223,8 +223,7 @@ namespace Sisk.SmarterSuit {
                 var position = character.GetPosition();
                 oxygen = MyAPIGateway.Session.OxygenProviderSystem.GetOxygenInPoint(position);
             } else {
-                var stat = character.Components.Get<MyCharacterOxygenComponent>();
-                oxygen = stat?.OxygenLevelAtCharacterLocation ?? character.EnvironmentOxygenLevel;
+                oxygen = character.OxygenLevel;
             }
 
             var helmet = oxygen < 0.5;
@@ -324,10 +323,6 @@ namespace Sisk.SmarterSuit {
             }
 
             bool? helmet = null;
-            bool? thruster = null;
-            bool? dampeners = null;
-            Vector3? linearVelocity = null;
-            Vector3? angularVelocity = null;
 
             switch (State) {
                 case State.CheckOxygenAfterDelay:
@@ -370,11 +365,13 @@ namespace Sisk.SmarterSuit {
                         return;
                     }
 
-                    var cubeGrid = medicalRoom.CubeGrid;
-                    linearVelocity = Vector3.Zero;
-                    angularVelocity = Vector3.Zero;
-                    var gravity = character.Physics.Gravity;
+                    bool? thruster;
+                    bool? dampeners;
+                    Vector3? linearVelocity = Vector3.Zero;
+                    Vector3? angularVelocity = Vector3.Zero;
 
+                    var cubeGrid = medicalRoom.CubeGrid;
+                    var gravity = character.Physics.Gravity;
                     var physics = cubeGrid.Physics;
                     if (physics != null) {
                         linearVelocity = physics.LinearVelocity;
@@ -384,7 +381,7 @@ namespace Sisk.SmarterSuit {
                     var isGravityDetected = gravity.Length() > 0;
                     var isGroundInRange = IsGroundInRange(character, gravity);
                     var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < Settings.HaltedSpeedTolerance && Math.Abs(angularVelocity.Value.Length()) < Settings.HaltedSpeedTolerance;
-
+                    
                     if (isGravityDetected) {
                         if (isGroundInRange) {
                             thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
@@ -508,13 +505,11 @@ namespace Sisk.SmarterSuit {
         private void InitializeLogging() {
             Log = Logger.ForScope<Mod>();
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
-                if (MyAPIGateway.Multiplayer.IsServer) {
-                    Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
-                } else if (IsDevVersion) {
-                    Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
+                if (MyAPIGateway.Multiplayer.IsServer || IsDevVersion) {
+                    Log.Register(new WorldStorageHandler(LogFile, LogFormatter, IsDevVersion ? LogEventLevel.All : DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
                 }
             } else {
-                Log.Register(new WorldStorageHandler(LogFile, LogFormatter, DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
+                Log.Register(new WorldStorageHandler(LogFile, LogFormatter, IsDevVersion ? LogEventLevel.All : DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
             }
 
             using (Log.BeginMethod(nameof(InitializeLogging))) {
@@ -575,7 +570,7 @@ namespace Sisk.SmarterSuit {
                     Texts.LoadTexts(currentLanguage);
                     Log.Info($"Loaded {currentLanguage} translations.");
                 } else if (supportedLanguages.Contains(MyLanguagesEnum.English)) {
-                    Texts.LoadTexts(MyLanguagesEnum.English);
+                    Texts.LoadTexts();
                     Log.Warning($"No {currentLanguage} translations found. Fall back to {MyLanguagesEnum.English} translations.");
                 }
             }
@@ -634,34 +629,22 @@ namespace Sisk.SmarterSuit {
                 var angularVelocity = velocities.AngularVelocity;
 
                 bool? thruster;
-                bool? dampeners;
 
-                var naturalGravity = cockpit.GetNaturalGravity();
                 var gravity = cockpit.GetTotalGravity();
-
                 var isGravityDetected = gravity.Length() > 0;
-                var isArtificial = !(naturalGravity.Length() > 0);
                 var isGroundInRange = IsGroundInRange(character, gravity);
-                var isNotMoving = Math.Abs(linearVelocity.Length()) < Settings.HaltedSpeedTolerance && Math.Abs(angularVelocity.Length()) < Settings.HaltedSpeedTolerance;
 
                 if (isGravityDetected) {
                     if (isGroundInRange) {
                         thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
-                        dampeners = isNotMoving;
                     } else {
                         thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
-                        dampeners = isNotMoving || !isArtificial;
                     }
                 } else {
                     thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
-                    dampeners = isNotMoving;
                 }
 
-                if (Settings.DisableAutoDampener != DisableAutoDamenerOption.Disable) {
-                    dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?) _lastDampenerState : null;
-                }
-
-                _dataFromLastCockpit = new SuitData(dampeners, thruster, helmet, linearVelocity, angularVelocity);
+                _dataFromLastCockpit = new SuitData(null, thruster, helmet, linearVelocity, angularVelocity);
                 State = State.ExitCockpit;
             }
         }
