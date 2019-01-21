@@ -37,8 +37,15 @@ In multiplayer only server admins can set options. All options are synced.
 	[td]AlwaysAutoHelmet[/td]
 	[td]AAH[/td]
 	[td]boolean[/td]
-	[td]Will check every time if helmet is needed. I don't recommend this setting for multiplayer with air tightness enabled, because of a bug with cockpits.
+	[td]Will check every time if helmet is needed.
 	[b]Default: true[/b][/td]
+[/tr]
+[tr]
+	[td]DelayAfterManualHelmet[/td]
+	[td]DAMH[/td]
+	[td]integer[/td]
+	[td]This will delay the "AutoHelmetCheck for x ticks after the player toggled his helmet manualy.
+	[b]Default: 312 (5000/16 or roughly 5 sec)[/b][/td]
 [/tr]
 [tr]
 	[td]AdditionalFuelWarning[/td]
@@ -179,8 +186,15 @@ Im Multiplayer können nur Serveradministratoren Optionen festlegen. Alle Option
 	[td]AlwaysAutoHelmet[/td]
 	[td]AAH[/td]
 	[td]boolean[/td]
-	[td]Wird jedes Mal prüfen, ob ein Helm benötigt wird. Ich empfehle diese Einstellung nicht für Multiplayer mit air tightness aktiviert, wegen eines Bugs mit Cockpits.
+	[td]Wird jedes Mal prüfen, ob ein Helm benötigt wird.
 	[b]Standard: true[/b][/td]
+[/tr]
+[tr]
+	[td]DelayAfterManualHelmet[/td]
+	[td]DAMH[/td]
+	[td]integer[/td]
+	[td]Dadurch wird der "AlwaysAutoHelmet" check um x ticks verzögert, nachdem der Spieler den Helm manuell umgeschaltet hat.
+	[b]Standard: 312 (5000/16 oder ungefähr 5 sec)[/b][/td]
 [/tr]
 [tr]
 	[td]AdditionalFuelWarning[/td]
