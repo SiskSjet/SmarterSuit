@@ -1,3 +1,12 @@
+# [1.3.1](https://github.com/SiskSjet/SmartSuit/compare/v1.3.0...v1.3.1) (2019-01-21)
+
+
+### Features
+
+* implement a delay after manual helmet toogle ([269ba00](https://github.com/SiskSjet/SmartSuit/commit/269ba00))
+
+
+
 <a name="1.3.0"></a>
 # [1.3.0](https://github.com/SiskSjet/SmartSuit/compare/v1.2.1...v1.3.0) (2018-10-24)
 
