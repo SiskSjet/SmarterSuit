@@ -262,7 +262,7 @@ namespace Sisk.SmarterSuit {
 
         /// <inheritdoc />
         public override void HandleInput() {
-            if (MyAPIGateway.Gui.ChatEntryVisible || MyAPIGateway.Gui.IsCursorVisible) {
+            if (!Settings.AlwaysAutoHelmet || MyAPIGateway.Gui.ChatEntryVisible || MyAPIGateway.Gui.IsCursorVisible) {
                 return;
             }
 
