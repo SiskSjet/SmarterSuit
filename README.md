@@ -30,6 +30,7 @@ It also seems to fix most issues with oxygen readouts. Now 'AlwaysAutoHelmet' op
 ## Options
 
 * **AlwaysAutoHelmet/AAH** (*boolean*) - Will check everytime if helmet is needed. I don't recomend this setting for multiplayer with airthigness enabled, because of an bug with cockpits.
+* **DelayAfterManualHelmet/DAMH** (*integer*) - This will delay the auto helmet check for x ticks after the player toggled his helmet manualy.
 * **AdditionalFuelWarning/AFW** (*boolean*) - Will play a additional fuel warning at given threshold.
 * **FuelThreshold/FT** (*float*) - The fuel threshold used for additional fuel warnings. *Default: 0.25* Range is 0-1.
 * **DisableAutoDampener/DAD** (*byte*) - Option to disable automatic dampener changes. *Default: 0 (Disabled)* 0 = Disabled | 1 = only mod changes disabled | 2 All dampener changes disabled.

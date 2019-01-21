@@ -4,6 +4,7 @@
         AdditionalFuelWarning,
         FuelThreshold,
         DisableAutoDampener,
-        HaltedSpeedTolerance
+        HaltedSpeedTolerance,
+        DelayAfterManualHelmet
     }
 }
