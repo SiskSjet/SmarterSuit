@@ -50,6 +50,9 @@ namespace Sisk.SmarterSuit.Net {
                     case Option.HaltedSpeedTolerance:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                         break;
+                    case Option.DelayAfterManualHelmet:
+                        SyncOption(Option.DelayAfterManualHelmet, MyAPIGateway.Utilities.SerializeFromBinary<int>(message.Value));
+                        break;
                     case Option.DisableAutoDampener:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value));
                         break;

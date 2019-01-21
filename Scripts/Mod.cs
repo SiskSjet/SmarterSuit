@@ -21,6 +21,7 @@ using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
+using VRage.Utils;
 using VRageMath;
 
 // ReSharper disable UsePatternMatching
@@ -259,6 +260,18 @@ namespace Sisk.SmarterSuit {
             MyAPIGateway.Utilities.ShowNotification(MyTexts.GetString(MySpaceTexts.NotificationFuelLow), 2500, "Red");
         }
 
+        /// <inheritdoc />
+        public override void HandleInput() {
+            if (MyAPIGateway.Gui.ChatEntryVisible || MyAPIGateway.Gui.IsCursorVisible) {
+                return;
+            }
+
+            var input = MyAPIGateway.Input;
+            if (input.IsNewGameControlReleased(MyStringId.Get("HELMET"))) {
+                _ticks = Math.Max(-Settings.DelayAfterManualHelmet, _ticks - Settings.DelayAfterManualHelmet);
+            }
+        }
+
         /// <summary>
         ///     Load mod settings, create localizations and initialize network handler.
         /// </summary>
@@ -381,7 +394,7 @@ namespace Sisk.SmarterSuit {
                     var isGravityDetected = gravity.Length() > 0;
                     var isGroundInRange = IsGroundInRange(character, gravity);
                     var isNotMoving = Math.Abs(linearVelocity.Value.Length()) < Settings.HaltedSpeedTolerance && Math.Abs(angularVelocity.Value.Length()) < Settings.HaltedSpeedTolerance;
-                    
+
                     if (isGravityDetected) {
                         if (isGroundInRange) {
                             thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
@@ -484,6 +497,9 @@ namespace Sisk.SmarterSuit {
                     break;
                 case Option.HaltedSpeedTolerance:
                     Settings.HaltedSpeedTolerance = (float) (object) value;
+                    break;
+                case Option.DelayAfterManualHelmet:
+                    Settings.DelayAfterManualHelmet = (int) (object) value;
                     break;
                 default:
                     using (Log.BeginMethod(nameof(SetOption))) {

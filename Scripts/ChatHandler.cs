@@ -20,7 +20,8 @@ namespace Sisk.SmarterSuit {
             { Acronym(nameof(Option.AdditionalFuelWarning)), Option.AdditionalFuelWarning },
             { Acronym(nameof(Option.FuelThreshold)), Option.FuelThreshold },
             { Acronym(nameof(Option.DisableAutoDampener)), Option.DisableAutoDampener },
-            { Acronym(nameof(Option.HaltedSpeedTolerance)), Option.HaltedSpeedTolerance }
+            { Acronym(nameof(Option.HaltedSpeedTolerance)), Option.HaltedSpeedTolerance },
+            { Acronym(nameof(Option.DelayAfterManualHelmet)), Option.DelayAfterManualHelmet }
         };
 
         private readonly CommandHandler _commandHandler;
@@ -30,7 +31,8 @@ namespace Sisk.SmarterSuit {
             { Option.AdditionalFuelWarning, typeof(bool) },
             { Option.FuelThreshold, typeof(float) },
             { Option.DisableAutoDampener, typeof(byte) },
-            { Option.HaltedSpeedTolerance, typeof(float) }
+            { Option.HaltedSpeedTolerance, typeof(float) },
+            { Option.DelayAfterManualHelmet, typeof(int) }
         };
 
         public ChatHandler(ILogger log, Network network, NetworkHandlerBase networkHandler) {
@@ -165,14 +167,21 @@ namespace Sisk.SmarterSuit {
                     }
                 } else if (type == typeof(float)) {
                     float value;
-                    if (float.TryParse(valueString, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value)) {
+                    if (float.TryParse(valueString, NumberStyles.Number, CultureInfo.InvariantCulture, out value)) {
                         SetOption(result, value);
                     } else {
                         MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
                     }
                 } else if (type == typeof(byte)) {
                     byte value;
-                    if (byte.TryParse(valueString, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value)) {
+                    if (byte.TryParse(valueString, NumberStyles.Integer, CultureInfo.InvariantCulture, out value)) {
+                        SetOption(result, value);
+                    } else {
+                        MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
+                    }
+                } else if (type == typeof(int)) {
+                    int value;
+                    if (int.TryParse(valueString, NumberStyles.Integer, CultureInfo.InvariantCulture, out value)) {
                         SetOption(result, value);
                     } else {
                         MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
