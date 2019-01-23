@@ -1,3 +1,12 @@
+# [1.3.2](https://github.com/SiskSjet/SmartSuit/compare/v1.3.1...v1.3.2) (2019-01-23)
+
+
+### Bug Fixes
+
+* fix an NRE introduced with the last update ([db5472f](https://github.com/SiskSjet/SmartSuit/commit/db5472f))
+
+
+
 # [1.3.1](https://github.com/SiskSjet/SmartSuit/compare/v1.3.0...v1.3.1) (2019-01-21)
 
 
