@@ -201,7 +201,7 @@ namespace Sisk.SmarterSuit {
 
                 var offset = Vector3D.Distance(character.GetPosition(), position);
                 var strength = gravity.Length() / GRAVITY;
-                var length = (float) offset + 5 / (strength > 1 ? strength : 1);
+                var length = (float)offset + 5 / (strength > 1 ? strength : 1);
 
                 gravity.Normalize();
                 var to = position + gravity * length;
@@ -262,7 +262,7 @@ namespace Sisk.SmarterSuit {
 
         /// <inheritdoc />
         public override void HandleInput() {
-            if (!Settings.AlwaysAutoHelmet || MyAPIGateway.Gui.ChatEntryVisible || MyAPIGateway.Gui.IsCursorVisible) {
+            if (Settings == null || !Settings.AlwaysAutoHelmet || MyAPIGateway.Gui.ChatEntryVisible || MyAPIGateway.Gui.IsCursorVisible) {
                 return;
             }
 
@@ -397,19 +397,19 @@ namespace Sisk.SmarterSuit {
 
                     if (isGravityDetected) {
                         if (isGroundInRange) {
-                            thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
+                            thruster = RemoveAutomaticJetpackActivation ? (bool?)null : false;
                             dampeners = isNotMoving;
                         } else {
-                            thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
+                            thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
                             dampeners = isNotMoving;
                         }
                     } else {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
                         dampeners = isNotMoving;
                     }
 
                     if (Settings.DisableAutoDampener != DisableAutoDamenerOption.Disable) {
-                        dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?) _lastDampenerState : null;
+                        dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?)_lastDampenerState : null;
                     }
 
                     if (MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
@@ -484,22 +484,22 @@ namespace Sisk.SmarterSuit {
         public void SetOption<TValue>(Option option, TValue value) {
             switch (option) {
                 case Option.AlwaysAutoHelmet:
-                    Settings.AlwaysAutoHelmet = (bool) (object) value;
+                    Settings.AlwaysAutoHelmet = (bool)(object)value;
                     break;
                 case Option.AdditionalFuelWarning:
-                    Settings.AdditionalFuelWarning = (bool) (object) value;
+                    Settings.AdditionalFuelWarning = (bool)(object)value;
                     break;
                 case Option.FuelThreshold:
-                    Settings.FuelThreshold = (float) (object) value;
+                    Settings.FuelThreshold = (float)(object)value;
                     break;
                 case Option.DisableAutoDampener:
-                    Settings.DisableAutoDampener = (DisableAutoDamenerOption) (object) value;
+                    Settings.DisableAutoDampener = (DisableAutoDamenerOption)(object)value;
                     break;
                 case Option.HaltedSpeedTolerance:
-                    Settings.HaltedSpeedTolerance = (float) (object) value;
+                    Settings.HaltedSpeedTolerance = (float)(object)value;
                     break;
                 case Option.DelayAfterManualHelmet:
-                    Settings.DelayAfterManualHelmet = (int) (object) value;
+                    Settings.DelayAfterManualHelmet = (int)(object)value;
                     break;
                 default:
                     using (Log.BeginMethod(nameof(SetOption))) {
@@ -652,12 +652,12 @@ namespace Sisk.SmarterSuit {
 
                 if (isGravityDetected) {
                     if (isGroundInRange) {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?)null : false;
                     } else {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
                     }
                 } else {
-                    thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
+                    thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
                 }
 
                 _dataFromLastCockpit = new SuitData(null, thruster, helmet, linearVelocity, angularVelocity);
