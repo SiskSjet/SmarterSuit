@@ -7,11 +7,12 @@ using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.Localization;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
-using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
 using Sisk.SmarterSuit.Net;
 using Sisk.SmarterSuit.Net.Messages;
 using Sisk.SmarterSuit.Settings;
+using Sisk.Utils.Localization;
+using Sisk.Utils.Localization.Extensions;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Logging.DefaultHandler;
 using Sisk.Utils.Net;
@@ -580,6 +581,41 @@ namespace Sisk.SmarterSuit {
             using (Log.BeginMethod(nameof(LoadTranslation))) {
                 var currentLanguage = MyAPIGateway.Session.Config.Language;
                 var supportedLanguages = new HashSet<MyLanguagesEnum>();
+
+                switch (currentLanguage) {
+                    case MyLanguagesEnum.English:
+                        Lang.Add(MyLanguagesEnum.English, new Dictionary<string, string> {
+                            { nameof(ModText.Description_SS_Enable), "[option] Enables an option" },
+                            { nameof(ModText.Description_SS_Disable), "[option] Disables an option" },
+                            { nameof(ModText.Description_SS_List), "Lists all options" },
+                            { nameof(ModText.Description_SS_Help), "Shows a help page" },
+                            { nameof(ModText.SS_NoPermissionError), "You do not have permission to set this option." },
+                            { nameof(ModText.SS_UnknownOptionError), "Unknown option '{0}'." },
+                            { nameof(ModText.SS_OnlyBooleanAllowedError), "Only Boolean options can be used." },
+                            { nameof(ModText.Description_SS_Set), "[option] [value] Set an option to value." },
+                            { nameof(ModText.SS_ConvertError), "Could not convert '{0}' to {1}." },
+                            { nameof(ModText.SS_ArgumentError), "Wrong arguments. Expect [option] [value] arguments." },
+                            { nameof(ModText.SS_SetOptionSuccess), "{0} successfully set to {1}." },
+                            { nameof(ModText.SS_SetOptionError), "Failed to set {0} to {1}." }
+                            });
+                        break;
+                    case MyLanguagesEnum.German:
+                        Lang.Add(MyLanguagesEnum.German, new Dictionary<string, string> {
+                            { nameof(ModText.Description_SS_Enable), "[option] Aktiviert eine Option" },
+                            { nameof(ModText.Description_SS_Disable), "[option] Deaktiviert eine Option" },
+                            { nameof(ModText.Description_SS_List), "Listet alle Optionen auf" },
+                            { nameof(ModText.Description_SS_Help), "Zeigt eine Hilfeseite an" },
+                            { nameof(ModText.SS_NoPermissionError), "Sie haben keine Berechtigung, diese Option festzulegen." },
+                            { nameof(ModText.SS_UnknownOptionError), "Unbekannte Option '{0}'." },
+                            { nameof(ModText.SS_OnlyBooleanAllowedError), "Nur 'Boolean' Optionen können benutzt werden." },
+                            { nameof(ModText.Description_SS_Set), "[option] [value] Legt eine Option auf den angegebenen Value fest." },
+                            { nameof(ModText.SS_ConvertError), "Konnte '{0}' nicht in {1} konvertieren." },
+                            { nameof(ModText.SS_ArgumentError), "Falsche Argumente. Erwartet [option] [value] Argumente." },
+                            { nameof(ModText.SS_SetOptionSuccess), "{0} erfolgreich auf {1} festgelegt." },
+                            { nameof(ModText.SS_SetOptionError), "Fehler beim Festlegen von {0} auf {1}." }
+                            });
+                        break;
+                }
 
                 Texts.LoadSupportedLanguages(supportedLanguages);
                 if (supportedLanguages.Contains(currentLanguage)) {

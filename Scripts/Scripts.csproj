@@ -98,12 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChatHandler.cs" />
-    <Compile Include="Command.cs" />
-    <Compile Include="CommandHandler.cs" />
-    <Compile Include="Extensions\MyStringIdExtensions.cs" />
-    <Compile Include="Localization\Lang.cs" />
     <Compile Include="Localization\ModText.cs" />
-    <Compile Include="Localization\Texts.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Data\Option.cs" />
     <Compile Include="Net\ClientHandler.cs" />
@@ -122,6 +117,14 @@
     <Compile Include="Data\SuitData.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Utils\CommandHandler\CommandHandler.csproj">
+      <Project>{f3734666-0aca-4cdc-b1b1-cd955fb6b4a8}</Project>
+      <Name>CommandHandler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utils\Localization\Localization.csproj">
+      <Project>{2675bec6-9106-4ab8-a2dc-77cd569d9954}</Project>
+      <Name>Localization</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utils\Logging\Logging.csproj">
       <Project>{d8581c43-f65d-49eb-bfe3-75f185371512}</Project>
       <Name>Logging</Name>
