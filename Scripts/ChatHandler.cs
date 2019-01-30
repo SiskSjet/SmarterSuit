@@ -5,9 +5,10 @@ using System.Linq;
 using System.Text;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
-using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
 using Sisk.SmarterSuit.Net;
+using Sisk.Utils.CommandHandler;
+using Sisk.Utils.Localization.Extensions;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Net;
 
@@ -40,7 +41,7 @@ namespace Sisk.SmarterSuit {
             Network = network;
             NetworkHandler = networkHandler;
 
-            _commandHandler = new CommandHandler { Prefix = $"/{Mod.Acronym}" };
+            _commandHandler = new CommandHandler(Mod.NAME) { Prefix = $"/{Mod.Acronym}" };
             _commandHandler.Register(new Command { Name = "Enable", Description = ModText.Description_SS_Enable.GetString(), Execute = OnEnableOptionCommand });
             _commandHandler.Register(new Command { Name = "Disable", Description = ModText.Description_SS_Disable.GetString(), Execute = OnDisableOptionCommand });
             _commandHandler.Register(new Command { Name = "Set", Description = ModText.Description_SS_Set.GetString(), Execute = OnSetOptionCommand });
