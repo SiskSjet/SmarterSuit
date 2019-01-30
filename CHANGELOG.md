@@ -1,3 +1,11 @@
+# [1.3.3](https://github.com/SiskSjet/SmartSuit/compare/v1.3.2...v1.3.3) (2019-01-30)
+
+This is just a maintance update. No new functions or fixes are added.
+
+* updated mod utils
+
+
+
 # [1.3.2](https://github.com/SiskSjet/SmartSuit/compare/v1.3.1...v1.3.2) (2019-01-23)
 
 
