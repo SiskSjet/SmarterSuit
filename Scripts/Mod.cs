@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.Game;
+using Sandbox.Game.Entities;
 using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.Localization;
 using Sandbox.ModAPI;
@@ -20,6 +21,7 @@ using SpaceEngineers.Game.ModAPI;
 using VRage;
 using VRage.Game;
 using VRage.Game.Components;
+using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRage.Utils;
@@ -254,9 +256,9 @@ namespace Sisk.SmarterSuit {
                 return;
             }
 
-            MyVisualScriptLogicProvider.RemoveSoundEmitter("HUD");
-            MyVisualScriptLogicProvider.CreateSoundEmitterAtPosition("HUD", character.GetPosition());
-            MyVisualScriptLogicProvider.PlaySound("HUD", "ArcHudVocFuelLow", true);
+            var soundEmitter = new MyEntity3DSoundEmitter((MyEntity)character);
+            var pair = new MySoundPair("ArcHudVocFuelLow");
+            soundEmitter.PlaySingleSound(pair);
 
             MyAPIGateway.Utilities.ShowNotification(MyTexts.GetString(MySpaceTexts.NotificationFuelLow), 2500, "Red");
         }
