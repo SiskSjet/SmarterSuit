@@ -1,3 +1,13 @@
+# [1.3.4](https://github.com/SiskSjet/SmartSuit/compare/v1.3.3...v1.3.4) (2019-02-25)
+
+
+### Bug Fixes
+
+* fix a crash when enter a message shorter than command prefix ([0601b65](https://github.com/SiskSjet/SmartSuit/commit/0601b65))
+* fix the choppy notification warning ([c5b88e2](https://github.com/SiskSjet/SmartSuit/commit/c5b88e2))
+
+
+
 # [1.3.3](https://github.com/SiskSjet/SmartSuit/compare/v1.3.2...v1.3.3) (2019-01-30)
 
 This is just a maintance update. No new functions or fixes are added.
