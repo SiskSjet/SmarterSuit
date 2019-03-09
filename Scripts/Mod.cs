@@ -25,20 +25,19 @@ using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
-// ReSharper disable UsePatternMatching
-
 namespace Sisk.SmarterSuit {
     [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
     public class Mod : MySessionComponentBase {
         public const string NAME = "Smarter Suit";
         private const LogEventLevel DEFAULT_LOG_EVENT_LEVEL = LogEventLevel.Info | LogEventLevel.Warning | LogEventLevel.Error;
-
         private const float GRAVITY = 9.81f;
         private const string HYDROGEN_BOTTLE_ID = "MyObjectBuilder_GasContainerObject/HydrogenBottle";
         private const string LOG_FILE_TEMPLATE = "{0}.log";
+        private const string MEDICAL_ROOM = "MyObjectBuilder_MedicalRoom";
         private const ushort NETWORK_ID = 51501;
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const string SETTINGS_FILE = "settings.xml";
+        private const string SURVIVAL_KIT = "MyObjectBuilder_SurvivalKit";
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 30;
 
@@ -46,11 +45,9 @@ namespace Sisk.SmarterSuit {
         private ChatHandler _chatHandler;
         private SuitData _dataFromLastCockpit;
         private int _fuelCheckTicks;
-
         private bool _hasWaitedATick;
         private IMyIdentity _identity;
         private bool _isFuelUnderThresholdBefore;
-
         private bool _lastDampenerState;
         private NetworkHandlerBase _networkHandler;
         private int _ticks;
@@ -127,8 +124,6 @@ namespace Sisk.SmarterSuit {
             }
         }
 
-        private const string MedicalRoom = "MyObjectBuilder_MedicalRoom";
-        private const string SurvivalKit = "MyObjectBuilder_SurvivalKit";
         /// <summary>
         ///     Gets the medical room that is closest to the given entity.
         /// </summary>
@@ -142,7 +137,7 @@ namespace Sisk.SmarterSuit {
 
             foreach (var cubeGrid in entities) {
                 blocks.Clear();
-                MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid).GetBlocksOfType(blocks, x => x.BlockDefinition.TypeIdString == MedicalRoom || x.BlockDefinition.TypeIdString == SurvivalKit);
+                MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid).GetBlocksOfType(blocks, x => x.BlockDefinition.TypeIdString == MEDICAL_ROOM || x.BlockDefinition.TypeIdString == SURVIVAL_KIT);
                 medicalRooms.AddRange(blocks);
             }
 
@@ -178,6 +173,8 @@ namespace Sisk.SmarterSuit {
             }
 
             float bottleFillLevel = 0;
+
+            // todo: fix obsolete GetItems().
             var items = character.GetInventory().GetItems();
             foreach (var item in items) {
                 if (item.Content.ToString() == HYDROGEN_BOTTLE_ID) {
@@ -204,7 +201,7 @@ namespace Sisk.SmarterSuit {
 
                 var offset = Vector3D.Distance(character.GetPosition(), position);
                 var strength = gravity.Length() / GRAVITY;
-                var length = (float)offset + 5 / (strength > 1 ? strength : 1);
+                var length = (float) offset + 5 / (strength > 1 ? strength : 1);
 
                 gravity.Normalize();
                 var to = position + gravity * length;
@@ -256,7 +253,7 @@ namespace Sisk.SmarterSuit {
                 return;
             }
 
-            var soundEmitter = new MyEntity3DSoundEmitter((MyEntity)character);
+            var soundEmitter = new MyEntity3DSoundEmitter((MyEntity) character);
             var pair = new MySoundPair("ArcHudVocFuelLow");
             soundEmitter.PlaySingleSound(pair);
 
@@ -401,19 +398,19 @@ namespace Sisk.SmarterSuit {
 
                     if (isGravityDetected) {
                         if (isGroundInRange) {
-                            thruster = RemoveAutomaticJetpackActivation ? (bool?)null : false;
+                            thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
                             dampeners = isNotMoving;
                         } else {
-                            thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
+                            thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                             dampeners = isNotMoving;
                         }
                     } else {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                         dampeners = isNotMoving;
                     }
 
                     if (Settings.DisableAutoDampener != DisableAutoDamenerOption.Disable) {
-                        dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?)_lastDampenerState : null;
+                        dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?) _lastDampenerState : null;
                     }
 
                     if (MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
@@ -488,22 +485,22 @@ namespace Sisk.SmarterSuit {
         public void SetOption<TValue>(Option option, TValue value) {
             switch (option) {
                 case Option.AlwaysAutoHelmet:
-                    Settings.AlwaysAutoHelmet = (bool)(object)value;
+                    Settings.AlwaysAutoHelmet = (bool) (object) value;
                     break;
                 case Option.AdditionalFuelWarning:
-                    Settings.AdditionalFuelWarning = (bool)(object)value;
+                    Settings.AdditionalFuelWarning = (bool) (object) value;
                     break;
                 case Option.FuelThreshold:
-                    Settings.FuelThreshold = (float)(object)value;
+                    Settings.FuelThreshold = (float) (object) value;
                     break;
                 case Option.DisableAutoDampener:
-                    Settings.DisableAutoDampener = (DisableAutoDamenerOption)(object)value;
+                    Settings.DisableAutoDampener = (DisableAutoDamenerOption) (object) value;
                     break;
                 case Option.HaltedSpeedTolerance:
-                    Settings.HaltedSpeedTolerance = (float)(object)value;
+                    Settings.HaltedSpeedTolerance = (float) (object) value;
                     break;
                 case Option.DelayAfterManualHelmet:
-                    Settings.DelayAfterManualHelmet = (int)(object)value;
+                    Settings.DelayAfterManualHelmet = (int) (object) value;
                     break;
                 default:
                     using (Log.BeginMethod(nameof(SetOption))) {
@@ -600,7 +597,7 @@ namespace Sisk.SmarterSuit {
                             { nameof(ModText.SS_ArgumentError), "Wrong arguments. Expect [option] [value] arguments." },
                             { nameof(ModText.SS_SetOptionSuccess), "{0} successfully set to {1}." },
                             { nameof(ModText.SS_SetOptionError), "Failed to set {0} to {1}." }
-                            });
+                        });
                         break;
                     case MyLanguagesEnum.German:
                         Lang.Add(MyLanguagesEnum.German, new Dictionary<string, string> {
@@ -616,7 +613,7 @@ namespace Sisk.SmarterSuit {
                             { nameof(ModText.SS_ArgumentError), "Falsche Argumente. Erwartet [option] [value] Argumente." },
                             { nameof(ModText.SS_SetOptionSuccess), "{0} erfolgreich auf {1} festgelegt." },
                             { nameof(ModText.SS_SetOptionError), "Fehler beim Festlegen von {0} auf {1}." }
-                            });
+                        });
                         break;
                 }
 
@@ -691,12 +688,12 @@ namespace Sisk.SmarterSuit {
 
                 if (isGravityDetected) {
                     if (isGroundInRange) {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?)null : false;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
                     } else {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                     }
                 } else {
-                    thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
+                    thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                 }
 
                 _dataFromLastCockpit = new SuitData(null, thruster, helmet, linearVelocity, angularVelocity);
