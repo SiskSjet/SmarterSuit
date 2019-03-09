@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
-using Sandbox.Game;
 using Sandbox.Game.Entities;
 using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.Localization;
@@ -17,7 +16,6 @@ using Sisk.Utils.Localization.Extensions;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Logging.DefaultHandler;
 using Sisk.Utils.Net;
-using SpaceEngineers.Game.ModAPI;
 using VRage;
 using VRage.Game;
 using VRage.Game.Components;
@@ -129,20 +127,22 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        private const string MedicalRoom = "MyObjectBuilder_MedicalRoom";
+        private const string SurvivalKit = "MyObjectBuilder_SurvivalKit";
         /// <summary>
         ///     Gets the medical room that is closest to the given entity.
         /// </summary>
         /// <param name="entity">The entity used to find the closest medical room.</param>
         /// <returns>Return the closest medical room or <see langword="null" />.</returns>
-        private static IMyMedicalRoom GetMedialRoom(IMyEntity entity) {
+        private static IMyTerminalBlock GetRespawnLocation(IMyEntity entity) {
             var sphere = entity.PositionComp.WorldVolume;
             var entities = MyAPIGateway.Entities.GetTopMostEntitiesInSphere(ref sphere).OfType<IMyCubeGrid>().ToList();
+            var medicalRooms = new List<IMyTerminalBlock>();
+            var blocks = new List<IMyTerminalBlock>();
 
-            var medicalRooms = new List<IMyMedicalRoom>();
-            var blocks = new List<IMyMedicalRoom>();
             foreach (var cubeGrid in entities) {
                 blocks.Clear();
-                MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid).GetBlocksOfType(blocks);
+                MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid).GetBlocksOfType(blocks, x => x.BlockDefinition.TypeIdString == MedicalRoom || x.BlockDefinition.TypeIdString == SurvivalKit);
                 medicalRooms.AddRange(blocks);
             }
 
@@ -369,14 +369,15 @@ namespace Sisk.SmarterSuit {
                     _hasWaitedATick = false;
 
                     var entity = MyAPIGateway.Session.ControlledObject;
-                    var atMedicalRoom = character == entity;
-                    if (!atMedicalRoom) {
+                    var atRespawnLocation = character == entity;
+                    if (!atRespawnLocation) {
                         State = State.None;
                         return;
                     }
 
-                    var medicalRoom = GetMedialRoom(character);
-                    if (medicalRoom == null) {
+                    var respawnLocation = GetRespawnLocation(character);
+                    if (respawnLocation == null) {
+                        MyAPIGateway.Utilities.ShowNotification("No respawn location found");
                         State = State.None;
                         return;
                     }
@@ -386,7 +387,7 @@ namespace Sisk.SmarterSuit {
                     Vector3? linearVelocity = Vector3.Zero;
                     Vector3? angularVelocity = Vector3.Zero;
 
-                    var cubeGrid = medicalRoom.CubeGrid;
+                    var cubeGrid = respawnLocation.CubeGrid;
                     var gravity = character.Physics.Gravity;
                     var physics = cubeGrid.Physics;
                     if (physics != null) {

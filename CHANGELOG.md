@@ -1,3 +1,12 @@
+# [1.3.5](https://github.com/SiskSjet/SmartSuit/compare/v1.3.4...v1.3.5) (2019-03-09)
+
+
+### Bug Fixes
+
+* fix the missing support after respawning at a survival kit ([da5e758](https://github.com/SiskSjet/SmartSuit/commit/da5e758))
+
+
+
 # [1.3.4](https://github.com/SiskSjet/SmartSuit/compare/v1.3.3...v1.3.4) (2019-02-25)
 
 
