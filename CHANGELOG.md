@@ -1,3 +1,12 @@
+# [1.3.6](https://github.com/SiskSjet/SmartSuit/compare/v1.3.5...v1.3.6) (2019-03-10)
+
+
+### Bug Fixes
+
+* fix DelayAfterManualHelmet not synronized on client on change ([8149083](https://github.com/SiskSjet/SmartSuit/commit/8149083))
+
+
+
 # [1.3.5](https://github.com/SiskSjet/SmartSuit/compare/v1.3.4...v1.3.5) (2019-03-09)
 
 
