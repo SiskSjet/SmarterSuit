@@ -43,6 +43,9 @@ namespace Sisk.SmarterSuit.Net {
                 case Option.HaltedSpeedTolerance:
                     value = MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value);
                     break;
+                case Option.DelayAfterManualHelmet:
+                    value = MyAPIGateway.Utilities.SerializeFromBinary<int>(message.Value);
+                    break;
                 case Option.DisableAutoDampener:
                     value = MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value);
                     break;
@@ -71,6 +74,9 @@ namespace Sisk.SmarterSuit.Net {
                 case Option.FuelThreshold:
                 case Option.HaltedSpeedTolerance:
                     Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
+                    break;
+                case Option.DelayAfterManualHelmet:
+                    Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<int>(message.Value));
                     break;
                 case Option.DisableAutoDampener:
                     Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value));
