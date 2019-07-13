@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.Game.Entities;
@@ -7,12 +8,11 @@ using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.Localization;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
+using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
 using Sisk.SmarterSuit.Net;
 using Sisk.SmarterSuit.Net.Messages;
 using Sisk.SmarterSuit.Settings;
-using Sisk.Utils.Localization;
-using Sisk.Utils.Localization.Extensions;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Logging.DefaultHandler;
 using Sisk.Utils.Net;
@@ -25,20 +25,19 @@ using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
-// ReSharper disable UsePatternMatching
-
 namespace Sisk.SmarterSuit {
     [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
     public class Mod : MySessionComponentBase {
         public const string NAME = "Smarter Suit";
         private const LogEventLevel DEFAULT_LOG_EVENT_LEVEL = LogEventLevel.Info | LogEventLevel.Warning | LogEventLevel.Error;
-
         private const float GRAVITY = 9.81f;
         private const string HYDROGEN_BOTTLE_ID = "MyObjectBuilder_GasContainerObject/HydrogenBottle";
         private const string LOG_FILE_TEMPLATE = "{0}.log";
+        private const string MEDICAL_ROOM = "MyObjectBuilder_MedicalRoom";
         private const ushort NETWORK_ID = 51501;
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const string SETTINGS_FILE = "settings.xml";
+        private const string SURVIVAL_KIT = "MyObjectBuilder_SurvivalKit";
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 30;
 
@@ -46,11 +45,9 @@ namespace Sisk.SmarterSuit {
         private ChatHandler _chatHandler;
         private SuitData _dataFromLastCockpit;
         private int _fuelCheckTicks;
-
         private bool _hasWaitedATick;
         private IMyIdentity _identity;
         private bool _isFuelUnderThresholdBefore;
-
         private bool _lastDampenerState;
         private NetworkHandlerBase _networkHandler;
         private int _ticks;
@@ -71,6 +68,11 @@ namespace Sisk.SmarterSuit {
         ///     Indicates if mod is a dev version.
         /// </summary>
         private bool IsDevVersion => ModContext.ModName.EndsWith("_DEV");
+
+        /// <summary>
+        ///     Language used to localize this mod.
+        /// </summary>
+        public MyLanguagesEnum? Language { get; private set; }
 
         /// <summary>
         ///     Logger used for logging.
@@ -116,19 +118,17 @@ namespace Sisk.SmarterSuit {
 
             switch (result) {
                 case Result.NoPermission:
-                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Error_SS_NoPermission.GetString());
                     break;
                 case Result.Error:
-                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionError.GetString(option, value));
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Error_SS_SetOption.GetString(option, value));
                     break;
                 case Result.Success:
-                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionSuccess.GetString(option, value));
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Message_SS_SetOptionSuccess.GetString(option, value));
                     break;
             }
         }
 
-        private const string MedicalRoom = "MyObjectBuilder_MedicalRoom";
-        private const string SurvivalKit = "MyObjectBuilder_SurvivalKit";
         /// <summary>
         ///     Gets the medical room that is closest to the given entity.
         /// </summary>
@@ -142,7 +142,7 @@ namespace Sisk.SmarterSuit {
 
             foreach (var cubeGrid in entities) {
                 blocks.Clear();
-                MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid).GetBlocksOfType(blocks, x => x.BlockDefinition.TypeIdString == MedicalRoom || x.BlockDefinition.TypeIdString == SurvivalKit);
+                MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid).GetBlocksOfType(blocks, x => x.BlockDefinition.TypeIdString == MEDICAL_ROOM || x.BlockDefinition.TypeIdString == SURVIVAL_KIT);
                 medicalRooms.AddRange(blocks);
             }
 
@@ -178,6 +178,8 @@ namespace Sisk.SmarterSuit {
             }
 
             float bottleFillLevel = 0;
+
+            // todo: fix obsolete GetItems().
             var items = character.GetInventory().GetItems();
             foreach (var item in items) {
                 if (item.Content.ToString() == HYDROGEN_BOTTLE_ID) {
@@ -204,7 +206,7 @@ namespace Sisk.SmarterSuit {
 
                 var offset = Vector3D.Distance(character.GetPosition(), position);
                 var strength = gravity.Length() / GRAVITY;
-                var length = (float)offset + 5 / (strength > 1 ? strength : 1);
+                var length = (float) offset + 5 / (strength > 1 ? strength : 1);
 
                 gravity.Normalize();
                 var to = position + gravity * length;
@@ -256,7 +258,7 @@ namespace Sisk.SmarterSuit {
                 return;
             }
 
-            var soundEmitter = new MyEntity3DSoundEmitter((MyEntity)character);
+            var soundEmitter = new MyEntity3DSoundEmitter((MyEntity) character);
             var pair = new MySoundPair("ArcHudVocFuelLow");
             soundEmitter.PlaySingleSound(pair);
 
@@ -280,7 +282,9 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         public override void LoadData() {
             InitializeLogging();
-            LoadTranslation();
+            LoadLocalization();
+            MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
+
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
                 InitializeNetwork();
 
@@ -401,19 +405,19 @@ namespace Sisk.SmarterSuit {
 
                     if (isGravityDetected) {
                         if (isGroundInRange) {
-                            thruster = RemoveAutomaticJetpackActivation ? (bool?)null : false;
+                            thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
                             dampeners = isNotMoving;
                         } else {
-                            thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
+                            thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                             dampeners = isNotMoving;
                         }
                     } else {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                         dampeners = isNotMoving;
                     }
 
                     if (Settings.DisableAutoDampener != DisableAutoDamenerOption.Disable) {
-                        dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?)_lastDampenerState : null;
+                        dampeners = Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? (bool?) _lastDampenerState : null;
                     }
 
                     if (MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization) {
@@ -435,6 +439,7 @@ namespace Sisk.SmarterSuit {
             Log?.EnterMethod(nameof(UnloadData));
 
             MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
+            MyAPIGateway.Gui.GuiControlRemoved -= OnGuiControlRemoved;
 
             if (_chatHandler != null) {
                 _chatHandler.Close();
@@ -488,22 +493,22 @@ namespace Sisk.SmarterSuit {
         public void SetOption<TValue>(Option option, TValue value) {
             switch (option) {
                 case Option.AlwaysAutoHelmet:
-                    Settings.AlwaysAutoHelmet = (bool)(object)value;
+                    Settings.AlwaysAutoHelmet = (bool) (object) value;
                     break;
                 case Option.AdditionalFuelWarning:
-                    Settings.AdditionalFuelWarning = (bool)(object)value;
+                    Settings.AdditionalFuelWarning = (bool) (object) value;
                     break;
                 case Option.FuelThreshold:
-                    Settings.FuelThreshold = (float)(object)value;
+                    Settings.FuelThreshold = (float) (object) value;
                     break;
                 case Option.DisableAutoDampener:
-                    Settings.DisableAutoDampener = (DisableAutoDamenerOption)(object)value;
+                    Settings.DisableAutoDampener = (DisableAutoDamenerOption) (object) value;
                     break;
                 case Option.HaltedSpeedTolerance:
-                    Settings.HaltedSpeedTolerance = (float)(object)value;
+                    Settings.HaltedSpeedTolerance = (float) (object) value;
                     break;
                 case Option.DelayAfterManualHelmet:
-                    Settings.DelayAfterManualHelmet = (int)(object)value;
+                    Settings.DelayAfterManualHelmet = (int) (object) value;
                     break;
                 default:
                     using (Log.BeginMethod(nameof(SetOption))) {
@@ -550,6 +555,29 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Load localizations for this mod.
+        /// </summary>
+        private void LoadLocalization() {
+            var path = Path.Combine(ModContext.ModPathData, "Localization");
+            var supportedLanguages = new HashSet<MyLanguagesEnum>();
+            MyTexts.LoadSupportedLanguages(path, supportedLanguages);
+
+            var currentLanguage = supportedLanguages.Contains(MyAPIGateway.Session.Config.Language) ? MyAPIGateway.Session.Config.Language : MyLanguagesEnum.English;
+            if (Language != null && Language == currentLanguage) {
+                return;
+            }
+
+            Language = currentLanguage;
+            var languageDescription = MyTexts.Languages.Where(x => x.Key == currentLanguage).Select(x => x.Value).FirstOrDefault();
+            if (languageDescription != null) {
+                var cultureName = string.IsNullOrWhiteSpace(languageDescription.CultureName) ? null : languageDescription.CultureName;
+                var subcultureName = string.IsNullOrWhiteSpace(languageDescription.SubcultureName) ? null : languageDescription.SubcultureName;
+
+                MyTexts.LoadTexts(path, cultureName, subcultureName);
+            }
+        }
+
+        /// <summary>
         ///     Load mod settings.
         /// </summary>
         private void LoadSettings() {
@@ -578,60 +606,6 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
-        ///     Load translations for this mod.
-        /// </summary>
-        private void LoadTranslation() {
-            using (Log.BeginMethod(nameof(LoadTranslation))) {
-                var currentLanguage = MyAPIGateway.Session.Config.Language;
-                var supportedLanguages = new HashSet<MyLanguagesEnum>();
-
-                switch (currentLanguage) {
-                    case MyLanguagesEnum.English:
-                        Lang.Add(MyLanguagesEnum.English, new Dictionary<string, string> {
-                            { nameof(ModText.Description_SS_Enable), "[option] Enables an option" },
-                            { nameof(ModText.Description_SS_Disable), "[option] Disables an option" },
-                            { nameof(ModText.Description_SS_List), "Lists all options" },
-                            { nameof(ModText.Description_SS_Help), "Shows a help page" },
-                            { nameof(ModText.SS_NoPermissionError), "You do not have permission to set this option." },
-                            { nameof(ModText.SS_UnknownOptionError), "Unknown option '{0}'." },
-                            { nameof(ModText.SS_OnlyBooleanAllowedError), "Only Boolean options can be used." },
-                            { nameof(ModText.Description_SS_Set), "[option] [value] Set an option to value." },
-                            { nameof(ModText.SS_ConvertError), "Could not convert '{0}' to {1}." },
-                            { nameof(ModText.SS_ArgumentError), "Wrong arguments. Expect [option] [value] arguments." },
-                            { nameof(ModText.SS_SetOptionSuccess), "{0} successfully set to {1}." },
-                            { nameof(ModText.SS_SetOptionError), "Failed to set {0} to {1}." }
-                            });
-                        break;
-                    case MyLanguagesEnum.German:
-                        Lang.Add(MyLanguagesEnum.German, new Dictionary<string, string> {
-                            { nameof(ModText.Description_SS_Enable), "[option] Aktiviert eine Option" },
-                            { nameof(ModText.Description_SS_Disable), "[option] Deaktiviert eine Option" },
-                            { nameof(ModText.Description_SS_List), "Listet alle Optionen auf" },
-                            { nameof(ModText.Description_SS_Help), "Zeigt eine Hilfeseite an" },
-                            { nameof(ModText.SS_NoPermissionError), "Sie haben keine Berechtigung, diese Option festzulegen." },
-                            { nameof(ModText.SS_UnknownOptionError), "Unbekannte Option '{0}'." },
-                            { nameof(ModText.SS_OnlyBooleanAllowedError), "Nur 'Boolean' Optionen können benutzt werden." },
-                            { nameof(ModText.Description_SS_Set), "[option] [value] Legt eine Option auf den angegebenen Value fest." },
-                            { nameof(ModText.SS_ConvertError), "Konnte '{0}' nicht in {1} konvertieren." },
-                            { nameof(ModText.SS_ArgumentError), "Falsche Argumente. Erwartet [option] [value] Argumente." },
-                            { nameof(ModText.SS_SetOptionSuccess), "{0} erfolgreich auf {1} festgelegt." },
-                            { nameof(ModText.SS_SetOptionError), "Fehler beim Festlegen von {0} auf {1}." }
-                            });
-                        break;
-                }
-
-                Texts.LoadSupportedLanguages(supportedLanguages);
-                if (supportedLanguages.Contains(currentLanguage)) {
-                    Texts.LoadTexts(currentLanguage);
-                    Log.Info($"Loaded {currentLanguage} translations.");
-                } else if (supportedLanguages.Contains(MyLanguagesEnum.English)) {
-                    Texts.LoadTexts();
-                    Log.Warning($"No {currentLanguage} translations found. Fall back to {MyLanguagesEnum.English} translations.");
-                }
-            }
-        }
-
-        /// <summary>
         ///     Called on <see cref="IMyIdentity.CharacterChanged" /> event. Used to check if we respawned.
         /// </summary>
         /// <param name="oldCharacter">The old character instance.</param>
@@ -644,6 +618,17 @@ namespace Sisk.SmarterSuit {
 
             if (respawn) {
                 State = State.Respawn;
+            }
+        }
+
+        /// <summary>
+        ///     Event triggered on gui control removed.
+        ///     Used to detect if Option screen is closed and then to reload localization.
+        /// </summary>
+        /// <param name="obj"></param>
+        private void OnGuiControlRemoved(object obj) {
+            if (obj.ToString().EndsWith("ScreenOptionsSpace")) {
+                LoadLocalization();
             }
         }
 
@@ -691,12 +676,12 @@ namespace Sisk.SmarterSuit {
 
                 if (isGravityDetected) {
                     if (isGroundInRange) {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?)null : false;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : false;
                     } else {
-                        thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
+                        thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                     }
                 } else {
-                    thruster = RemoveAutomaticJetpackActivation ? (bool?)null : true;
+                    thruster = RemoveAutomaticJetpackActivation ? (bool?) null : true;
                 }
 
                 _dataFromLastCockpit = new SuitData(null, thruster, helmet, linearVelocity, angularVelocity);
