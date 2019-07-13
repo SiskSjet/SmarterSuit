@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.Game.Entities;
@@ -7,12 +8,11 @@ using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.Localization;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
+using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
 using Sisk.SmarterSuit.Net;
 using Sisk.SmarterSuit.Net.Messages;
 using Sisk.SmarterSuit.Settings;
-using Sisk.Utils.Localization;
-using Sisk.Utils.Localization.Extensions;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Logging.DefaultHandler;
 using Sisk.Utils.Net;
@@ -70,6 +70,11 @@ namespace Sisk.SmarterSuit {
         private bool IsDevVersion => ModContext.ModName.EndsWith("_DEV");
 
         /// <summary>
+        ///     Language used to localize this mod.
+        /// </summary>
+        public MyLanguagesEnum? Language { get; private set; }
+
+        /// <summary>
         ///     Logger used for logging.
         /// </summary>
         public ILogger Log { get; private set; }
@@ -113,13 +118,13 @@ namespace Sisk.SmarterSuit {
 
             switch (result) {
                 case Result.NoPermission:
-                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_NoPermissionError.GetString());
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Error_SS_NoPermission.GetString());
                     break;
                 case Result.Error:
-                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionError.GetString(option, value));
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Error_SS_SetOption.GetString(option, value));
                     break;
                 case Result.Success:
-                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.SS_SetOptionSuccess.GetString(option, value));
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Message_SS_SetOptionSuccess.GetString(option, value));
                     break;
             }
         }
@@ -277,7 +282,9 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         public override void LoadData() {
             InitializeLogging();
-            LoadTranslation();
+            LoadLocalization();
+            MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
+
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
                 InitializeNetwork();
 
@@ -432,6 +439,7 @@ namespace Sisk.SmarterSuit {
             Log?.EnterMethod(nameof(UnloadData));
 
             MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
+            MyAPIGateway.Gui.GuiControlRemoved -= OnGuiControlRemoved;
 
             if (_chatHandler != null) {
                 _chatHandler.Close();
@@ -547,6 +555,29 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Load localizations for this mod.
+        /// </summary>
+        private void LoadLocalization() {
+            var path = Path.Combine(ModContext.ModPathData, "Localization");
+            var supportedLanguages = new HashSet<MyLanguagesEnum>();
+            MyTexts.LoadSupportedLanguages(path, supportedLanguages);
+
+            var currentLanguage = supportedLanguages.Contains(MyAPIGateway.Session.Config.Language) ? MyAPIGateway.Session.Config.Language : MyLanguagesEnum.English;
+            if (Language != null && Language == currentLanguage) {
+                return;
+            }
+
+            Language = currentLanguage;
+            var languageDescription = MyTexts.Languages.Where(x => x.Key == currentLanguage).Select(x => x.Value).FirstOrDefault();
+            if (languageDescription != null) {
+                var cultureName = string.IsNullOrWhiteSpace(languageDescription.CultureName) ? null : languageDescription.CultureName;
+                var subcultureName = string.IsNullOrWhiteSpace(languageDescription.SubcultureName) ? null : languageDescription.SubcultureName;
+
+                MyTexts.LoadTexts(path, cultureName, subcultureName);
+            }
+        }
+
+        /// <summary>
         ///     Load mod settings.
         /// </summary>
         private void LoadSettings() {
@@ -575,60 +606,6 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
-        ///     Load translations for this mod.
-        /// </summary>
-        private void LoadTranslation() {
-            using (Log.BeginMethod(nameof(LoadTranslation))) {
-                var currentLanguage = MyAPIGateway.Session.Config.Language;
-                var supportedLanguages = new HashSet<MyLanguagesEnum>();
-
-                switch (currentLanguage) {
-                    case MyLanguagesEnum.English:
-                        Lang.Add(MyLanguagesEnum.English, new Dictionary<string, string> {
-                            { nameof(ModText.Description_SS_Enable), "[option] Enables an option" },
-                            { nameof(ModText.Description_SS_Disable), "[option] Disables an option" },
-                            { nameof(ModText.Description_SS_List), "Lists all options" },
-                            { nameof(ModText.Description_SS_Help), "Shows a help page" },
-                            { nameof(ModText.SS_NoPermissionError), "You do not have permission to set this option." },
-                            { nameof(ModText.SS_UnknownOptionError), "Unknown option '{0}'." },
-                            { nameof(ModText.SS_OnlyBooleanAllowedError), "Only Boolean options can be used." },
-                            { nameof(ModText.Description_SS_Set), "[option] [value] Set an option to value." },
-                            { nameof(ModText.SS_ConvertError), "Could not convert '{0}' to {1}." },
-                            { nameof(ModText.SS_ArgumentError), "Wrong arguments. Expect [option] [value] arguments." },
-                            { nameof(ModText.SS_SetOptionSuccess), "{0} successfully set to {1}." },
-                            { nameof(ModText.SS_SetOptionError), "Failed to set {0} to {1}." }
-                        });
-                        break;
-                    case MyLanguagesEnum.German:
-                        Lang.Add(MyLanguagesEnum.German, new Dictionary<string, string> {
-                            { nameof(ModText.Description_SS_Enable), "[option] Aktiviert eine Option" },
-                            { nameof(ModText.Description_SS_Disable), "[option] Deaktiviert eine Option" },
-                            { nameof(ModText.Description_SS_List), "Listet alle Optionen auf" },
-                            { nameof(ModText.Description_SS_Help), "Zeigt eine Hilfeseite an" },
-                            { nameof(ModText.SS_NoPermissionError), "Sie haben keine Berechtigung, diese Option festzulegen." },
-                            { nameof(ModText.SS_UnknownOptionError), "Unbekannte Option '{0}'." },
-                            { nameof(ModText.SS_OnlyBooleanAllowedError), "Nur 'Boolean' Optionen können benutzt werden." },
-                            { nameof(ModText.Description_SS_Set), "[option] [value] Legt eine Option auf den angegebenen Value fest." },
-                            { nameof(ModText.SS_ConvertError), "Konnte '{0}' nicht in {1} konvertieren." },
-                            { nameof(ModText.SS_ArgumentError), "Falsche Argumente. Erwartet [option] [value] Argumente." },
-                            { nameof(ModText.SS_SetOptionSuccess), "{0} erfolgreich auf {1} festgelegt." },
-                            { nameof(ModText.SS_SetOptionError), "Fehler beim Festlegen von {0} auf {1}." }
-                        });
-                        break;
-                }
-
-                Texts.LoadSupportedLanguages(supportedLanguages);
-                if (supportedLanguages.Contains(currentLanguage)) {
-                    Texts.LoadTexts(currentLanguage);
-                    Log.Info($"Loaded {currentLanguage} translations.");
-                } else if (supportedLanguages.Contains(MyLanguagesEnum.English)) {
-                    Texts.LoadTexts();
-                    Log.Warning($"No {currentLanguage} translations found. Fall back to {MyLanguagesEnum.English} translations.");
-                }
-            }
-        }
-
-        /// <summary>
         ///     Called on <see cref="IMyIdentity.CharacterChanged" /> event. Used to check if we respawned.
         /// </summary>
         /// <param name="oldCharacter">The old character instance.</param>
@@ -641,6 +618,17 @@ namespace Sisk.SmarterSuit {
 
             if (respawn) {
                 State = State.Respawn;
+            }
+        }
+
+        /// <summary>
+        ///     Event triggered on gui control removed.
+        ///     Used to detect if Option screen is closed and then to reload localization.
+        /// </summary>
+        /// <param name="obj"></param>
+        private void OnGuiControlRemoved(object obj) {
+            if (obj.ToString().EndsWith("ScreenOptionsSpace")) {
+                LoadLocalization();
             }
         }
 

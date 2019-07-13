@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
+using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
 using Sisk.SmarterSuit.Net;
 using Sisk.Utils.CommandHandler;
-using Sisk.Utils.Localization.Extensions;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Net;
 
@@ -91,10 +91,10 @@ namespace Sisk.SmarterSuit {
                 if (_options[result] == typeof(bool)) {
                     SetOption(result, false);
                 } else {
-                    MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_OnlyBooleanAllowedError.GetString());
+                    MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.Error_SS_OnlyBooleanAllowed.GetString());
                 }
             } else {
-                MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_UnknownOptionError.GetString(arguments));
+                MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.Error_SS_UnknownOption.GetString(arguments));
             }
         }
 
@@ -108,10 +108,10 @@ namespace Sisk.SmarterSuit {
                 if (_options[result] == typeof(bool)) {
                     SetOption(result, true);
                 } else {
-                    MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_OnlyBooleanAllowedError.GetString());
+                    MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.Error_SS_OnlyBooleanAllowed.GetString());
                 }
             } else {
-                MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_UnknownOptionError.GetString(arguments));
+                MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.Error_SS_UnknownOption.GetString(arguments));
             }
         }
 
@@ -150,7 +150,7 @@ namespace Sisk.SmarterSuit {
         private void OnSetOptionCommand(string arguments) {
             var array = arguments.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             if (array.Length < 2) {
-                MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_ArgumentError.GetString(arguments));
+                MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.Error_SS_Argument.GetString(arguments));
                 return;
             }
 
@@ -164,32 +164,32 @@ namespace Sisk.SmarterSuit {
                     if (bool.TryParse(valueString, out value)) {
                         SetOption(result, value);
                     } else {
-                        MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
+                        MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.Error_SS_Convert.GetString(valueString, type.Name));
                     }
                 } else if (type == typeof(float)) {
                     float value;
                     if (float.TryParse(valueString, NumberStyles.Number, CultureInfo.InvariantCulture, out value)) {
                         SetOption(result, value);
                     } else {
-                        MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
+                        MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.Error_SS_Convert.GetString(valueString, type.Name));
                     }
                 } else if (type == typeof(byte)) {
                     byte value;
                     if (byte.TryParse(valueString, NumberStyles.Integer, CultureInfo.InvariantCulture, out value)) {
                         SetOption(result, value);
                     } else {
-                        MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
+                        MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.Error_SS_Convert.GetString(valueString, type.Name));
                     }
                 } else if (type == typeof(int)) {
                     int value;
                     if (int.TryParse(valueString, NumberStyles.Integer, CultureInfo.InvariantCulture, out value)) {
                         SetOption(result, value);
                     } else {
-                        MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_ConvertError.GetString(valueString, type.Name));
+                        MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.Error_SS_Convert.GetString(valueString, type.Name));
                     }
                 }
             } else {
-                MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.SS_UnknownOptionError.GetString(optionString));
+                MyAPIGateway.Utilities.ShowMessage(Mod.NAME, ModText.Error_SS_UnknownOption.GetString(optionString));
             }
         }
 
