@@ -47,7 +47,7 @@ namespace Sisk.SmarterSuit.Net {
                     value = MyAPIGateway.Utilities.SerializeFromBinary<int>(message.Value);
                     break;
                 case Option.DisableAutoDampener:
-                    value = MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value);
+                    value = MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDampenerOption>(message.Value);
                     break;
                 default:
                     using (Log.BeginMethod(nameof(OnSetOptionResponseMessage))) {
@@ -79,7 +79,7 @@ namespace Sisk.SmarterSuit.Net {
                     Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<int>(message.Value));
                     break;
                 case Option.DisableAutoDampener:
-                    Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value));
+                    Mod.Static.SetOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDampenerOption>(message.Value));
                     break;
                 default:
                     using (Log.BeginMethod(nameof(OnSetOptionSyncMessage))) {

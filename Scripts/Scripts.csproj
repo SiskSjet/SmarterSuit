@@ -122,10 +122,8 @@
     <Compile Include="Net\NetworkHandlerBase.cs" />
     <Compile Include="Net\ServerHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Data\DisableAutoDamenerOption.cs" />
+    <Compile Include="Data\DisableAutoDampenerOption.cs" />
     <Compile Include="Settings\ModSettings.cs" />
-    <Compile Include="Data\State.cs" />
-    <Compile Include="Data\SuitData.cs" />
     <Compile Include="SuitComputer.cs" />
     <Compile Include="ThrusterWorkData.cs" />
     <Compile Include="Work.cs" />

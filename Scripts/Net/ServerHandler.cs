@@ -54,7 +54,7 @@ namespace Sisk.SmarterSuit.Net {
                         SyncOption(Option.DelayAfterManualHelmet, MyAPIGateway.Utilities.SerializeFromBinary<int>(message.Value));
                         break;
                     case Option.DisableAutoDampener:
-                        SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value));
+                        SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDampenerOption>(message.Value));
                         break;
                     default:
                         using (Log.BeginMethod(nameof(OnSetOptionMessage))) {

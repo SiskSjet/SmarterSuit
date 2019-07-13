@@ -1,10 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sandbox.Common.ObjectBuilders.Definitions;
+using Sandbox.Game;
+using Sandbox.Game.Entities;
+using Sandbox.Game.Entities.Character.Components;
+using Sandbox.Game.Localization;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.Utils.Logging;
+using VRage;
 using VRage.Game;
+using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRageMath;
@@ -12,16 +19,20 @@ using VRageMath;
 namespace Sisk.SmarterSuit {
     public class SuitComputer {
         private const float GRAVITY = 9.81f;
+        private const string HYDROGEN_BOTTLE_ID = "MyObjectBuilder_GasContainerObject/HydrogenBottle";
         private const double MAX_RUNTIME_IN_MILLISECONDS = 1;
         private const int MAX_SIMULTANEOUS_WORK = 16;
         private const string MEDICAL_ROOM = "MyObjectBuilder_MedicalRoom";
         private const string SURVIVAL_KIT = "MyObjectBuilder_SurvivalKit";
+        private const int TICKS_UNTIL_FUEL_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 30;
         private readonly IMyPlayer _player;
         private readonly Queue<Work> _workQueue = new Queue<Work>();
         private int _autoHelmetTicks;
+        private int _fuelCheckTicks;
         private IMyIdentity _identity;
         private bool _lastDampenerState;
+        private bool _wasFuelUnderThresholdBefore;
 
         /// <summary>
         ///     Creates a new instance of <see cref="SuitComputer" />.
@@ -106,6 +117,40 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Check if fuel for given character is under given threshold.
+        /// </summary>
+        /// <param name="character">The character for which will be checked.</param>
+        /// <param name="threshold">The threshold.</param>
+        /// <returns>Return true if fuel is under given threshold.</returns>
+        private static bool IsFuelUnderThreshold(IMyCharacter character, float threshold) {
+            if (MyAPIGateway.Session.CreativeMode) {
+                return false;
+            }
+
+            var jetpackComponent = character.Components.Get<MyCharacterJetpackComponent>();
+            var oxygenComponent = character.Components.Get<MyCharacterOxygenComponent>();
+            if (jetpackComponent == null || oxygenComponent == null) {
+                return false;
+            }
+
+            float bottleFillLevel = 0;
+            var inventory = character.GetInventory() as MyInventory;
+            if (inventory != null) {
+                var items = inventory.GetItems();
+                foreach (var item in items) {
+                    if (item.Content.ToString() == HYDROGEN_BOTTLE_ID) {
+                        var bottle = item.Content as MyObjectBuilder_GasContainerObject;
+                        if (bottle != null) {
+                            bottleFillLevel += bottle.GasLevel;
+                        }
+                    }
+                }
+            }
+
+            return oxygenComponent.GetGasFillLevel(MyCharacterOxygenComponent.HydrogenId) < threshold && bottleFillLevel < 0.1;
+        }
+
+        /// <summary>
         ///     Checks if the ground is close by.
         /// </summary>
         /// <param name="character">The character used to check distance.</param>
@@ -151,6 +196,17 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Show a 'fuel low' warning.
+        /// </summary>
+        private static void ShowFuelLowWarningNotification(IMyCharacter character) {
+            var soundEmitter = new MyEntity3DSoundEmitter((MyEntity) character);
+            var pair = new MySoundPair("ArcHudVocFuelLow");
+            soundEmitter.PlaySingleSound(pair);
+
+            MyAPIGateway.Utilities.ShowNotification(MyTexts.GetString(MySpaceTexts.NotificationFuelLow), 2500, "Red");
+        }
+
+        /// <summary>
         ///     Un-register all events.
         /// </summary>
         public void Close() {
@@ -172,11 +228,24 @@ namespace Sisk.SmarterSuit {
         ///     Update <see cref="SuitComputer" />.
         /// </summary>
         public void Update() {
-            if (Mod.Static.Settings != null && Mod.Static.Settings.AlwaysAutoHelmet && MyAPIGateway.Session.SessionSettings.EnableOxygen) {
+            if (Mod.Static.Settings == null) {
+                return;
+            }
+
+            if (Mod.Static.Settings.AlwaysAutoHelmet && MyAPIGateway.Session.SessionSettings.EnableOxygen) {
                 _autoHelmetTicks++;
                 if (_autoHelmetTicks >= TICKS_UNTIL_OXYGEN_CHECK - 1) {
-                    _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
                     _autoHelmetTicks = 0;
+                    _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
+                }
+            }
+
+            if (Mod.Static.Settings.AdditionalFuelWarning && MyAPIGateway.Session.ControlledObject != null && MyAPIGateway.Session.ControlledObject is IMyCharacter) {
+                _fuelCheckTicks++;
+
+                if (_fuelCheckTicks >= TICKS_UNTIL_FUEL_CHECK) {
+                    _fuelCheckTicks = 0;
+                    _workQueue.Enqueue(new Work(ShowFuelLowWarningIfNeeded));
                 }
             }
 
@@ -229,7 +298,7 @@ namespace Sisk.SmarterSuit {
         /// <param name="oldState">The old movement state.</param>
         /// <param name="newState">The new movement state.</param>
         private void OnMovementStateChanged(IMyCharacter character, MyCharacterMovementEnum oldState, MyCharacterMovementEnum newState) {
-            if (Mod.Static.Settings.DisableAutoDampener == DisableAutoDamenerOption.All && (newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
+            if (Mod.Static.Settings.DisableAutoDampener == DisableAutoDampenerOption.All && (newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
                 _lastDampenerState = character.EnabledDamping;
             }
 
@@ -285,11 +354,31 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        /// </summary>
+        /// <param name="workData"></param>
+        private void ShowFuelLowWarningIfNeeded(Work.Data workData) {
+            using (Log.BeginMethod(nameof(ShowFuelLowWarningIfNeeded))) {
+                var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+                if (character == null) {
+                    Log.Warning("No character found for local player.");
+                    return;
+                }
+
+                var isFuelUnderThreshold = IsFuelUnderThreshold(character, Mod.Static.Settings.FuelThreshold);
+                if (isFuelUnderThreshold && !_wasFuelUnderThresholdBefore) {
+                    ShowFuelLowWarningNotification(character);
+                }
+
+                _wasFuelUnderThresholdBefore = isFuelUnderThreshold;
+            }
+        }
+
+        /// <summary>
         ///     Will enable dampeners when grid is not moving or planetary gravity is detected and no ground is in range.
         /// </summary>
         private void ToggleDampenersIfNeeded(IMyCharacter character, bool isNotMoving, bool hasGravity, bool isGroundInRange, bool lastDampenerState) {
-            if (Mod.Static.Settings.DisableAutoDampener != DisableAutoDamenerOption.Mod) {
-                var dampenersRequired = Mod.Static.Settings.DisableAutoDampener == DisableAutoDamenerOption.All ? lastDampenerState : isNotMoving || hasGravity && !isGroundInRange;
+            if (Mod.Static.Settings.DisableAutoDampener != DisableAutoDampenerOption.Mod) {
+                var dampenersRequired = Mod.Static.Settings.DisableAutoDampener == DisableAutoDampenerOption.All ? lastDampenerState : isNotMoving || hasGravity && !isGroundInRange;
                 if (character.EnabledDamping != dampenersRequired) {
                     character.SwitchDamping();
                 }
@@ -317,7 +406,8 @@ namespace Sisk.SmarterSuit {
 
         /// <summary>
         ///     Will enable jetpack when no gravity is present and no ground is in range.
-        ///     Will enable dampeners when allowed and grid is not moving or planetary gravity is detected and no ground is in range.
+        ///     Will enable dampeners when allowed and grid is not moving or planetary gravity is detected and no ground is in
+        ///     range.
         /// </summary>
         private void ToggleJetpackAndDampenersIfNeeded(Work.Data workData) {
             using (Log.BeginMethod(nameof(ToggleJetpackAndDampenersIfNeeded))) {
