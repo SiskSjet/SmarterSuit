@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="protobuf-net">
+      <HintPath>C:\Spiele\Steam\steamapps\common\SpaceEngineers\Bin64\protobuf-net.dll</HintPath>
+    </Reference>
     <Reference Include="Sandbox.Common">
       <HintPath>C:\Spiele\Steam\steamapps\common\SpaceEngineers\Bin64\Sandbox.Common.dll</HintPath>
     </Reference>
@@ -81,9 +84,6 @@
     <Reference Include="VRage.Math">
       <HintPath>C:\Spiele\Steam\steamapps\common\SpaceEngineers\Bin64\VRage.Math.dll</HintPath>
     </Reference>
-    <Reference Include="VRage.Native">
-      <HintPath>C:\Spiele\Steam\steamapps\common\SpaceEngineers\Bin64\VRage.Native.dll</HintPath>
-    </Reference>
     <Reference Include="VRage.Render">
       <HintPath>C:\Spiele\Steam\steamapps\common\SpaceEngineers\Bin64\VRage.Render.dll</HintPath>
     </Reference>
@@ -99,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChatHandler.cs" />
+    <Compile Include="Extensions\MyStringIdExtensions.cs" />
     <Compile Include="Localization\ModText.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Data\Option.cs" />
@@ -121,10 +122,6 @@
     <ProjectReference Include="..\Utils\CommandHandler\CommandHandler.csproj">
       <Project>{f3734666-0aca-4cdc-b1b1-cd955fb6b4a8}</Project>
       <Name>CommandHandler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Utils\Localization\Localization.csproj">
-      <Project>{2675bec6-9106-4ab8-a2dc-77cd569d9954}</Project>
-      <Name>Localization</Name>
     </ProjectReference>
     <ProjectReference Include="..\Utils\Logging\Logging.csproj">
       <Project>{d8581c43-f65d-49eb-bfe3-75f185371512}</Project>
