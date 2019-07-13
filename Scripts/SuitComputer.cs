@@ -304,10 +304,22 @@ namespace Sisk.SmarterSuit {
 
             switch (oldState) {
                 case MyCharacterMovementEnum.Ladder:
+                case MyCharacterMovementEnum.LadderOut:
                 case MyCharacterMovementEnum.LadderDown:
                 case MyCharacterMovementEnum.LadderUp:
-                    if (newState == MyCharacterMovementEnum.LadderOut) {
-                        // todo: implement ladder logic
+                    switch (newState) {
+                        case MyCharacterMovementEnum.Ladder:
+                        case MyCharacterMovementEnum.LadderOut:
+                        case MyCharacterMovementEnum.LadderDown:
+                        case MyCharacterMovementEnum.LadderUp:
+                            break;
+                        default:
+                            var position = character.GetPosition();
+                            var sphere = character.PositionComp.WorldVolume;
+                            var entities = MyAPIGateway.Entities.GetTopMostEntitiesInSphere(ref sphere).OfType<IMyCubeGrid>().ToList();
+                            var cubeGrid = entities.OrderBy(x => Vector3.Distance(x.GetPosition(), position)).FirstOrDefault();
+                            _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(cubeGrid, leavedLadder: oldState == MyCharacterMovementEnum.LadderOut)));
+                            break;
                     }
 
                     break;
@@ -419,6 +431,7 @@ namespace Sisk.SmarterSuit {
 
                 var lastEntity = data.LastEntity;
                 var allowSwitchingDampeners = data.AllowSwitchingDampeners;
+                var leavedLadder = data.LeavedLadder;
 
                 var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
                 if (character == null) {
@@ -461,10 +474,14 @@ namespace Sisk.SmarterSuit {
                 var isNotMoving = Math.Abs(linearVelocity.Length()) < Mod.Static.Settings.HaltedSpeedTolerance && Math.Abs(angularVelocity.Length()) < Mod.Static.Settings.HaltedSpeedTolerance;
                 var thrustRequired = !isGroundInRange;
                 if (!thrustRequired && !hasGravity) {
-                    character.Physics.SetSpeeds(linearVelocity + character.WorldMatrix.Down * 2, angularVelocity);
-                } else {
-                    character.Physics.SetSpeeds(linearVelocity, angularVelocity);
+                    linearVelocity += character.WorldMatrix.Down * 2;
                 }
+
+                if (leavedLadder) {
+                    linearVelocity += character.WorldMatrix.Forward * 5;
+                }
+
+                character.Physics.SetSpeeds(linearVelocity, angularVelocity);
 
                 if (allowSwitchingDampeners) {
                     ToggleDampenersIfNeeded(character, isNotMoving, hasGravity, isGroundInRange, _lastDampenerState);
