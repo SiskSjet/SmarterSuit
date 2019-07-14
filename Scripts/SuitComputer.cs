@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
+using Sandbox.Definitions;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
 using Sandbox.Game.Entities.Character.Components;
@@ -14,6 +15,7 @@ using VRage.Game;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
+using VRage.Utils;
 using VRageMath;
 
 namespace Sisk.SmarterSuit {
@@ -24,14 +26,19 @@ namespace Sisk.SmarterSuit {
         private const int MAX_SIMULTANEOUS_WORK = 16;
         private const string MEDICAL_ROOM = "MyObjectBuilder_MedicalRoom";
         private const string SURVIVAL_KIT = "MyObjectBuilder_SurvivalKit";
+        private const int TICKS_UNTIL_AUTO_ALIGN = 80;
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 30;
         private readonly IMyPlayer _player;
         private readonly Queue<Work> _workQueue = new Queue<Work>();
+        private int _autoAlignTicks;
         private int _autoHelmetTicks;
         private int _fuelCheckTicks;
         private IMyIdentity _identity;
+        private bool _isAutoAlignRunning;
+        private bool _isFlying;
         private bool _lastDampenerState;
+        private bool _stopAutoAlign;
         private bool _wasFuelUnderThresholdBefore;
 
         /// <summary>
@@ -70,6 +77,56 @@ namespace Sisk.SmarterSuit {
             }
 
             return new SuitComputer(player);
+        }
+
+        /// <summary>
+        ///     Calculates alignment to given gravity.
+        /// </summary>
+        /// <param name="character">The character for which this is calculated.</param>
+        /// <param name="gravity">The gravity vector.</param>
+        /// <param name="up">The up vector.</param>
+        /// <param name="forward">The forward vector.</param>
+        private static void CalculateAlignment(IMyCharacter character, ref Vector3 gravity, ref Vector3 up, ref Vector3 forward) {
+            var invertedNormalizedGravity = -Vector3.Normalize(gravity);
+            var direction = invertedNormalizedGravity;
+
+            if (character.Physics != null) {
+                var supportNormal = character.Physics.SupportNormal;
+                var definition = character.Definition as MyCharacterDefinition;
+                if (definition != null) {
+                    if (definition.RotationToSupport == MyEnumCharacterRotationToSupport.OneAxis) {
+                        var num1 = invertedNormalizedGravity.Dot(ref supportNormal);
+                        if (!MyUtils.IsZero(num1 - 1f) && !MyUtils.IsZero(num1 + 1f)) {
+                            var cross = invertedNormalizedGravity.Cross(supportNormal);
+                            cross.Normalize();
+                            direction = Vector3.Lerp(supportNormal, invertedNormalizedGravity, Math.Abs(cross.Dot(character.WorldMatrix.Forward)));
+                        }
+                    } else if (definition.RotationToSupport == MyEnumCharacterRotationToSupport.Full) {
+                        direction = supportNormal;
+                    }
+                }
+            }
+
+            var dot = Vector3.Dot(up, direction) / (up.Length() * direction.Length());
+            if (float.IsNaN(dot) || float.IsNegativeInfinity(dot) || float.IsPositiveInfinity(dot)) {
+                dot = 1f;
+            }
+
+            dot = MathHelper.Clamp(dot, -1f, 1f);
+            if (MyUtils.IsZero(dot - 1f, 1E-08f)) {
+                return;
+            }
+
+            var angle = !MyUtils.IsZero(dot + 1f, 1E-08f) ? (float) Math.Acos(dot) : 0.1f;
+            angle = Math.Min(Math.Abs(angle), 0.04f) * Math.Sign(angle);
+            var axis = Vector3.Cross(up, direction);
+            if (axis.LengthSquared() <= 0.0) {
+                return;
+            }
+
+            axis = Vector3.Normalize(axis);
+            up = Vector3.TransformNormal(up, Matrix.CreateFromAxisAngle(axis, angle));
+            forward = Vector3.TransformNormal(forward, Matrix.CreateFromAxisAngle(axis, angle));
         }
 
         /// <summary>
@@ -225,6 +282,24 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Resets the AutoAlign timeout when flying.
+        /// </summary>
+        public void ResetAutoAlignTimeout() {
+            using (Log.BeginMethod(nameof(ResetAutoAlignTimeout))) {
+                var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+                if (character == null) {
+                    Log.Warning("No character found for local player.");
+                    return;
+                }
+
+                if (character.CurrentMovementState == MyCharacterMovementEnum.Flying) {
+                    _autoAlignTicks = 0;
+                    _stopAutoAlign = true;
+                }
+            }
+        }
+
+        /// <summary>
         ///     Update <see cref="SuitComputer" />.
         /// </summary>
         public void Update() {
@@ -249,15 +324,66 @@ namespace Sisk.SmarterSuit {
                 }
             }
 
+            if (_isFlying) {
+                _autoAlignTicks++;
+                if (!_isAutoAlignRunning && _autoAlignTicks >= TICKS_UNTIL_AUTO_ALIGN) {
+                    _autoAlignTicks = 0;
+                    _workQueue.Enqueue(new Work(AutoAlign));
+                }
+            } else {
+                _autoAlignTicks = 0;
+                _isAutoAlignRunning = false;
+                _stopAutoAlign = true;
+            }
+
             var startTime = DateTime.UtcNow;
             var amount = _workQueue.Count < MAX_SIMULTANEOUS_WORK ? _workQueue.Count : MAX_SIMULTANEOUS_WORK;
             MyAPIGateway.Parallel.For(0, amount, i => {
                 if (NotOverRuntime(startTime)) {
                     _workQueue.Dequeue()?.DoWork();
                 } else {
-                    Log.Warning($"R: {(DateTime.UtcNow - startTime).TotalMilliseconds:F2} -> Action will be executed in next update.");
+                    Log.Warning($"R: {(DateTime.UtcNow - startTime).TotalMilliseconds:F2} -> {_workQueue.Peek()?.Name} will be executed in next update.");
                 }
             });
+        }
+
+        /// <summary>
+        ///     Auto Align character to gravity.
+        /// </summary>
+        private void AutoAlign(Work.Data obj) {
+            using (Log.BeginMethod(nameof(AutoAlign))) {
+                var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+                if (character == null) {
+                    Log.Warning("No character found for local player.");
+                    return;
+                }
+
+                _isAutoAlignRunning = true;
+
+                var physics = character.Physics;
+                if (physics != null) {
+                    var gravity = physics.Gravity;
+                    if (gravity.Length() > 0) {
+                        gravity.Normalize();
+                        var matrix = character.WorldMatrix;
+                        var up = (Vector3) matrix.Up;
+                        var forward = (Vector3) matrix.Forward;
+
+                        CalculateAlignment(character, ref gravity, ref up, ref forward);
+                        character.SetWorldMatrix(MatrixD.CreateWorld(matrix.Translation, forward, up));
+                    }
+                } else {
+                    Log.Error("No physics found for character.");
+                }
+
+                if (!_stopAutoAlign && _isFlying) {
+                    _workQueue.Enqueue(new Work(AutoAlign));
+                } else {
+                    _isAutoAlignRunning = false;
+                    _stopAutoAlign = false;
+                    _autoAlignTicks = 0;
+                }
+            }
         }
 
         /// <summary>
@@ -302,6 +428,7 @@ namespace Sisk.SmarterSuit {
                 _lastDampenerState = character.EnabledDamping;
             }
 
+            _isFlying = newState == MyCharacterMovementEnum.Flying;
             switch (oldState) {
                 case MyCharacterMovementEnum.Ladder:
                 case MyCharacterMovementEnum.LadderOut:
