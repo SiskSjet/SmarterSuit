@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -28,8 +28,10 @@ namespace Sisk.SmarterSuit {
         private const string SURVIVAL_KIT = "MyObjectBuilder_SurvivalKit";
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 30;
+        private readonly List<DelayedWork> _delayedWorkQueue = new List<DelayedWork>();
         private readonly IMyPlayer _player;
         private readonly Queue<Work> _workQueue = new Queue<Work>();
+        private readonly Queue<Work> _workQueueForUpdate = new Queue<Work>();
         private int _autoAlignTicks;
         private int _autoHelmetTicks;
         private int _fuelCheckTicks;
@@ -285,7 +287,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         public void ResetAutoAlignTimeout() {
             using (Log.BeginMethod(nameof(ResetAutoAlignTimeout))) {
-                var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+                var character = MyAPIGateway.Session.LocalHumanPlayer?.Character;
                 if (character == null) {
                     Log.Warning("No character found for local player.");
                     return;
@@ -305,6 +307,8 @@ namespace Sisk.SmarterSuit {
             if (Mod.Static.Settings == null) {
                 return;
             }
+
+            var startTime = DateTime.UtcNow;
 
             if (MyAPIGateway.Session.ControlledObject != null && MyAPIGateway.Session.ControlledObject is IMyCharacter) {
                 if (Mod.Static.Settings.AlwaysAutoHelmet && MyAPIGateway.Session.SessionSettings.EnableOxygen) {
@@ -339,15 +343,35 @@ namespace Sisk.SmarterSuit {
                 }
             }
 
-            var startTime = DateTime.UtcNow;
-            var amount = _workQueue.Count < MAX_SIMULTANEOUS_WORK ? _workQueue.Count : MAX_SIMULTANEOUS_WORK;
-            MyAPIGateway.Parallel.For(0, amount, i => {
-                if (NotOverRuntime(startTime)) {
-                    _workQueue.Dequeue()?.DoWork();
-                } else {
-                    Log.Warning($"R: {(DateTime.UtcNow - startTime).TotalMilliseconds:F2} -> {_workQueue.Peek()?.Name} will be executed in next update.");
+            int amount;
+            if (_delayedWorkQueue.Any()) {
+                for (var i = 0; i < _delayedWorkQueue.Count; i++) {
+                    var work = _delayedWorkQueue[i];
+                    work.UpdateTicks();
+                    if (work.RunAfterTicks <= 0) {
+                        _workQueueForUpdate.Enqueue(work);
+                        _delayedWorkQueue.RemoveAt(i);
+                    }
                 }
-            });
+            }
+
+            if (_workQueue.Any()) {
+                amount = _workQueueForUpdate.Count + _workQueue.Count < MAX_SIMULTANEOUS_WORK ? _workQueue.Count : MAX_SIMULTANEOUS_WORK - _workQueueForUpdate.Count;
+                for (var i = 0; i < amount; i++) {
+                    _workQueueForUpdate.Enqueue(_workQueue.Dequeue());
+                }
+            }
+
+            if (_workQueueForUpdate.Any()) {
+                amount = _workQueueForUpdate.Count < MAX_SIMULTANEOUS_WORK ? _workQueueForUpdate.Count : MAX_SIMULTANEOUS_WORK - _workQueueForUpdate.Count;
+                MyAPIGateway.Parallel.For(0, amount, i => {
+                    if (NotOverRuntime(startTime)) {
+                        _workQueueForUpdate.Dequeue()?.DoWork();
+                    } else {
+                        Log.Warning($"R: {(DateTime.UtcNow - startTime).TotalMilliseconds:F2} -> {_workQueueForUpdate.Peek()?.Name} will be executed in next update.");
+                    }
+                });
+            }
         }
 
         /// <summary>
@@ -355,7 +379,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void AutoAlign(Work.Data obj) {
             using (Log.BeginMethod(nameof(AutoAlign))) {
-                var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+                var character = MyAPIGateway.Session.LocalHumanPlayer?.Character;
                 if (character == null) {
                     Log.Warning("No character found for local player.");
                     return;
@@ -386,6 +410,28 @@ namespace Sisk.SmarterSuit {
                     _stopAutoAlign = false;
                     _autoAlignTicks = 0;
                 }
+            }
+        }
+
+        private void MoveAndRotate(Work.Data workData) {
+            using (Log.BeginMethod(nameof(MoveAndRotate))) {
+                var data = workData as MoveAnRotateData;
+                if (data == null) {
+                    Log.Warning("Invalid workData.");
+                    return;
+                }
+
+                var character = MyAPIGateway.Session.LocalHumanPlayer?.Character;
+                if (character == null) {
+                    Log.Warning("No character found for local player.");
+                    return;
+                }
+
+                var movementIndicator = data.MoveIndicator;
+                var rotationIndicator = data.RotationIndicator;
+                var rollIndicator = data.RollIndicator;
+
+                character.MoveAndRotate(movementIndicator, rotationIndicator, rollIndicator);
             }
         }
 
@@ -480,7 +526,7 @@ namespace Sisk.SmarterSuit {
 
         private void Respawned(Work.Data workData) {
             using (Log.BeginMethod(nameof(Respawned))) {
-                var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+                var character = MyAPIGateway.Session.LocalHumanPlayer?.Character;
                 if (character == null) {
                     Log.Warning("No character found for local player.");
                     return;
@@ -500,7 +546,7 @@ namespace Sisk.SmarterSuit {
         /// <param name="workData"></param>
         private void ShowFuelLowWarningIfNeeded(Work.Data workData) {
             using (Log.BeginMethod(nameof(ShowFuelLowWarningIfNeeded))) {
-                var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+                var character = MyAPIGateway.Session.LocalHumanPlayer?.Character;
                 if (character == null) {
                     Log.Warning("No character found for local player.");
                     return;
@@ -532,7 +578,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void ToggleHelmetIfNeeded(Work.Data workData) {
             using (Log.BeginMethod(nameof(ToggleHelmetIfNeeded))) {
-                var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+                var character = MyAPIGateway.Session.LocalHumanPlayer?.Character;
                 if (character == null) {
                     Log.Warning("No character found for local player.");
                     return;
@@ -559,15 +605,15 @@ namespace Sisk.SmarterSuit {
                     return;
                 }
 
-                var lastEntity = data.LastEntity;
-                var allowSwitchingDampeners = data.AllowSwitchingDampeners;
-                var leavedLadder = data.LeavedLadder;
-
-                var character = MyAPIGateway.Session.LocalHumanPlayer.Character;
+                var character = MyAPIGateway.Session.LocalHumanPlayer?.Character;
                 if (character == null) {
                     Log.Warning("No character found for local player.");
                     return;
                 }
+
+                var lastEntity = data.LastEntity;
+                var allowSwitchingDampeners = data.AllowSwitchingDampeners;
+                var leavedLadder = data.LeavedLadder;
 
                 var gravity = Vector3D.Zero;
                 var linearVelocity = Vector3D.Zero;
@@ -608,7 +654,11 @@ namespace Sisk.SmarterSuit {
                 }
 
                 if (leavedLadder) {
-                    linearVelocity += character.WorldMatrix.Forward * 5;
+                    var moveAnRotateData = new MoveAnRotateData(new Vector3(0, 0, -1), Vector2.Zero, 0);
+                    MoveAndRotate(moveAnRotateData);
+                    for (var i = 0; i < 10; i++) {
+                        _delayedWorkQueue.Add(new DelayedWork(MoveAndRotate, 1 + i, moveAnRotateData));
+                    }
                 }
 
                 character.Physics.SetSpeeds(linearVelocity, angularVelocity);
