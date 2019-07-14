@@ -10,6 +10,7 @@ namespace Sisk.SmarterSuit.Settings {
     public class ModSettings {
         public const int VERSION = 1;
         private const bool ADDITIONAL_FUEL_WARNING = false;
+        private const bool ALIGN_TO_GRAVITY = true;
         private const bool AUTO_HELMET_EVERYWHERE = true;
         private const int DELAY_AFTER_MANUAL_HELMET = 5000 / 16;
         private const DisableAutoDampenerOption DISABLE_AUTO_DAMPENER = DisableAutoDampenerOption.Disable;
@@ -20,6 +21,11 @@ namespace Sisk.SmarterSuit.Settings {
         [DefaultValue(ADDITIONAL_FUEL_WARNING)]
         [XmlElement(Order = 3)]
         public bool AdditionalFuelWarning { get; set; } = ADDITIONAL_FUEL_WARNING;
+
+        [ProtoMember(8)]
+        [DefaultValue(ALIGN_TO_GRAVITY)]
+        [XmlElement(Order = 8)]
+        public bool AlignToGravity { get; set; } = ALIGN_TO_GRAVITY;
 
         [ProtoMember(2)]
         [DefaultValue(AUTO_HELMET_EVERYWHERE)]

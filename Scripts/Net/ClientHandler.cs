@@ -37,6 +37,7 @@ namespace Sisk.SmarterSuit.Net {
             switch (message.Option) {
                 case Option.AlwaysAutoHelmet:
                 case Option.AdditionalFuelWarning:
+                case Option.AlignToGravity:
                     value = MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value);
                     break;
                 case Option.FuelThreshold:

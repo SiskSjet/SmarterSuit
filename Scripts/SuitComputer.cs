@@ -307,33 +307,37 @@ namespace Sisk.SmarterSuit {
                 return;
             }
 
-            if (Mod.Static.Settings.AlwaysAutoHelmet && MyAPIGateway.Session.SessionSettings.EnableOxygen) {
-                _autoHelmetTicks++;
-                if (_autoHelmetTicks >= TICKS_UNTIL_OXYGEN_CHECK - 1) {
-                    _autoHelmetTicks = 0;
-                    _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
+            if (MyAPIGateway.Session.ControlledObject != null && MyAPIGateway.Session.ControlledObject is IMyCharacter) {
+                if (Mod.Static.Settings.AlwaysAutoHelmet && MyAPIGateway.Session.SessionSettings.EnableOxygen) {
+                    _autoHelmetTicks++;
+                    if (_autoHelmetTicks >= TICKS_UNTIL_OXYGEN_CHECK - 1) {
+                        _autoHelmetTicks = 0;
+                        _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
+                    }
                 }
-            }
 
-            if (Mod.Static.Settings.AdditionalFuelWarning && MyAPIGateway.Session.ControlledObject != null && MyAPIGateway.Session.ControlledObject is IMyCharacter) {
-                _fuelCheckTicks++;
+                if (Mod.Static.Settings.AdditionalFuelWarning) {
+                    _fuelCheckTicks++;
 
-                if (_fuelCheckTicks >= TICKS_UNTIL_FUEL_CHECK) {
-                    _fuelCheckTicks = 0;
-                    _workQueue.Enqueue(new Work(ShowFuelLowWarningIfNeeded));
+                    if (_fuelCheckTicks >= TICKS_UNTIL_FUEL_CHECK) {
+                        _fuelCheckTicks = 0;
+                        _workQueue.Enqueue(new Work(ShowFuelLowWarningIfNeeded));
+                    }
                 }
-            }
 
-            if (_isFlying) {
-                _autoAlignTicks++;
-                if (!_isAutoAlignRunning && _autoAlignTicks >= TICKS_UNTIL_AUTO_ALIGN) {
-                    _autoAlignTicks = 0;
-                    _workQueue.Enqueue(new Work(AutoAlign));
+                if (Mod.Static.Settings.AlignToGravity) {
+                    if (_isFlying) {
+                        _autoAlignTicks++;
+                        if (!_isAutoAlignRunning && _autoAlignTicks >= TICKS_UNTIL_AUTO_ALIGN) {
+                            _autoAlignTicks = 0;
+                            _workQueue.Enqueue(new Work(AutoAlign));
+                        }
+                    } else {
+                        _autoAlignTicks = 0;
+                        _isAutoAlignRunning = false;
+                        _stopAutoAlign = true;
+                    }
                 }
-            } else {
-                _autoAlignTicks = 0;
-                _isAutoAlignRunning = false;
-                _stopAutoAlign = true;
             }
 
             var startTime = DateTime.UtcNow;

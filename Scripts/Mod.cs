@@ -144,39 +144,40 @@ namespace Sisk.SmarterSuit {
                 _suitComputer.DelayAutoHelmet();
             }
 
-            if (!input.IsGameControlPressed(MyControlsSpace.LOOKAROUND) && (
-                    input.GetMouseX() != 0 ||
-                    input.GetMouseY() != 0 ||
-                    input.IsGameControlPressed(MyControlsSpace.ROTATION_DOWN) ||
-                    input.IsGameControlPressed(MyControlsSpace.ROTATION_LEFT) ||
-                    input.IsGameControlPressed(MyControlsSpace.ROTATION_RIGHT) ||
-                    input.IsGameControlPressed(MyControlsSpace.ROTATION_UP) ||
-                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXpos) ||
-                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXneg) ||
-                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYpos) ||
-                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYneg) ||
-                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZpos) ||
-                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZneg))
-            ) {
-                _suitComputer.ResetAutoAlignTimeout();
-            }
+            if (Settings.AlignToGravity) {
+                if (!input.IsGameControlPressed(MyControlsSpace.LOOKAROUND) && (
+                        input.GetMouseX() != 0 ||
+                        input.GetMouseY() != 0 ||
+                        input.IsGameControlPressed(MyControlsSpace.ROTATION_DOWN) ||
+                        input.IsGameControlPressed(MyControlsSpace.ROTATION_LEFT) ||
+                        input.IsGameControlPressed(MyControlsSpace.ROTATION_RIGHT) ||
+                        input.IsGameControlPressed(MyControlsSpace.ROTATION_UP) ||
+                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXpos) ||
+                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXneg) ||
+                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYpos) ||
+                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYneg) ||
+                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZpos) ||
+                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZneg))) {
+                    _suitComputer.ResetAutoAlignTimeout();
+                }
 
-            if (
-                input.IsGameControlPressed(MyControlsSpace.STRAFE_LEFT) ||
-                input.IsGameControlPressed(MyControlsSpace.STRAFE_RIGHT) ||
-                input.IsGameControlPressed(MyControlsSpace.FORWARD) ||
-                input.IsGameControlPressed(MyControlsSpace.BACKWARD) ||
-                input.IsGameControlPressed(MyControlsSpace.ROLL_LEFT) ||
-                input.IsGameControlPressed(MyControlsSpace.ROLL_LEFT) ||
-                input.IsGameControlPressed(MyControlsSpace.JUMP) ||
-                input.IsGameControlPressed(MyControlsSpace.CROUCH) ||
-                input.IsJoystickAxisPressed(MyJoystickAxesEnum.Xpos) ||
-                input.IsJoystickAxisPressed(MyJoystickAxesEnum.Xneg) ||
-                input.IsJoystickAxisPressed(MyJoystickAxesEnum.Ypos) ||
-                input.IsJoystickAxisPressed(MyJoystickAxesEnum.Yneg) ||
-                input.IsJoystickAxisPressed(MyJoystickAxesEnum.Zpos) ||
-                input.IsJoystickAxisPressed(MyJoystickAxesEnum.Zneg)) {
-                _suitComputer.ResetAutoAlignTimeout();
+                if (
+                    input.IsGameControlPressed(MyControlsSpace.STRAFE_LEFT) ||
+                    input.IsGameControlPressed(MyControlsSpace.STRAFE_RIGHT) ||
+                    input.IsGameControlPressed(MyControlsSpace.FORWARD) ||
+                    input.IsGameControlPressed(MyControlsSpace.BACKWARD) ||
+                    input.IsGameControlPressed(MyControlsSpace.ROLL_LEFT) ||
+                    input.IsGameControlPressed(MyControlsSpace.ROLL_LEFT) ||
+                    input.IsGameControlPressed(MyControlsSpace.JUMP) ||
+                    input.IsGameControlPressed(MyControlsSpace.CROUCH) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.Xpos) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.Xneg) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.Ypos) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.Yneg) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.Zpos) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.Zneg)) {
+                    _suitComputer.ResetAutoAlignTimeout();
+                }
             }
         }
 
@@ -270,6 +271,9 @@ namespace Sisk.SmarterSuit {
             switch (option) {
                 case Option.AlwaysAutoHelmet:
                     Settings.AlwaysAutoHelmet = (bool) (object) value;
+                    break;
+                case Option.AlignToGravity:
+                    Settings.AlignToGravity = (bool) (object) value;
                     break;
                 case Option.AdditionalFuelWarning:
                     Settings.AdditionalFuelWarning = (bool) (object) value;

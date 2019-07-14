@@ -5,6 +5,7 @@
         FuelThreshold,
         DisableAutoDampener,
         HaltedSpeedTolerance,
-        DelayAfterManualHelmet
+        DelayAfterManualHelmet,
+        AlignToGravity
     }
 }
