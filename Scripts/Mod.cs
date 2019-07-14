@@ -213,6 +213,9 @@ namespace Sisk.SmarterSuit {
             MyAPIGateway.Session.OnSessionReady += OnSessionReady;
         }
 
+        /// <summary>
+        ///     Used to update <see cref="SuitComputer" />.
+        /// </summary>
         public override void UpdateBeforeSimulation() {
             if (_suitComputer == null) {
                 return;
