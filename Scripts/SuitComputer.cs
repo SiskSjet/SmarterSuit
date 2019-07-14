@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -26,7 +26,6 @@ namespace Sisk.SmarterSuit {
         private const int MAX_SIMULTANEOUS_WORK = 16;
         private const string MEDICAL_ROOM = "MyObjectBuilder_MedicalRoom";
         private const string SURVIVAL_KIT = "MyObjectBuilder_SurvivalKit";
-        private const int TICKS_UNTIL_AUTO_ALIGN = 80;
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 30;
         private readonly IMyPlayer _player;
@@ -328,7 +327,7 @@ namespace Sisk.SmarterSuit {
                 if (Mod.Static.Settings.AlignToGravity) {
                     if (_isFlying) {
                         _autoAlignTicks++;
-                        if (!_isAutoAlignRunning && _autoAlignTicks >= TICKS_UNTIL_AUTO_ALIGN) {
+                        if (!_isAutoAlignRunning && _autoAlignTicks >= Mod.Static.Settings.AlignToGravityDelay) {
                             _autoAlignTicks = 0;
                             _workQueue.Enqueue(new Work(AutoAlign));
                         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -23,7 +23,8 @@ namespace Sisk.SmarterSuit {
             { Acronym(nameof(Option.DisableAutoDampener)), Option.DisableAutoDampener },
             { Acronym(nameof(Option.HaltedSpeedTolerance)), Option.HaltedSpeedTolerance },
             { Acronym(nameof(Option.DelayAfterManualHelmet)), Option.DelayAfterManualHelmet },
-            { Acronym(nameof(Option.AlignToGravity)), Option.AlignToGravity }
+            { Acronym(nameof(Option.AlignToGravity)), Option.AlignToGravity },
+            { Acronym(nameof(Option.AlignToGravityDelay)), Option.AlignToGravityDelay },
         };
 
         private readonly CommandHandler _commandHandler;
@@ -35,7 +36,8 @@ namespace Sisk.SmarterSuit {
             { Option.DisableAutoDampener, typeof(byte) },
             { Option.HaltedSpeedTolerance, typeof(float) },
             { Option.DelayAfterManualHelmet, typeof(int) },
-            { Option.AlignToGravity, typeof(bool) }
+            { Option.AlignToGravity, typeof(bool) },
+            { Option.AlignToGravityDelay, typeof(int) },
         };
 
         public ChatHandler(ILogger log, Network network, NetworkHandlerBase networkHandler) {

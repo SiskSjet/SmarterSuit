@@ -1,4 +1,4 @@
-﻿using Sandbox.ModAPI;
+using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Net.Messages;
 using Sisk.Utils.Logging;
@@ -44,6 +44,7 @@ namespace Sisk.SmarterSuit.Net {
                 case Option.HaltedSpeedTolerance:
                     value = MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value);
                     break;
+                case Option.AlignToGravityDelay:
                 case Option.DelayAfterManualHelmet:
                     value = MyAPIGateway.Utilities.SerializeFromBinary<int>(message.Value);
                     break;

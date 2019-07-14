@@ -1,4 +1,4 @@
-﻿namespace Sisk.SmarterSuit.Data {
+namespace Sisk.SmarterSuit.Data {
     public enum Option : byte {
         AlwaysAutoHelmet,
         AdditionalFuelWarning,
@@ -6,6 +6,7 @@
         DisableAutoDampener,
         HaltedSpeedTolerance,
         DelayAfterManualHelmet,
-        AlignToGravity
+        AlignToGravity,
+        AlignToGravityDelay,
     }
 }

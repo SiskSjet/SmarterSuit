@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Xml.Serialization;
 using ProtoBuf;
 using Sisk.SmarterSuit.Data;
@@ -11,6 +11,7 @@ namespace Sisk.SmarterSuit.Settings {
         public const int VERSION = 1;
         private const bool ADDITIONAL_FUEL_WARNING = false;
         private const bool ALIGN_TO_GRAVITY = true;
+        private const int ALIGN_TO_GRAVITY_DELAY = 5000 / 16;
         private const bool AUTO_HELMET_EVERYWHERE = true;
         private const int DELAY_AFTER_MANUAL_HELMET = 5000 / 16;
         private const DisableAutoDampenerOption DISABLE_AUTO_DAMPENER = DisableAutoDampenerOption.Disable;
@@ -26,6 +27,11 @@ namespace Sisk.SmarterSuit.Settings {
         [DefaultValue(ALIGN_TO_GRAVITY)]
         [XmlElement(Order = 8)]
         public bool AlignToGravity { get; set; } = ALIGN_TO_GRAVITY;
+
+        [ProtoMember(9)]
+        [DefaultValue(ALIGN_TO_GRAVITY_DELAY)]
+        [XmlElement(Order = 9)]
+        public int AlignToGravityDelay { get; set; } = ALIGN_TO_GRAVITY_DELAY;
 
         [ProtoMember(2)]
         [DefaultValue(AUTO_HELMET_EVERYWHERE)]

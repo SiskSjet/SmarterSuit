@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -277,6 +277,9 @@ namespace Sisk.SmarterSuit {
                     break;
                 case Option.AlignToGravity:
                     Settings.AlignToGravity = (bool) (object) value;
+                    break;
+                case Option.AlignToGravityDelay:
+                    Settings.AlignToGravityDelay = (int) (object) value;
                     break;
                 case Option.AdditionalFuelWarning:
                     Settings.AdditionalFuelWarning = (bool) (object) value;
