@@ -58,6 +58,7 @@ namespace Sisk.SmarterSuit {
             var character = player.Character;
             if (character != null) {
                 RegisterEvents(character);
+                _isFlying = character.CurrentMovementState == MyCharacterMovementEnum.Flying;
             }
         }
 
@@ -233,7 +234,7 @@ namespace Sisk.SmarterSuit {
             MyAPIGateway.Physics.CastRay(from, to, results);
             return results.Any();
         }
-        
+
         /// <summary>
         ///     Checks if the ground is close by.
         /// </summary>
@@ -335,7 +336,7 @@ namespace Sisk.SmarterSuit {
                             _autoAlignTicks = 0;
                             _workQueue.Enqueue(new Work(AutoAlign));
                         }
-                    } else {
+                    } else if (_isAutoAlignRunning) {
                         _autoAlignTicks = 0;
                         _isAutoAlignRunning = false;
                         _stopAutoAlign = true;
