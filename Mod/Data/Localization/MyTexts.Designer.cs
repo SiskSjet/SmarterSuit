@@ -115,6 +115,15 @@ namespace Mod.Data.Localization {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} can only be set in multiplayer. ähnelt.
+        /// </summary>
+        internal static string Error_SS_CanOnlyBeSetInMultiplayer {
+            get {
+                return ResourceManager.GetString("Error_SS_CanOnlyBeSetInMultiplayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Could not convert &apos;{0}&apos; to {1}. ähnelt.
         /// </summary>
         internal static string Error_SS_Convert {

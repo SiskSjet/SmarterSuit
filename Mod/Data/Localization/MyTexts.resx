@@ -133,4 +133,7 @@
   <data name="Error_SS_SetOption" xml:space="preserve">
     <value>Failed to set {0} to {1}.</value>
   </data>
+  <data name="Error_SS_CanOnlyBeSetInMultiplayer" xml:space="preserve">
+    <value>{0} can only be set in multiplayer.</value>
+  </data>
 </root>

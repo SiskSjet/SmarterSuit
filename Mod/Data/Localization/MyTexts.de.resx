@@ -153,4 +153,7 @@
   <data name="Error_SS_SetOption" xml:space="preserve">
     <value>Fehler beim Festlegen von {0} auf {1}.</value>
   </data>
+  <data name="Error_SS_CanOnlyBeSetInMultiplayer" xml:space="preserve">
+    <value>{0} kann nur im Mehrspielermodus festgelegt werden</value>
+  </data>
 </root>

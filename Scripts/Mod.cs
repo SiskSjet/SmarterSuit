@@ -107,6 +107,9 @@ namespace Sisk.SmarterSuit {
                 case Result.Success:
                     MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Message_SS_SetOptionSuccess.GetString(option, value));
                     break;
+                case Result.CanOnlyBeSetInMultiplayer:
+                    MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Error_SS_CanOnlyBeSetInMultiplayer.GetString(option));
+                    break;
             }
         }
 
