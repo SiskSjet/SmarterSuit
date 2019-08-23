@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Net.Messages;
@@ -44,17 +44,19 @@ namespace Sisk.SmarterSuit.Net {
                 switch (message.Option) {
                     case Option.AlwaysAutoHelmet:
                     case Option.AdditionalFuelWarning:
+                    case Option.AlignToGravity:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value));
                         break;
                     case Option.FuelThreshold:
                     case Option.HaltedSpeedTolerance:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                         break;
+                    case Option.AlignToGravityDelay:
                     case Option.DelayAfterManualHelmet:
                         SyncOption(Option.DelayAfterManualHelmet, MyAPIGateway.Utilities.SerializeFromBinary<int>(message.Value));
                         break;
                     case Option.DisableAutoDampener:
-                        SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDamenerOption>(message.Value));
+                        SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDampenerOption>(message.Value));
                         break;
                     default:
                         using (Log.BeginMethod(nameof(OnSetOptionMessage))) {
