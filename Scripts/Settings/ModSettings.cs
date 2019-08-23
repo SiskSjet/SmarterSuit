@@ -10,7 +10,7 @@ namespace Sisk.SmarterSuit.Settings {
     public class ModSettings {
         public const int VERSION = 1;
         private const bool ADDITIONAL_FUEL_WARNING = false;
-        private const bool ALIGN_TO_GRAVITY = true;
+        private const bool ALIGN_TO_GRAVITY = false;
         private const int ALIGN_TO_GRAVITY_DELAY = 5000 / 16;
         private const bool AUTO_HELMET_EVERYWHERE = true;
         private const int DELAY_AFTER_MANUAL_HELMET = 5000 / 16;

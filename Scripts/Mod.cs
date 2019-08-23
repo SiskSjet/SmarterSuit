@@ -170,7 +170,7 @@ namespace Sisk.SmarterSuit {
                     input.IsGameControlPressed(MyControlsSpace.FORWARD) ||
                     input.IsGameControlPressed(MyControlsSpace.BACKWARD) ||
                     input.IsGameControlPressed(MyControlsSpace.ROLL_LEFT) ||
-                    input.IsGameControlPressed(MyControlsSpace.ROLL_LEFT) ||
+                    input.IsGameControlPressed(MyControlsSpace.ROLL_RIGHT) ||
                     input.IsGameControlPressed(MyControlsSpace.JUMP) ||
                     input.IsGameControlPressed(MyControlsSpace.CROUCH) ||
                     input.IsJoystickAxisPressed(MyJoystickAxesEnum.Xpos) ||
