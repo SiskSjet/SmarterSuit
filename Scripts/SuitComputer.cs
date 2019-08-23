@@ -218,7 +218,7 @@ namespace Sisk.SmarterSuit {
             var results = new List<IHitInfo>();
             var position = character.WorldAABB.Center;
             var matrix = character.WorldMatrix;
-            var from = position;
+            var from = Mod.Static.Network == null ? position : position + matrix.Forward * .5;
             var to = from + matrix.Down * 2;
 
             if (gravity.Length() > 0) {
@@ -233,7 +233,7 @@ namespace Sisk.SmarterSuit {
             MyAPIGateway.Physics.CastRay(from, to, results);
             return results.Any();
         }
-
+        
         /// <summary>
         ///     Checks if the ground is close by.
         /// </summary>
@@ -447,7 +447,7 @@ namespace Sisk.SmarterSuit {
             if (oldCharacter != null) {
                 oldCharacter.MovementStateChanged -= OnMovementStateChanged;
             }
-            
+
             newCharacter.MovementStateChanged += OnMovementStateChanged;
 
             if (isRespawn) {
