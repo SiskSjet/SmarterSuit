@@ -32,7 +32,7 @@ namespace Sisk.SmarterSuit {
         private const string SETTINGS_FILE = "settings.xml";
 
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
-        private static readonly MyStringHash LowPressure = MyStringHash.Get("LowPressure");
+        private static readonly MyStringHash LowPressure = MyStringHash.GetOrCompute("LowPressure");
         private static readonly MyDefinitionId OxygenId = new MyDefinitionId(typeof(MyObjectBuilder_GasProperties), "Oxygen");
         private ChatHandler _chatHandler;
         private NetworkHandlerBase _networkHandler;
