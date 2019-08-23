@@ -444,7 +444,10 @@ namespace Sisk.SmarterSuit {
         private void OnCharacterChanged(IMyCharacter oldCharacter, IMyCharacter newCharacter) {
             var isRespawn = oldCharacter != newCharacter;
 
-            oldCharacter.MovementStateChanged -= OnMovementStateChanged;
+            if (oldCharacter != null) {
+                oldCharacter.MovementStateChanged -= OnMovementStateChanged;
+            }
+            
             newCharacter.MovementStateChanged += OnMovementStateChanged;
 
             if (isRespawn) {
