@@ -319,8 +319,10 @@ namespace Sisk.SmarterSuit {
         private void InitializeLogging() {
             Log = Logger.ForScope<Mod>();
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
-                if (MyAPIGateway.Multiplayer.IsServer || IsDevVersion) {
+                if (MyAPIGateway.Multiplayer.IsServer) {
                     Log.Register(new WorldStorageHandler(LogFile, LogFormatter, IsDevVersion ? LogEventLevel.All : DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
+                } else {
+                    Log.Register(new GlobalStorageHandler(LogFile, LogFormatter, IsDevVersion ? LogEventLevel.All : DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
                 }
             } else {
                 Log.Register(new WorldStorageHandler(LogFile, LogFormatter, IsDevVersion ? LogEventLevel.All : DEFAULT_LOG_EVENT_LEVEL, IsDevVersion ? 0 : 500));
