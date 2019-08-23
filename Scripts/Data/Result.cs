@@ -2,6 +2,7 @@
     public enum Result {
         NoPermission,
         Error,
-        Success
+        Success,
+        CanOnlyBeSetInMultiplayer
     }
 }
