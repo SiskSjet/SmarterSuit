@@ -1,5 +1,5 @@
 ﻿namespace Sisk.SmarterSuit.Data {
-    public enum DisableAutoDamenerOption : byte {
+    public enum DisableAutoDampenerOption : byte {
         Disable,
         Mod,
         All

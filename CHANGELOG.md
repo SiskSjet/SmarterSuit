@@ -1,3 +1,27 @@
+# [1.9.0](https://github.com/SiskSjet/SmartSuit/compare/v1.3.6...v1.9.0) (2019-08-23)
+
+
+### Bug Fixes
+
+* fix a possible NRE when character is first time changed ([d3e3426](https://github.com/SiskSjet/SmartSuit/commit/d3e3426))
+* fix an issue where this mod would not load the first time the world is loaded ([4a726e9](https://github.com/SiskSjet/SmartSuit/commit/4a726e9))
+* fix an issue which wouldn't enable magboot when ground is found when leaving a ladder in multiplayer ([7e8d952](https://github.com/SiskSjet/SmartSuit/commit/7e8d952))
+* fix some auto align issues and disabled it by default ([3ff4bc8](https://github.com/SiskSjet/SmartSuit/commit/3ff4bc8))
+* fix wrong log file path for clients in multiplayer ([0ad8125](https://github.com/SiskSjet/SmartSuit/commit/0ad8125))
+
+
+### Features
+
+* bump character to ground when in range and start code rewrite ([e467224](https://github.com/SiskSjet/SmartSuit/commit/e467224))
+* implement auto align to gravity ([1a1b2b6](https://github.com/SiskSjet/SmartSuit/commit/1a1b2b6)), closes [#4](https://github.com/SiskSjet/SmartSuit/issues/4)
+* implement ladder support. ([a910bc6](https://github.com/SiskSjet/SmartSuit/commit/a910bc6)), closes [#5](https://github.com/SiskSjet/SmartSuit/issues/5)
+* implement option to disable align to gravity ([742d54a](https://github.com/SiskSjet/SmartSuit/commit/742d54a))
+* implement option to set the align to gravity delay ([dfd2e7d](https://github.com/SiskSjet/SmartSuit/commit/dfd2e7d))
+* move a step forward after climbing to the top of a ladder ([0b23e99](https://github.com/SiskSjet/SmartSuit/commit/0b23e99))
+* update localization code ([953209a](https://github.com/SiskSjet/SmartSuit/commit/953209a))
+
+
+
 # [1.3.6](https://github.com/SiskSjet/SmartSuit/compare/v1.3.5...v1.3.6) (2019-03-10)
 
 
