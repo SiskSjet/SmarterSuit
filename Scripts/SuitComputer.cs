@@ -365,13 +365,13 @@ namespace Sisk.SmarterSuit {
 
             if (_workQueueForUpdate.Any()) {
                 amount = _workQueueForUpdate.Count < MAX_SIMULTANEOUS_WORK ? _workQueueForUpdate.Count : MAX_SIMULTANEOUS_WORK - _workQueueForUpdate.Count;
-                MyAPIGateway.Parallel.For(0, amount, i => {
+                for (var i = 0; i < amount; i++) {
                     if (NotOverRuntime(startTime)) {
                         _workQueueForUpdate.Dequeue()?.DoWork();
                     } else {
                         Log.Warning($"R: {(DateTime.UtcNow - startTime).TotalMilliseconds:F2} -> {_workQueueForUpdate.Peek()?.Name} will be executed in next update.");
                     }
-                });
+                }
             }
         }
 
