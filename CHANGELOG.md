@@ -1,3 +1,12 @@
+# [1.9.1](https://github.com/SiskSjet/SmartSuit/compare/v1.9.0...v1.9.1) (2019-11-09)
+
+
+### Bug Fixes
+
+* fix Smarter Suit is accessing physics from parallel threads warnings ([4b0f7fa](https://github.com/SiskSjet/SmartSuit/commit/4b0f7fab37caa9d00e09bb7342161b412bf3a99d))
+
+
+
 # [1.9.0](https://github.com/SiskSjet/SmartSuit/compare/v1.3.6...v1.9.0) (2019-08-23)
 
 
