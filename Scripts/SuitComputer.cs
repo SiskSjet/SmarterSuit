@@ -505,7 +505,7 @@ namespace Sisk.SmarterSuit {
                     break;
                 case MyCharacterMovementEnum.Sitting:
                     _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
-                    if (!Mod.Static.RemoveAutomaticJetpackActivation) {
+                    if (!Mod.Static.RemoveAutomaticJetpackActivationModAvailable) {
                         var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
                         if (cockpit == null) {
                             return;
@@ -540,7 +540,7 @@ namespace Sisk.SmarterSuit {
                 if (respawnLocation != null) {
                     var lastEntity = respawnLocation.CubeGrid;
                     _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
-                    if (!Mod.Static.RemoveAutomaticJetpackActivation) {
+                    if (!Mod.Static.RemoveAutomaticJetpackActivationModAvailable) {
                         _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(lastEntity, true)));
                     }
                 }

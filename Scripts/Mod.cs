@@ -73,7 +73,7 @@ namespace Sisk.SmarterSuit {
         /// <summary>
         ///     Indicates if the 'Remove all automatic jetpack activation' is available.
         /// </summary>
-        public bool RemoveAutomaticJetpackActivation { get; set; }
+        public bool RemoveAutomaticJetpackActivationModAvailable { get; set; }
 
         /// <summary>
         ///     The Mod Settings.
@@ -433,7 +433,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void OnSessionReady() {
             MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
-            RemoveAutomaticJetpackActivation = MyAPIGateway.Session.Mods.Any(x => x.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID);
+            RemoveAutomaticJetpackActivationModAvailable = MyAPIGateway.Session.Mods.Any(x => x.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID);
 
             _suitComputer = SuitComputer.Create();
             if (_suitComputer != null) {
