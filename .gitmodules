@@ -1,3 +1,6 @@
 [submodule "Utils"]
 	path = Utils
 	url = https://github.com/SiskSjet/SE_Mod_Utils
+[submodule "SE-Water"]
+	path = SE-Water
+	url = https://github.com/jakarianstudios/SE-Water
