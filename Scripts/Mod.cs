@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Jakaria;
 using Sandbox.Game;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
@@ -30,6 +31,7 @@ namespace Sisk.SmarterSuit {
         private const ushort NETWORK_ID = 51501;
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const string SETTINGS_FILE = "settings.xml";
+        private const ulong WATER_MOD_ID = 2200451495;
 
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
         private static readonly MyStringHash LowPressure = MyStringHash.GetOrCompute("LowPressure");
@@ -84,6 +86,16 @@ namespace Sisk.SmarterSuit {
         ///     The static instance.
         /// </summary>
         public static Mod Static { get; private set; }
+
+        /// <summary>
+        ///     The water mod api.
+        /// </summary>
+        public WaterModAPI WaterModAPI { get; private set; }
+
+        /// <summary>
+        ///     Indicates if 'Water Mod' is Available.
+        /// </summary>
+        public bool WaterModAvailable { get; set; }
 
         /// <summary>
         ///     Shows a result message in chat window.
@@ -149,18 +161,18 @@ namespace Sisk.SmarterSuit {
 
             if (Settings.AlignToGravity) {
                 if (!input.IsGameControlPressed(MyControlsSpace.LOOKAROUND) && (
-                        input.GetMouseX() != 0 ||
-                        input.GetMouseY() != 0 ||
-                        input.IsGameControlPressed(MyControlsSpace.ROTATION_DOWN) ||
-                        input.IsGameControlPressed(MyControlsSpace.ROTATION_LEFT) ||
-                        input.IsGameControlPressed(MyControlsSpace.ROTATION_RIGHT) ||
-                        input.IsGameControlPressed(MyControlsSpace.ROTATION_UP) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXpos) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXneg) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYpos) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYneg) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZpos) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZneg))) {
+                    input.GetMouseX() != 0 ||
+                    input.GetMouseY() != 0 ||
+                    input.IsGameControlPressed(MyControlsSpace.ROTATION_DOWN) ||
+                    input.IsGameControlPressed(MyControlsSpace.ROTATION_LEFT) ||
+                    input.IsGameControlPressed(MyControlsSpace.ROTATION_RIGHT) ||
+                    input.IsGameControlPressed(MyControlsSpace.ROTATION_UP) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXpos) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXneg) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYpos) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYneg) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZpos) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZneg))) {
                     _suitComputer.ResetAutoAlignTimeout();
                 }
 
@@ -190,6 +202,11 @@ namespace Sisk.SmarterSuit {
         public override void LoadData() {
             InitializeLogging();
             LoadLocalization();
+            CheckSupportedMods();
+            if (WaterModAvailable) {
+                RegisterWaterModApi();
+            }
+
             MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
 
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
@@ -217,6 +234,21 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Used to register <see cref="SuitComputer" /> when in some rare cases the player or player identity was not set in
+        ///     <see cref="OnSessionReady" />.
+        /// </summary>
+        public override void UpdateAfterSimulation() {
+            if (_suitComputer != null) {
+                return;
+            }
+
+            _suitComputer = SuitComputer.Create();
+            if (_suitComputer != null) {
+                SetUpdateOrder(MyUpdateOrder.BeforeSimulation);
+            }
+        }
+
+        /// <summary>
         ///     Used to update <see cref="SuitComputer" />.
         /// </summary>
         public override void UpdateBeforeSimulation() {
@@ -233,6 +265,10 @@ namespace Sisk.SmarterSuit {
 
             MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
             MyAPIGateway.Gui.GuiControlRemoved -= OnGuiControlRemoved;
+
+            if (WaterModAvailable) {
+                WaterModAPI?.Unregister();
+            }
 
             if (_chatHandler != null) {
                 _chatHandler.Close();
@@ -310,6 +346,28 @@ namespace Sisk.SmarterSuit {
             if (Network == null || Network.IsServer) {
                 ShowResultMessage(option, value, Result.Success);
                 SaveSettings();
+            }
+        }
+
+        /// <summary>
+        ///     Check supported mods available.
+        /// </summary>
+        private void CheckSupportedMods() {
+            using (Log.BeginMethod(nameof(CheckSupportedMods))) {
+                foreach (var mod in MyAPIGateway.Session.Mods) {
+                    if (mod.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID || mod.PublishedFileId == WATER_MOD_ID) {
+                        Log.Info($"Activate mod support for '{mod.FriendlyName}'");
+
+                        switch (mod.PublishedFileId) {
+                            case REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID:
+                                RemoveAutomaticJetpackActivationModAvailable = true;
+                                break;
+                            case WATER_MOD_ID:
+                                WaterModAvailable = true;
+                                break;
+                        }
+                    }
+                }
             }
         }
 
@@ -433,11 +491,18 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void OnSessionReady() {
             MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
-            RemoveAutomaticJetpackActivationModAvailable = MyAPIGateway.Session.Mods.Any(x => x.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID);
 
             _suitComputer = SuitComputer.Create();
-            if (_suitComputer != null) {
-                SetUpdateOrder(MyUpdateOrder.BeforeSimulation);
+            SetUpdateOrder(_suitComputer != null ? MyUpdateOrder.BeforeSimulation : MyUpdateOrder.AfterSimulation);
+        }
+
+        /// <summary>
+        ///     Register water mod api.
+        /// </summary>
+        private void RegisterWaterModApi() {
+            using (Log.BeginMethod(nameof(RegisterWaterModApi))) {
+                WaterModAPI = new WaterModAPI();
+                WaterModAPI.Register(NAME);
             }
         }
 
