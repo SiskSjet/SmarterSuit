@@ -540,7 +540,9 @@ namespace Sisk.SmarterSuit {
                 if (respawnLocation != null) {
                     var lastEntity = respawnLocation.CubeGrid;
                     _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
-                    _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(lastEntity, true)));
+                    if (!Mod.Static.RemoveAutomaticJetpackActivation) {
+                        _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(lastEntity, true)));
+                    }
                 }
             }
         }
