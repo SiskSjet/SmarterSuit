@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -73,8 +73,9 @@ namespace Sisk.SmarterSuit {
         /// <returns>A new instance of <see cref="SuitComputer" /> or null if something when wrong.</returns>
         public static SuitComputer Create() {
             var player = MyAPIGateway.Session.LocalHumanPlayer;
-            if (player.Identity == null) {
+            if (player?.Identity == null) {
                 // todo: throw an error?
+                Mod.Static.Log.ForScope<SuitComputer>().Error("Player or player identity was not set at this point...");
                 return null;
             }
 
