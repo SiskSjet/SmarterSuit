@@ -29,7 +29,7 @@ if not exist "%mod_dir%\" goto NO_MOD_DIR
 if not exist "%scripts_dir%\" goto NO_SCRIPTS_DIR
 
 ::create exclude lists for robocopy
-set dirs=dev beta
+set dirs="dev" "beta"
 set file=exclude.txt
 for /f "tokens=*" %%L in (%file%) do (
 	set line=%%L
