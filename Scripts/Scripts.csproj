@@ -110,6 +110,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SE-Water\API\Water.cs">
+      <Link>API\Water.cs</Link>
+    </Compile>
+    <Compile Include="..\SE-Water\API\WaterModAPI.cs">
+      <Link>API\WaterModAPI.cs</Link>
+    </Compile>
     <Compile Include="ChatHandler.cs" />
     <Compile Include="Extensions\MyStringIdExtensions.cs" />
     <Compile Include="Localization\ModText.cs" />

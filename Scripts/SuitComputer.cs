@@ -20,7 +20,9 @@ using VRageMath;
 
 namespace Sisk.SmarterSuit {
     public class SuitComputer {
+        private const float DEFAUL_HEAD_OFFSET = 1.8f;
         private const float GRAVITY = 9.81f;
+        private const string HEAD_BONE = "SE_RigHead";
         private const string HYDROGEN_BOTTLE_ID = "MyObjectBuilder_GasContainerObject/HydrogenBottle";
         private const double MAX_RUNTIME_IN_MILLISECONDS = 1;
         private const int MAX_SIMULTANEOUS_WORK = 16;
@@ -35,6 +37,8 @@ namespace Sisk.SmarterSuit {
         private int _autoAlignTicks;
         private int _autoHelmetTicks;
         private int _fuelCheckTicks;
+
+        private float _headOffset;
         private IMyIdentity _identity;
         private bool _isAutoAlignRunning;
         private bool _isFlying;
@@ -59,6 +63,7 @@ namespace Sisk.SmarterSuit {
             if (character != null) {
                 RegisterEvents(character);
                 _isFlying = character.CurrentMovementState == MyCharacterMovementEnum.Flying;
+                _headOffset = (float) GetHeadOffset(character);
             }
         }
 
@@ -73,8 +78,9 @@ namespace Sisk.SmarterSuit {
         /// <returns>A new instance of <see cref="SuitComputer" /> or null if something when wrong.</returns>
         public static SuitComputer Create() {
             var player = MyAPIGateway.Session.LocalHumanPlayer;
-            if (player.Identity == null) {
+            if (player?.Identity == null) {
                 // todo: throw an error?
+                Mod.Static.Log.ForScope<SuitComputer>().Error("Player or player identity was not set at this point...");
                 return null;
             }
 
@@ -129,6 +135,31 @@ namespace Sisk.SmarterSuit {
             axis = Vector3.Normalize(axis);
             up = Vector3.TransformNormal(up, Matrix.CreateFromAxisAngle(axis, angle));
             forward = Vector3.TransformNormal(forward, Matrix.CreateFromAxisAngle(axis, angle));
+        }
+
+        /// <summary>
+        ///     Get the head offset of a given character or when head bone not found the default head offset.
+        /// </summary>
+        /// <param name="character">The character.</param>
+        /// <returns>Returns the head offset or the default head offset when head bone not found.</returns>
+        private static double GetHeadOffset(IMyCharacter character) {
+            var characterSkinned = (MySkinnedEntity) character;
+            if (characterSkinned.UseNewAnimationSystem) {
+                int boneIndex;
+                if (characterSkinned.AnimationController.FindBone(HEAD_BONE, out boneIndex) == null) {
+                    return DEFAUL_HEAD_OFFSET;
+                }
+
+                var worldMatrix = character.WorldMatrix;
+                var boneLocalMatrix = characterSkinned.BoneAbsoluteTransforms[boneIndex];
+
+                var boneMatrixWorld = boneLocalMatrix * worldMatrix;
+                var position = boneMatrixWorld.Translation;
+
+                return Vector3D.Distance(position, character.GetPosition());
+            }
+
+            return DEFAUL_HEAD_OFFSET;
         }
 
         /// <summary>
@@ -310,7 +341,6 @@ namespace Sisk.SmarterSuit {
             }
 
             var startTime = DateTime.UtcNow;
-
             if (MyAPIGateway.Session.ControlledObject != null && MyAPIGateway.Session.ControlledObject is IMyCharacter) {
                 if (Mod.Static.Settings.AlwaysAutoHelmet && MyAPIGateway.Session.SessionSettings.EnableOxygen) {
                     _autoHelmetTicks++;
@@ -445,6 +475,10 @@ namespace Sisk.SmarterSuit {
         private void OnCharacterChanged(IMyCharacter oldCharacter, IMyCharacter newCharacter) {
             var isRespawn = oldCharacter != newCharacter;
 
+            if (Mod.Static.WaterModAvailable) {
+                _headOffset = (float) GetHeadOffset(newCharacter);
+            }
+
             if (oldCharacter != null) {
                 oldCharacter.MovementStateChanged -= OnMovementStateChanged;
             }
@@ -505,7 +539,7 @@ namespace Sisk.SmarterSuit {
                     break;
                 case MyCharacterMovementEnum.Sitting:
                     _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
-                    if (!Mod.Static.RemoveAutomaticJetpackActivation) {
+                    if (!Mod.Static.RemoveAutomaticJetpackActivationModAvailable) {
                         var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
                         if (cockpit == null) {
                             return;
@@ -540,7 +574,9 @@ namespace Sisk.SmarterSuit {
                 if (respawnLocation != null) {
                     var lastEntity = respawnLocation.CubeGrid;
                     _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
-                    _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(lastEntity, true)));
+                    if (!Mod.Static.RemoveAutomaticJetpackActivationModAvailable) {
+                        _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(lastEntity, true)));
+                    }
                 }
             }
         }
@@ -588,8 +624,17 @@ namespace Sisk.SmarterSuit {
                     return;
                 }
 
+                var underwater = false;
+                if (Mod.Static.WaterModAvailable && Mod.Static.WaterModAPI.Registered) {
+                    foreach (var water in Mod.Static.WaterModAPI.Waters) {
+                        if (water.IsUnderwater(character.GetPosition(), -_headOffset)) {
+                            underwater = true;
+                        }
+                    }
+                }
+
                 var oxygen = GetOxygenLevel(character);
-                var required = oxygen <= 0.5;
+                var required = oxygen <= 0.5 || underwater;
                 if (character.EnabledHelmet != required) {
                     character.SwitchHelmet();
                 }
