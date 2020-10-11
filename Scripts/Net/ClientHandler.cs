@@ -10,6 +10,10 @@ namespace Sisk.SmarterSuit.Net {
             Network.Register<SettingsResponseMessage>(OnSettingsResponseMessage);
             Network.Register<SetOptionResponseMessage>(OnSetOptionResponseMessage);
             Network.Register<SetOptionSyncMessage>(OnSetOptionSyncMessage);
+
+            if (Mod.Static.WaterModAvailable) {
+                Network.Register<WaterModDataSyncMessage>(OnWaterModDataReceived);
+            }
         }
 
         /// <inheritdoc />
@@ -17,6 +21,11 @@ namespace Sisk.SmarterSuit.Net {
             Network.Unregister<SettingsResponseMessage>(OnSettingsResponseMessage);
             Network.Unregister<SetOptionResponseMessage>(OnSetOptionResponseMessage);
             Network.Unregister<SetOptionSyncMessage>(OnSetOptionSyncMessage);
+
+            if (Mod.Static.WaterModAvailable) {
+                Network.Unregister<WaterModDataSyncMessage>(OnWaterModDataReceived);
+            }
+
             base.Close();
         }
 
@@ -101,6 +110,15 @@ namespace Sisk.SmarterSuit.Net {
             if (message.Settings != null) {
                 Mod.Static.OnSettingsReceived(message.Settings);
             }
+        }
+
+        /// <summary>
+        ///     Water mod data received message handler.
+        /// </summary>
+        /// <param name="sender">The sender of the message.</param>
+        /// <param name="message">The message.</param>
+        private void OnWaterModDataReceived(ulong sender, WaterModDataSyncMessage message) {
+            Mod.Static.WaterModAPI.Waters = message.Waters;
         }
     }
 }
