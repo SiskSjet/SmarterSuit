@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -22,6 +22,7 @@ namespace Sisk.SmarterSuit {
     public class SuitComputer {
         private const float GRAVITY = 9.81f;
         private const string HYDROGEN_BOTTLE_ID = "MyObjectBuilder_GasContainerObject/HydrogenBottle";
+        private const string HYDROGEN_ID = "MyObjectBuilder_GasProperties/Hydrogen";
         private const double MAX_RUNTIME_IN_MILLISECONDS = 1;
         private const int MAX_SIMULTANEOUS_WORK = 16;
         private const string MEDICAL_ROOM = "MyObjectBuilder_MedicalRoom";
@@ -200,7 +201,7 @@ namespace Sisk.SmarterSuit {
             if (inventory != null) {
                 var items = inventory.GetItems();
                 foreach (var item in items) {
-                    if (item.Content.ToString() == HYDROGEN_BOTTLE_ID) {
+                    if (item.Content.GetObjectId().ToString() == HYDROGEN_BOTTLE_ID) {
                         var bottle = item.Content as MyObjectBuilder_GasContainerObject;
                         if (bottle != null) {
                             bottleFillLevel += bottle.GasLevel;
@@ -209,7 +210,14 @@ namespace Sisk.SmarterSuit {
                 }
             }
 
-            return oxygenComponent.GetGasFillLevel(MyCharacterOxygenComponent.HydrogenId) < threshold && bottleFillLevel < 0.1;
+            var hydrogenStorage = 0.125f;
+            var definition = character.Definition as MyCharacterDefinition;
+            var suitResourceDefinition = definition?.SuitResourceStorage.FirstOrDefault(x => x.Id.ToString() == HYDROGEN_ID);
+            if (suitResourceDefinition != null) {
+                hydrogenStorage = suitResourceDefinition.MaxCapacity / 1000;
+            }
+
+            return oxygenComponent.GetGasFillLevel(MyCharacterOxygenComponent.HydrogenId) < threshold && bottleFillLevel < hydrogenStorage;
         }
 
         /// <summary>

@@ -20,7 +20,6 @@ using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Input;
-using VRage.Utils;
 
 namespace Sisk.SmarterSuit {
     [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
