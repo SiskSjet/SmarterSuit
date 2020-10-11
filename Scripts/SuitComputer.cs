@@ -22,6 +22,7 @@ namespace Sisk.SmarterSuit {
     public class SuitComputer {
         private const float GRAVITY = 9.81f;
         private const string HYDROGEN_BOTTLE_ID = "MyObjectBuilder_GasContainerObject/HydrogenBottle";
+        private const string HYDROGEN_ID = "MyObjectBuilder_GasProperties/Hydrogen";
         private const double MAX_RUNTIME_IN_MILLISECONDS = 1;
         private const int MAX_SIMULTANEOUS_WORK = 16;
         private const string MEDICAL_ROOM = "MyObjectBuilder_MedicalRoom";
@@ -35,6 +36,7 @@ namespace Sisk.SmarterSuit {
         private int _autoAlignTicks;
         private int _autoHelmetTicks;
         private int _fuelCheckTicks;
+
         private IMyIdentity _identity;
         private bool _isAutoAlignRunning;
         private bool _isFlying;
@@ -73,8 +75,10 @@ namespace Sisk.SmarterSuit {
         /// <returns>A new instance of <see cref="SuitComputer" /> or null if something when wrong.</returns>
         public static SuitComputer Create() {
             var player = MyAPIGateway.Session.LocalHumanPlayer;
-            if (player.Identity == null) {
+            if (player?.Identity == null) {
                 // todo: throw an error?
+                Mod.Static.Log.ForScope<SuitComputer>().Error("Player or player identity was not set at this point...");
+
                 return null;
             }
 
@@ -197,7 +201,7 @@ namespace Sisk.SmarterSuit {
             if (inventory != null) {
                 var items = inventory.GetItems();
                 foreach (var item in items) {
-                    if (item.Content.ToString() == HYDROGEN_BOTTLE_ID) {
+                    if (item.Content.GetObjectId().ToString() == HYDROGEN_BOTTLE_ID) {
                         var bottle = item.Content as MyObjectBuilder_GasContainerObject;
                         if (bottle != null) {
                             bottleFillLevel += bottle.GasLevel;
@@ -206,7 +210,14 @@ namespace Sisk.SmarterSuit {
                 }
             }
 
-            return oxygenComponent.GetGasFillLevel(MyCharacterOxygenComponent.HydrogenId) < threshold && bottleFillLevel < 0.1;
+            var hydrogenStorage = 0.125f;
+            var definition = character.Definition as MyCharacterDefinition;
+            var suitResourceDefinition = definition?.SuitResourceStorage.FirstOrDefault(x => x.Id.ToString() == HYDROGEN_ID);
+            if (suitResourceDefinition != null) {
+                hydrogenStorage = suitResourceDefinition.MaxCapacity / 1000;
+            }
+
+            return oxygenComponent.GetGasFillLevel(MyCharacterOxygenComponent.HydrogenId) < threshold && bottleFillLevel < hydrogenStorage;
         }
 
         /// <summary>
@@ -310,7 +321,6 @@ namespace Sisk.SmarterSuit {
             }
 
             var startTime = DateTime.UtcNow;
-
             if (MyAPIGateway.Session.ControlledObject != null && MyAPIGateway.Session.ControlledObject is IMyCharacter) {
                 if (Mod.Static.Settings.AlwaysAutoHelmet && MyAPIGateway.Session.SessionSettings.EnableOxygen) {
                     _autoHelmetTicks++;
@@ -505,7 +515,7 @@ namespace Sisk.SmarterSuit {
                     break;
                 case MyCharacterMovementEnum.Sitting:
                     _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
-                    if (!Mod.Static.RemoveAutomaticJetpackActivation) {
+                    if (!Mod.Static.RemoveAutomaticJetpackActivationModAvailable) {
                         var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
                         if (cockpit == null) {
                             return;
@@ -540,7 +550,9 @@ namespace Sisk.SmarterSuit {
                 if (respawnLocation != null) {
                     var lastEntity = respawnLocation.CubeGrid;
                     _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
-                    _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(lastEntity, true)));
+                    if (!Mod.Static.RemoveAutomaticJetpackActivationModAvailable) {
+                        _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(lastEntity, true)));
+                    }
                 }
             }
         }
@@ -588,8 +600,23 @@ namespace Sisk.SmarterSuit {
                     return;
                 }
 
+                var underwater = false;
+                if (Mod.Static.WaterModAvailable && Mod.Static.WaterModAPI.Registered) {
+                    var waters = Mod.Static.WaterModAPI.Waters;
+                    if (waters != null) {
+                        foreach (var water in Mod.Static.WaterModAPI.Waters) {
+                            var depth = water.GetDepth(character.GetHeadMatrix(true).Translation);
+                            if (depth < 0) {
+                                underwater = true;
+                            }
+                        }
+                    } else {
+                        Log.Debug("Waters not registered.");
+                    }
+                }
+
                 var oxygen = GetOxygenLevel(character);
-                var required = oxygen <= 0.5;
+                var required = oxygen <= 0.5 || underwater;
                 if (character.EnabledHelmet != required) {
                     character.SwitchHelmet();
                 }

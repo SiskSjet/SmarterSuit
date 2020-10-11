@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Jakaria;
 using Sandbox.Game;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
@@ -19,7 +20,6 @@ using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Input;
-using VRage.Utils;
 
 namespace Sisk.SmarterSuit {
     [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
@@ -30,9 +30,9 @@ namespace Sisk.SmarterSuit {
         private const ushort NETWORK_ID = 51501;
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
         private const string SETTINGS_FILE = "settings.xml";
+        private const ulong WATER_MOD_ID = 2200451495;
 
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
-        private static readonly MyStringHash LowPressure = MyStringHash.GetOrCompute("LowPressure");
         private static readonly MyDefinitionId OxygenId = new MyDefinitionId(typeof(MyObjectBuilder_GasProperties), "Oxygen");
         private ChatHandler _chatHandler;
         private NetworkHandlerBase _networkHandler;
@@ -73,7 +73,7 @@ namespace Sisk.SmarterSuit {
         /// <summary>
         ///     Indicates if the 'Remove all automatic jetpack activation' is available.
         /// </summary>
-        public bool RemoveAutomaticJetpackActivation { get; set; }
+        public bool RemoveAutomaticJetpackActivationModAvailable { get; set; }
 
         /// <summary>
         ///     The Mod Settings.
@@ -84,6 +84,16 @@ namespace Sisk.SmarterSuit {
         ///     The static instance.
         /// </summary>
         public static Mod Static { get; private set; }
+
+        /// <summary>
+        ///     The water mod api.
+        /// </summary>
+        public WaterModAPI WaterModAPI { get; private set; }
+
+        /// <summary>
+        ///     Indicates if 'Water Mod' is Available.
+        /// </summary>
+        public bool WaterModAvailable { get; set; }
 
         /// <summary>
         ///     Shows a result message in chat window.
@@ -138,29 +148,31 @@ namespace Sisk.SmarterSuit {
 
         /// <inheritdoc />
         public override void HandleInput() {
-            if (Settings == null || _suitComputer == null || !Settings.AlwaysAutoHelmet || MyAPIGateway.Gui.ChatEntryVisible || MyAPIGateway.Gui.IsCursorVisible) {
+            if (Settings == null || _suitComputer == null || !(Settings.AlwaysAutoHelmet || Settings.AlignToGravity) || MyAPIGateway.Gui.ChatEntryVisible || MyAPIGateway.Gui.IsCursorVisible) {
                 return;
             }
 
             var input = MyAPIGateway.Input;
-            if (input.IsNewGameControlReleased(MyControlsSpace.HELMET)) {
-                _suitComputer.DelayAutoHelmet();
+            if (Settings.AlwaysAutoHelmet) {
+                if (input.IsNewGameControlReleased(MyControlsSpace.HELMET)) {
+                    _suitComputer.DelayAutoHelmet();
+                }
             }
 
             if (Settings.AlignToGravity) {
                 if (!input.IsGameControlPressed(MyControlsSpace.LOOKAROUND) && (
-                        input.GetMouseX() != 0 ||
-                        input.GetMouseY() != 0 ||
-                        input.IsGameControlPressed(MyControlsSpace.ROTATION_DOWN) ||
-                        input.IsGameControlPressed(MyControlsSpace.ROTATION_LEFT) ||
-                        input.IsGameControlPressed(MyControlsSpace.ROTATION_RIGHT) ||
-                        input.IsGameControlPressed(MyControlsSpace.ROTATION_UP) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXpos) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXneg) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYpos) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYneg) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZpos) ||
-                        input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZneg))) {
+                    input.GetMouseX() != 0 ||
+                    input.GetMouseY() != 0 ||
+                    input.IsGameControlPressed(MyControlsSpace.ROTATION_DOWN) ||
+                    input.IsGameControlPressed(MyControlsSpace.ROTATION_LEFT) ||
+                    input.IsGameControlPressed(MyControlsSpace.ROTATION_RIGHT) ||
+                    input.IsGameControlPressed(MyControlsSpace.ROTATION_UP) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXpos) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationXneg) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYpos) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationYneg) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZpos) ||
+                    input.IsJoystickAxisPressed(MyJoystickAxesEnum.RotationZneg))) {
                     _suitComputer.ResetAutoAlignTimeout();
                 }
 
@@ -190,7 +202,10 @@ namespace Sisk.SmarterSuit {
         public override void LoadData() {
             InitializeLogging();
             LoadLocalization();
-            MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
+            CheckSupportedMods();
+            if (WaterModAvailable) {
+                RegisterWaterModApi();
+            }
 
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
                 InitializeNetwork();
@@ -200,20 +215,41 @@ namespace Sisk.SmarterSuit {
                         LoadSettings();
                         _networkHandler = new ServerHandler(Log, Network);
 
+                        if (!Network.IsDedicated) {
+                            MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
+                        }
+
                         if (Network.IsDedicated) {
                             return;
                         }
                     } else {
+                        MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
                         _networkHandler = new ClientHandler(Log, Network);
                         Network.SendToServer(new SettingsRequestMessage());
                     }
                 }
             } else {
+                MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
                 LoadSettings();
             }
 
             _chatHandler = new ChatHandler(Log, Network, _networkHandler);
             MyAPIGateway.Session.OnSessionReady += OnSessionReady;
+        }
+
+        /// <summary>
+        ///     Used to register <see cref="SuitComputer" /> when in some rare cases the player or player identity was not set in
+        ///     <see cref="OnSessionReady" />.
+        /// </summary>
+        public override void UpdateAfterSimulation() {
+            if (_suitComputer != null) {
+                return;
+            }
+
+            _suitComputer = SuitComputer.Create();
+            if (_suitComputer != null) {
+                SetUpdateOrder(MyUpdateOrder.BeforeSimulation);
+            }
         }
 
         /// <summary>
@@ -233,6 +269,10 @@ namespace Sisk.SmarterSuit {
 
             MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
             MyAPIGateway.Gui.GuiControlRemoved -= OnGuiControlRemoved;
+
+            if (WaterModAvailable) {
+                WaterModAPI?.Unregister();
+            }
 
             if (_chatHandler != null) {
                 _chatHandler.Close();
@@ -310,6 +350,28 @@ namespace Sisk.SmarterSuit {
             if (Network == null || Network.IsServer) {
                 ShowResultMessage(option, value, Result.Success);
                 SaveSettings();
+            }
+        }
+
+        /// <summary>
+        ///     Check supported mods available.
+        /// </summary>
+        private void CheckSupportedMods() {
+            using (Log.BeginMethod(nameof(CheckSupportedMods))) {
+                foreach (var mod in MyAPIGateway.Session.Mods) {
+                    if (mod.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID || mod.PublishedFileId == WATER_MOD_ID) {
+                        Log.Info($"Activate mod support for '{mod.FriendlyName}'");
+
+                        switch (mod.PublishedFileId) {
+                            case REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID:
+                                RemoveAutomaticJetpackActivationModAvailable = true;
+                                break;
+                            case WATER_MOD_ID:
+                                WaterModAvailable = true;
+                                break;
+                        }
+                    }
+                }
             }
         }
 
@@ -402,8 +464,22 @@ namespace Sisk.SmarterSuit {
         /// <param name="target">The target which received the damage.</param>
         /// <param name="info">The damage info.</param>
         private void OnBeforeDamage(object target, ref MyDamageInformation info) {
-            if (info.Type == LowPressure && Static.Settings.AlwaysAutoHelmet) {
+            if (info.Type == MyDamageType.LowPressure && Static.Settings.AlwaysAutoHelmet) {
                 // todo: when settings can be per player I have to check if AutoHelmet is enabled for this player.
+                var character = target as IMyCharacter;
+                if (character != null) {
+                    if (!character.EnabledHelmet) {
+                        character.SwitchHelmet();
+                    }
+
+                    if (character.GetSuitGasFillLevel(OxygenId) > 0) {
+                        info.Amount = 0;
+                    }
+                }
+            }
+
+            // note: workaround because there is a small gap where is underwater check or depth < 0 check is false, but the player would receive damage.
+            if (info.Type == MyDamageType.Asphyxia && Static.Settings.AlwaysAutoHelmet && WaterModAvailable && WaterModAPI.Registered) {
                 var character = target as IMyCharacter;
                 if (character != null) {
                     if (!character.EnabledHelmet) {
@@ -433,11 +509,46 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void OnSessionReady() {
             MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
-            RemoveAutomaticJetpackActivation = MyAPIGateway.Session.Mods.Any(x => x.PublishedFileId == REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID);
 
             _suitComputer = SuitComputer.Create();
-            if (_suitComputer != null) {
-                SetUpdateOrder(MyUpdateOrder.BeforeSimulation);
+            SetUpdateOrder(_suitComputer != null ? MyUpdateOrder.BeforeSimulation : MyUpdateOrder.AfterSimulation);
+        }
+
+        /// <summary>
+        ///     Workaround to get water data on clients. Server will sync water data when <see cref="WaterModAPI.RecievedData" />
+        ///     event is triggered on server.
+        /// </summary>
+        private void OnWaterModAPIReceivedData() {
+            if (Network != null && Network.IsServer) {
+                var message = new WaterModDataSyncMessage {
+                    Waters = WaterModAPI.Waters
+                };
+
+                Network.Sync(message);
+            }
+        }
+
+        /// <summary>
+        ///     Workaround to get water data on clients. Will request water mod data when
+        ///     <see cref="WaterModAPI.OnRegisteredEvent" /> event is triggered on client.
+        /// </summary>
+        private void OnWaterModApiRegisteredEvent() {
+            if (Network != null && Network.IsClient) {
+                Network.SendToServer(new WaterModDataRequestMessage());
+            }
+        }
+
+        /// <summary>
+        ///     Register water mod api.
+        /// </summary>
+        private void RegisterWaterModApi() {
+            using (Log.BeginMethod(nameof(RegisterWaterModApi))) {
+                WaterModAPI = new WaterModAPI();
+                WaterModAPI.Register(NAME);
+
+                // note: workaround because on multiplayer clients water data is not set. I sync it by myself.
+                WaterModAPI.OnRegisteredEvent += OnWaterModApiRegisteredEvent;
+                WaterModAPI.RecievedData += OnWaterModAPIReceivedData;
             }
         }
 

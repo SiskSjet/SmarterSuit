@@ -29,7 +29,7 @@ if not exist "%mod_dir%\" goto NO_MOD_DIR
 if not exist "%scripts_dir%\" goto NO_SCRIPTS_DIR
 
 ::create exclude lists for robocopy
-set dirs=dev beta
+set dirs="dev" "beta"
 set file=exclude.txt
 for /f "tokens=*" %%L in (%file%) do (
 	set line=%%L
@@ -72,7 +72,7 @@ for /F %%G in ('dir /ad /b ^| findstr /l /i /x /v /g:"%tmp%\exclude.txt"') do (
 )
 
 echo copy files from 'Mod'
-robocopy "%mod_dir%" "%se_mod_path%" /MIR /Z /MT:8 /XJD /FFT /XD !dirs! "Scripts" /XF !files! /NC /NDL /NFL /NJH /NP /NS
+robocopy "%mod_dir%" "%se_mod_path%" /MIR /Z /MT:8 /XJD /FFT /XD !dirs! "Scripts" /XF !files! /NC /NDL /NFL /NP /NS
 if defined dev (
 	if exist "%se_mod_path%\modinfo.sbmi" del "%se_mod_path%\modinfo.sbmi"
 	xcopy "%mod_dir%\dev\*.*" /s /e /f /y "%se_mod_path%\"
@@ -84,13 +84,13 @@ if defined beta (
 )
 
 echo copy files from 'Scripts'
-robocopy "%scripts_dir%" "%se_mod_scripts%" /MIR /Z /MT:8 /XJD /FFT /XD !dirs! !script_dirs! /XF !files! /NC /NDL /NFL /NJH /NP /NS
+robocopy "%scripts_dir%" "%se_mod_scripts%" /MIR /Z /MT:8 /XJD /FFT /XD !dirs! !script_dirs! /XF !files! /NC /NDL /NFL /NP /NS
 
 for /F %%G in ('dir /ad /b ^| findstr /l /i /x /v /g:"%tmp%\exclude.txt"') do (
 	if not %%~nxG == Mod (
 		if not %%~nxG == Scripts (
 			echo copy files from '%%G'
-			robocopy "%~dp0%%G" "%se_mod_scripts%\%%G" /MIR /Z /MT:8 /XJD /FFT /XD !dirs! /XF !files! /NC /NDL /NFL /NJH /NP /NS
+			robocopy "%~dp0%%G" "%se_mod_scripts%\%%G" /MIR /Z /MT:8 /XJD /FFT /XD !dirs! /XF !files! /NC /NDL /NFL /NP /NS
 		)
 	)
 )
