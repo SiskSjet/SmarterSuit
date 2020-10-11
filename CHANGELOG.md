@@ -1,3 +1,21 @@
+# [1.9.2](https://github.com/SiskSjet/SmartSuit/compare/v1.9.1...v1.9.2) (2020-10-11)
+
+
+### Bug Fixes
+
+* fix an issue where align to gravity would not properly work when auto helmet option was not enabled ([4ac80fb](https://github.com/SiskSjet/SmartSuit/commit/4ac80fbc004973ee89fbae21af1bcae9f40e6027))
+* fix an issue where jetpack would change even when when it is disabled in options ([888c8f1](https://github.com/SiskSjet/SmartSuit/commit/888c8f1148207a479a7e08f11495dbac89355df0))
+* fix issues related to water mod ([03999ac](https://github.com/SiskSjet/SmartSuit/commit/03999ac6ca66e1cc1c06fede122f90dccade804e))
+* fix possible exception when played on dedicated servers ([2a2836f](https://github.com/SiskSjet/SmartSuit/commit/2a2836f6eecff26935236288db3e697665ff672d))
+* Fixed an issue where hydrogen bottles fill level were not included in the additional fuel warning check ([9fb703b](https://github.com/SiskSjet/SmartSuit/commit/9fb703b4408ab68c162b69aff4216e35d31cecf6))
+
+
+### Features
+
+* add support for `Water Mod` ([db65d58](https://github.com/SiskSjet/SmartSuit/commit/db65d5883c6eef55eb00d64effde519d798a145d))
+
+
+
 # [1.9.1](https://github.com/SiskSjet/SmartSuit/compare/v1.9.0...v1.9.1) (2019-11-09)
 
 
