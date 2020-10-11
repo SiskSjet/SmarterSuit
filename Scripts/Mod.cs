@@ -209,8 +209,6 @@ namespace Sisk.SmarterSuit {
                 RegisterWaterModApi();
             }
 
-            MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
-
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
                 InitializeNetwork();
 
@@ -219,15 +217,21 @@ namespace Sisk.SmarterSuit {
                         LoadSettings();
                         _networkHandler = new ServerHandler(Log, Network);
 
+                        if (!Network.IsDedicated) {
+                            MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
+                        }
+
                         if (Network.IsDedicated) {
                             return;
                         }
                     } else {
+                        MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
                         _networkHandler = new ClientHandler(Log, Network);
                         Network.SendToServer(new SettingsRequestMessage());
                     }
                 }
             } else {
+                MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
                 LoadSettings();
             }
 
