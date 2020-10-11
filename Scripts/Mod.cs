@@ -150,15 +150,17 @@ namespace Sisk.SmarterSuit {
 
         /// <inheritdoc />
         public override void HandleInput() {
-            if (Settings == null || _suitComputer == null || !Settings.AlwaysAutoHelmet || MyAPIGateway.Gui.ChatEntryVisible || MyAPIGateway.Gui.IsCursorVisible) {
+            if (Settings == null || _suitComputer == null || !(Settings.AlwaysAutoHelmet || Settings.AlignToGravity) || MyAPIGateway.Gui.ChatEntryVisible || MyAPIGateway.Gui.IsCursorVisible) {
                 return;
             }
 
             var input = MyAPIGateway.Input;
-            if (input.IsNewGameControlReleased(MyControlsSpace.HELMET)) {
-                _suitComputer.DelayAutoHelmet();
+            if (Settings.AlwaysAutoHelmet) {
+                if (input.IsNewGameControlReleased(MyControlsSpace.HELMET)) {
+                    _suitComputer.DelayAutoHelmet();
+                }
             }
-
+            
             if (Settings.AlignToGravity) {
                 if (!input.IsGameControlPressed(MyControlsSpace.LOOKAROUND) && (
                     input.GetMouseX() != 0 ||
