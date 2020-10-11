@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -598,7 +598,6 @@ namespace Sisk.SmarterSuit {
                     if (waters != null) {
                         foreach (var water in Mod.Static.WaterModAPI.Waters) {
                             var depth = water.GetDepth(character.GetHeadMatrix(true).Translation);
-                            Log.Debug($"DEPTH: {depth} | IsUnderwater: {depth < 0}");
                             if (depth < 0) {
                                 underwater = true;
                             }
