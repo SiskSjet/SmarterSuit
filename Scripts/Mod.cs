@@ -34,7 +34,6 @@ namespace Sisk.SmarterSuit {
         private const ulong WATER_MOD_ID = 2200451495;
 
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
-        private static readonly MyStringHash LowPressure = MyStringHash.GetOrCompute("LowPressure");
         private static readonly MyDefinitionId OxygenId = new MyDefinitionId(typeof(MyObjectBuilder_GasProperties), "Oxygen");
         private ChatHandler _chatHandler;
         private NetworkHandlerBase _networkHandler;
@@ -160,7 +159,7 @@ namespace Sisk.SmarterSuit {
                     _suitComputer.DelayAutoHelmet();
                 }
             }
-            
+
             if (Settings.AlignToGravity) {
                 if (!input.IsGameControlPressed(MyControlsSpace.LOOKAROUND) && (
                     input.GetMouseX() != 0 ||
@@ -466,8 +465,22 @@ namespace Sisk.SmarterSuit {
         /// <param name="target">The target which received the damage.</param>
         /// <param name="info">The damage info.</param>
         private void OnBeforeDamage(object target, ref MyDamageInformation info) {
-            if (info.Type == LowPressure && Static.Settings.AlwaysAutoHelmet) {
+            if (info.Type == MyDamageType.LowPressure && Static.Settings.AlwaysAutoHelmet) {
                 // todo: when settings can be per player I have to check if AutoHelmet is enabled for this player.
+                var character = target as IMyCharacter;
+                if (character != null) {
+                    if (!character.EnabledHelmet) {
+                        character.SwitchHelmet();
+                    }
+
+                    if (character.GetSuitGasFillLevel(OxygenId) > 0) {
+                        info.Amount = 0;
+                    }
+                }
+            }
+
+            // note: workaround because there is a small gap where is underwater check or depth < 0 check is false, but the player would receive damage.
+            if (info.Type == MyDamageType.Asphyxia && Static.Settings.AlwaysAutoHelmet && WaterModAvailable && WaterModAPI.Registered) {
                 var character = target as IMyCharacter;
                 if (character != null) {
                     if (!character.EnabledHelmet) {
@@ -503,12 +516,40 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     Workaround to get water data on clients. Server will sync water data when <see cref="WaterModAPI.RecievedData" />
+        ///     event is triggered on server.
+        /// </summary>
+        private void OnWaterModAPIReceivedData() {
+            if (Network != null && Network.IsServer) {
+                var message = new WaterModDataSyncMessage {
+                    Waters = WaterModAPI.Waters
+                };
+
+                Network.Sync(message);
+            }
+        }
+
+        /// <summary>
+        ///     Workaround to get water data on clients. Will request water mod data when
+        ///     <see cref="WaterModAPI.OnRegisteredEvent" /> event is triggered on client.
+        /// </summary>
+        private void OnWaterModApiRegisteredEvent() {
+            if (Network != null && Network.IsClient) {
+                Network.SendToServer(new WaterModDataRequestMessage());
+            }
+        }
+
+        /// <summary>
         ///     Register water mod api.
         /// </summary>
         private void RegisterWaterModApi() {
             using (Log.BeginMethod(nameof(RegisterWaterModApi))) {
                 WaterModAPI = new WaterModAPI();
                 WaterModAPI.Register(NAME);
+
+                // note: workaround because on multiplayer clients water data is not set. I sync it by myself.
+                WaterModAPI.OnRegisteredEvent += OnWaterModApiRegisteredEvent;
+                WaterModAPI.RecievedData += OnWaterModAPIReceivedData;
             }
         }
 
