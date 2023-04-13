@@ -1,3 +1,12 @@
+# [1.9.3](https://github.com/SiskSjet/SmartSuit/compare/v1.9.2...v1.9.3) (2023-04-13)
+
+
+### Bug Fixes
+
+* fix CTD when used with water mod ([ab1a681](https://github.com/SiskSjet/SmartSuit/commit/ab1a681c2601359eed17f18c5d24d822ea02002d))
+
+
+
 # [1.9.2](https://github.com/SiskSjet/SmartSuit/compare/v1.9.1...v1.9.2) (2020-10-11)
 
 
