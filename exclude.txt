@@ -1,57 +1,22 @@
-\.git
-\.vs
+.git/
+.vs/
 
-\bin
-\obj
-\Properties
-\packages
+beta/
+dev/
 
-\Profiler
-\TerminalControls
+bin/
+obj/
+Properties/
+packages/
 
-.csproj
-.git
-.sln
+Profiler/
+TerminalControls/
+
+*.csproj
+*.git
+*.sln
+*.gitignore
 
 App.config
-
 MyTexts.Designer.cs
-
-D:\Projekte\mods\space engineers\SmarterSuit\Utils\.git
-D:\Projekte\mods\space engineers\SmarterSuit\Utils\.gitignore
-D:\Projekte\mods\space engineers\SmarterSuit\Utils\CHANGELOG.md
-D:\Projekte\mods\space engineers\SmarterSuit\Utils\LICENSE
-D:\Projekte\mods\space engineers\SmarterSuit\Utils\Mod_Utils.sln
-D:\Projekte\mods\space engineers\SmarterSuit\Utils\README.md
-
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\.editorconfig
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\.git
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\.gitattributes
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\.gitignore
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\App.config
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\DragClientAPI.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\HudAPIv2.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Language.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\packages.config
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\README.md
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Water.csproj
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Water.sln
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\WaterData.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\WaterLocalization.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\WaterMod.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\WaterSettings.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\WaterUtils.cs
-
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Components\WaterCollectorComponent.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Components\WaterFarmComponent.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Components\WaterSolarComponent.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Components\WaterTurretComponent.cs
-
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Effects\Bubble.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Effects\COBIndicator.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Effects\Fish.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Effects\Seagull.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Effects\SmallBubble.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Effects\Splash.cs
-D:\Projekte\mods\space engineers\SmarterSuit\SE-Water\Effects\Wake.cs
-
+*.md

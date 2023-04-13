@@ -6,23 +6,17 @@ using Sisk.Utils.Logging;
 using Sisk.Utils.Net;
 
 namespace Sisk.SmarterSuit.Net {
+
     public class ServerHandler : NetworkHandlerBase {
+
         public ServerHandler(ILogger log, Network network) : base(log.ForScope<ClientHandler>(), network) {
             Network.Register<SettingsRequestMessage>(OnSettingsRequestMessage);
             Network.Register<SetOptionMessage>(OnSetOptionMessage);
-
-            if (Mod.Static.WaterModAvailable) {
-                Network.Register<WaterModDataRequestMessage>(OnWaterModDataRequestMessageReceived);
-            }
         }
 
         public override void Close() {
             Network.Unregister<SettingsRequestMessage>(OnSettingsRequestMessage);
             Network.Unregister<SetOptionMessage>(OnSetOptionMessage);
-
-            if (Mod.Static.WaterModAvailable) {
-                Network.Unregister<WaterModDataRequestMessage>(OnWaterModDataRequestMessageReceived);
-            }
 
             base.Close();
         }
@@ -56,17 +50,21 @@ namespace Sisk.SmarterSuit.Net {
                     case Option.AlignToGravity:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<bool>(message.Value));
                         break;
+
                     case Option.FuelThreshold:
                     case Option.HaltedSpeedTolerance:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<float>(message.Value));
                         break;
+
                     case Option.AlignToGravityDelay:
                     case Option.DelayAfterManualHelmet:
                         SyncOption(Option.DelayAfterManualHelmet, MyAPIGateway.Utilities.SerializeFromBinary<int>(message.Value));
                         break;
+
                     case Option.DisableAutoDampener:
                         SyncOption(message.Option, MyAPIGateway.Utilities.SerializeFromBinary<DisableAutoDampenerOption>(message.Value));
                         break;
+
                     default:
                         using (Log.BeginMethod(nameof(OnSetOptionMessage))) {
                             Log.Error($"Unknown option '{nameof(message.Option)}'");
@@ -106,29 +104,6 @@ namespace Sisk.SmarterSuit.Net {
                 Network.Send(response, sender);
             } catch (Exception exception) {
                 using (Log.BeginMethod(nameof(OnSettingsRequestMessage))) {
-                    Log.Error(exception);
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Request water mod data message handler.
-        /// </summary>
-        /// <param name="sender">The sender who requested the water data.</param>
-        /// <param name="message">The message from the requester.</param>
-        private void OnWaterModDataRequestMessageReceived(ulong sender, WaterModDataRequestMessage message) {
-            if (Mod.Static.WaterModAPI.Waters == null) {
-                return;
-            }
-
-            try {
-                var response = new WaterModDataSyncMessage {
-                    Waters = Mod.Static.WaterModAPI.Waters
-                };
-
-                Network.Send(response, sender);
-            } catch (Exception exception) {
-                using (Log.BeginMethod(nameof(OnWaterModDataRequestMessageReceived))) {
                     Log.Error(exception);
                 }
             }

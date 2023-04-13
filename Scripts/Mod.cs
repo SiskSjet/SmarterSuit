@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Jakaria;
+using Jakaria.API;
 using Sandbox.Game;
+using Sandbox.Game.Entities.Character;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Extensions;
@@ -22,6 +24,7 @@ using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Input;
 
 namespace Sisk.SmarterSuit {
+
     [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
     public class Mod : MySessionComponentBase {
         public const string NAME = "Smarter Suit";
@@ -51,9 +54,9 @@ namespace Sisk.SmarterSuit {
         public static string Acronym => string.Concat(NAME.Where(char.IsUpper));
 
         /// <summary>
-        ///     Indicates if mod is a dev version.
+        ///     The static instance.
         /// </summary>
-        private bool IsDevVersion => ModContext.ModName.EndsWith("_DEV");
+        public static Mod Static { get; private set; }
 
         /// <summary>
         ///     Language used to localize this mod.
@@ -81,19 +84,14 @@ namespace Sisk.SmarterSuit {
         public ModSettings Settings { get; private set; }
 
         /// <summary>
-        ///     The static instance.
-        /// </summary>
-        public static Mod Static { get; private set; }
-
-        /// <summary>
-        ///     The water mod api.
-        /// </summary>
-        public WaterModAPI WaterModAPI { get; private set; }
-
-        /// <summary>
         ///     Indicates if 'Water Mod' is Available.
         /// </summary>
         public bool WaterModAvailable { get; set; }
+
+        /// <summary>
+        ///     Indicates if mod is a dev version.
+        /// </summary>
+        private bool IsDevVersion => ModContext.ModName.EndsWith("_DEV");
 
         /// <summary>
         ///     Shows a result message in chat window.
@@ -111,29 +109,19 @@ namespace Sisk.SmarterSuit {
                 case Result.NoPermission:
                     MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Error_SS_NoPermission.GetString());
                     break;
+
                 case Result.Error:
                     MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Error_SS_SetOption.GetString(option, value));
                     break;
+
                 case Result.Success:
                     MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Message_SS_SetOptionSuccess.GetString(option, value));
                     break;
+
                 case Result.CanOnlyBeSetInMultiplayer:
                     MyAPIGateway.Utilities.ShowMessage(NAME, ModText.Error_SS_CanOnlyBeSetInMultiplayer.GetString(option));
                     break;
             }
-        }
-
-        /// <summary>
-        ///     Used to format the <see cref="LogEvent" /> entries.
-        /// </summary>
-        /// <param name="level">The <see cref="LogEventLevel" /> for current event.</param>
-        /// <param name="message">The <see cref="LogEvent" /> message.</param>
-        /// <param name="timestamp">The timestamp of the <see cref="LogEvent" />.</param>
-        /// <param name="scope">The scope of the <see cref="LogEvent" />.</param>
-        /// <param name="method">The called method of this <see cref="LogEvent" />.</param>
-        /// <returns></returns>
-        private static string LogFormatter(LogEventLevel level, string message, DateTime timestamp, Type scope, string method) {
-            return $"[{timestamp:HH:mm:ss:fff}] [{new string(level.ToString().Take(1).ToArray())}] [{scope}->{method}()]: {message}";
         }
 
         /// <summary>
@@ -203,9 +191,6 @@ namespace Sisk.SmarterSuit {
             InitializeLogging();
             LoadLocalization();
             CheckSupportedMods();
-            if (WaterModAvailable) {
-                RegisterWaterModApi();
-            }
 
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
                 InitializeNetwork();
@@ -235,6 +220,66 @@ namespace Sisk.SmarterSuit {
 
             _chatHandler = new ChatHandler(Log, Network, _networkHandler);
             MyAPIGateway.Session.OnSessionReady += OnSessionReady;
+        }
+
+        public void OnSettingsReceived(ModSettings settings) {
+            if (settings != null) {
+                Settings = settings;
+            }
+        }
+
+        /// <summary>
+        ///     Set a given option to given value.
+        /// </summary>
+        /// <typeparam name="TValue">The value type.</typeparam>
+        /// <param name="option">Which option should be set.</param>
+        /// <param name="value">The value for given option.</param>
+        public void SetOption<TValue>(Option option, TValue value) {
+            switch (option) {
+                case Option.AlwaysAutoHelmet:
+                    Settings.AlwaysAutoHelmet = (bool)(object)value;
+                    break;
+
+                case Option.AlignToGravity:
+                    Settings.AlignToGravity = (bool)(object)value;
+                    break;
+
+                case Option.AlignToGravityDelay:
+                    Settings.AlignToGravityDelay = (int)(object)value;
+                    break;
+
+                case Option.AdditionalFuelWarning:
+                    Settings.AdditionalFuelWarning = (bool)(object)value;
+                    break;
+
+                case Option.FuelThreshold:
+                    Settings.FuelThreshold = (float)(object)value;
+                    break;
+
+                case Option.DisableAutoDampener:
+                    Settings.DisableAutoDampener = (DisableAutoDampenerOption)(object)value;
+                    break;
+
+                case Option.HaltedSpeedTolerance:
+                    Settings.HaltedSpeedTolerance = (float)(object)value;
+                    break;
+
+                case Option.DelayAfterManualHelmet:
+                    Settings.DelayAfterManualHelmet = (int)(object)value;
+                    break;
+
+                default:
+                    using (Log.BeginMethod(nameof(SetOption))) {
+                        Log.Error($"Unknown option '{nameof(option)}'");
+                    }
+
+                    return;
+            }
+
+            if (Network == null || Network.IsServer) {
+                ShowResultMessage(option, value, Result.Success);
+                SaveSettings();
+            }
         }
 
         /// <summary>
@@ -270,10 +315,6 @@ namespace Sisk.SmarterSuit {
             MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
             MyAPIGateway.Gui.GuiControlRemoved -= OnGuiControlRemoved;
 
-            if (WaterModAvailable) {
-                WaterModAPI?.Unregister();
-            }
-
             if (_chatHandler != null) {
                 _chatHandler.Close();
                 _chatHandler = null;
@@ -301,56 +342,17 @@ namespace Sisk.SmarterSuit {
             }
         }
 
-        public void OnSettingsReceived(ModSettings settings) {
-            if (settings != null) {
-                Settings = settings;
-            }
-        }
-
         /// <summary>
-        ///     Set a given option to given value.
+        ///     Used to format the <see cref="LogEvent" /> entries.
         /// </summary>
-        /// <typeparam name="TValue">The value type.</typeparam>
-        /// <param name="option">Which option should be set.</param>
-        /// <param name="value">The value for given option.</param>
-        public void SetOption<TValue>(Option option, TValue value) {
-            switch (option) {
-                case Option.AlwaysAutoHelmet:
-                    Settings.AlwaysAutoHelmet = (bool) (object) value;
-                    break;
-                case Option.AlignToGravity:
-                    Settings.AlignToGravity = (bool) (object) value;
-                    break;
-                case Option.AlignToGravityDelay:
-                    Settings.AlignToGravityDelay = (int) (object) value;
-                    break;
-                case Option.AdditionalFuelWarning:
-                    Settings.AdditionalFuelWarning = (bool) (object) value;
-                    break;
-                case Option.FuelThreshold:
-                    Settings.FuelThreshold = (float) (object) value;
-                    break;
-                case Option.DisableAutoDampener:
-                    Settings.DisableAutoDampener = (DisableAutoDampenerOption) (object) value;
-                    break;
-                case Option.HaltedSpeedTolerance:
-                    Settings.HaltedSpeedTolerance = (float) (object) value;
-                    break;
-                case Option.DelayAfterManualHelmet:
-                    Settings.DelayAfterManualHelmet = (int) (object) value;
-                    break;
-                default:
-                    using (Log.BeginMethod(nameof(SetOption))) {
-                        Log.Error($"Unknown option '{nameof(option)}'");
-                    }
-
-                    return;
-            }
-
-            if (Network == null || Network.IsServer) {
-                ShowResultMessage(option, value, Result.Success);
-                SaveSettings();
-            }
+        /// <param name="level">The <see cref="LogEventLevel" /> for current event.</param>
+        /// <param name="message">The <see cref="LogEvent" /> message.</param>
+        /// <param name="timestamp">The timestamp of the <see cref="LogEvent" />.</param>
+        /// <param name="scope">The scope of the <see cref="LogEvent" />.</param>
+        /// <param name="method">The called method of this <see cref="LogEvent" />.</param>
+        /// <returns></returns>
+        private static string LogFormatter(LogEventLevel level, string message, DateTime timestamp, Type scope, string method) {
+            return $"[{timestamp:HH:mm:ss:fff}] [{new string(level.ToString().Take(1).ToArray())}] [{scope}->{method}()]: {message}";
         }
 
         /// <summary>
@@ -366,6 +368,7 @@ namespace Sisk.SmarterSuit {
                             case REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID:
                                 RemoveAutomaticJetpackActivationModAvailable = true;
                                 break;
+
                             case WATER_MOD_ID:
                                 WaterModAvailable = true;
                                 break;
@@ -464,19 +467,19 @@ namespace Sisk.SmarterSuit {
         /// <param name="target">The target which received the damage.</param>
         /// <param name="info">The damage info.</param>
         private void OnBeforeDamage(object target, ref MyDamageInformation info) {
-            if (info.Type == MyDamageType.LowPressure && Static.Settings.AlwaysAutoHelmet) {
-                // todo: when settings can be per player I have to check if AutoHelmet is enabled for this player.
-                var character = target as IMyCharacter;
-                if (character != null) {
-                    if (!character.EnabledHelmet) {
-                        character.SwitchHelmet();
-                    }
+            //if (info.Type == MyDamageType.LowPressure && Static.Settings.AlwaysAutoHelmet) {
+            //    // todo: when settings can be per player I have to check if AutoHelmet is enabled for this player.
+            //    var character = target as IMyCharacter;
+            //    if (!character.IsDead && character != null) {
+            //        if (!character.EnabledHelmet) {
+            //            character.SwitchHelmet();
+            //        }
 
-                    if (character.GetSuitGasFillLevel(OxygenId) > 0) {
-                        info.Amount = 0;
-                    }
-                }
-            }
+            //        if (character.GetSuitGasFillLevel(OxygenId) > 0) {
+            //            info.Amount = 0;
+            //        }
+            //    }
+            //}
 
             // note: workaround because there is a small gap where is underwater check or depth < 0 check is false, but the player would receive damage.
             if (info.Type == MyDamageType.Asphyxia && Static.Settings.AlwaysAutoHelmet && WaterModAvailable && WaterModAPI.Registered) {
@@ -512,44 +515,6 @@ namespace Sisk.SmarterSuit {
 
             _suitComputer = SuitComputer.Create();
             SetUpdateOrder(_suitComputer != null ? MyUpdateOrder.BeforeSimulation : MyUpdateOrder.AfterSimulation);
-        }
-
-        /// <summary>
-        ///     Workaround to get water data on clients. Server will sync water data when <see cref="WaterModAPI.RecievedData" />
-        ///     event is triggered on server.
-        /// </summary>
-        private void OnWaterModAPIReceivedData() {
-            if (Network != null && Network.IsServer) {
-                var message = new WaterModDataSyncMessage {
-                    Waters = WaterModAPI.Waters
-                };
-
-                Network.Sync(message);
-            }
-        }
-
-        /// <summary>
-        ///     Workaround to get water data on clients. Will request water mod data when
-        ///     <see cref="WaterModAPI.OnRegisteredEvent" /> event is triggered on client.
-        /// </summary>
-        private void OnWaterModApiRegisteredEvent() {
-            if (Network != null && Network.IsClient) {
-                Network.SendToServer(new WaterModDataRequestMessage());
-            }
-        }
-
-        /// <summary>
-        ///     Register water mod api.
-        /// </summary>
-        private void RegisterWaterModApi() {
-            using (Log.BeginMethod(nameof(RegisterWaterModApi))) {
-                WaterModAPI = new WaterModAPI();
-                WaterModAPI.Register(NAME);
-
-                // note: workaround because on multiplayer clients water data is not set. I sync it by myself.
-                WaterModAPI.OnRegisteredEvent += OnWaterModApiRegisteredEvent;
-                WaterModAPI.RecievedData += OnWaterModAPIReceivedData;
-            }
         }
 
         /// <summary>

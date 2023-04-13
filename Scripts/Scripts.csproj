@@ -110,9 +110,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\SE-Water\API\Water.cs">
-      <Link>API\Water.cs</Link>
-    </Compile>
     <Compile Include="..\SE-Water\API\WaterModAPI.cs">
       <Link>API\WaterModAPI.cs</Link>
     </Compile>
@@ -129,8 +126,6 @@
     <Compile Include="Net\Messages\SettingsRequestMessage.cs" />
     <Compile Include="Net\Messages\SettingsResponseMessage.cs" />
     <Compile Include="Data\Result.cs" />
-    <Compile Include="Net\Messages\WaterModDataRequestMessage.cs" />
-    <Compile Include="Net\Messages\WaterModDataSyncMessage.cs" />
     <Compile Include="Net\NetworkHandlerBase.cs" />
     <Compile Include="Net\ServerHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
