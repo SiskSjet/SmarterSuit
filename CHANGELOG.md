@@ -1,3 +1,12 @@
+# [1.9.4](https://github.com/SiskSjet/SmartSuit/compare/v1.9.3...v1.9.4) (2023-11-04)
+
+
+### Bug Fixes
+
+* fix the issue where damage was done when it should not. Also updated build script ([dd92093](https://github.com/SiskSjet/SmartSuit/commit/dd92093e064cad4785d1e4076dc76a31b5ace471))
+
+
+
 # [1.9.3](https://github.com/SiskSjet/SmartSuit/compare/v1.9.2...v1.9.3) (2023-04-13)
 
 
