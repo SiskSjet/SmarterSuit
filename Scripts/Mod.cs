@@ -467,19 +467,18 @@ namespace Sisk.SmarterSuit {
         /// <param name="target">The target which received the damage.</param>
         /// <param name="info">The damage info.</param>
         private void OnBeforeDamage(object target, ref MyDamageInformation info) {
-            //if (info.Type == MyDamageType.LowPressure && Static.Settings.AlwaysAutoHelmet) {
-            //    // todo: when settings can be per player I have to check if AutoHelmet is enabled for this player.
-            //    var character = target as IMyCharacter;
-            //    if (!character.IsDead && character != null) {
-            //        if (!character.EnabledHelmet) {
-            //            character.SwitchHelmet();
-            //        }
+            if (info.Type == MyDamageType.LowPressure && Static.Settings.AlwaysAutoHelmet) {
+                var character = target as IMyCharacter;
+                if (character != null && !character.IsDead) {
+                    if (!character.EnabledHelmet) {
+                        character.SwitchHelmet();
+                    }
 
-            //        if (character.GetSuitGasFillLevel(OxygenId) > 0) {
-            //            info.Amount = 0;
-            //        }
-            //    }
-            //}
+                    if (character.GetSuitGasFillLevel(OxygenId) > 0) {
+                        info.Amount = 0;
+                    }
+                }
+            }
 
             // note: workaround because there is a small gap where is underwater check or depth < 0 check is false, but the player would receive damage.
             if (info.Type == MyDamageType.Asphyxia && Static.Settings.AlwaysAutoHelmet && WaterModAvailable && WaterModAPI.Registered) {
