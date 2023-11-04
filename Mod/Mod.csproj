@@ -51,7 +51,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="beta\thumb.png" />
+    <Content Include="dev\metadata.mod" />
     <Content Include="dev\thumb.png" />
+    <Content Include="metadata.mod" />
     <Content Include="thumb.png" />
   </ItemGroup>
   <ItemGroup>
