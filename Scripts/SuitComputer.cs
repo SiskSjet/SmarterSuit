@@ -45,6 +45,7 @@ namespace Sisk.SmarterSuit {
         private bool _lastDampenerState;
         private bool _stopAutoAlign;
         private bool _wasFuelUnderThresholdBefore;
+        private bool _wasHelmetClosedBefore;
 
         /// <summary>
         ///     Creates a new instance of <see cref="SuitComputer" />.
@@ -606,15 +607,19 @@ namespace Sisk.SmarterSuit {
 
                 var underwater = false;
                 if (Mod.Static.WaterModAvailable && WaterModAPI.Registered) {
-                    WaterModAPI.Entity_PercentUnderwater(character as MyEntity);
                     underwater = WaterModAPI.IsUnderwater(character.GetHeadMatrix(true).Translation);
                 }
 
                 var oxygen = GetOxygenLevel(character);
+                var suitOxy = character.GetSuitGasFillLevel(MyCharacterOxygenComponent.OxygenId);
                 var required = oxygen <= 0.5 || underwater;
-                if (character.EnabledHelmet != required) {
+                var shouldOpen = _wasHelmetClosedBefore && oxygen > 0.6 && !underwater;
+
+                if (required && !character.EnabledHelmet || !required && character.EnabledHelmet && suitOxy > 0.2 && shouldOpen || !required && character.EnabledHelmet && suitOxy < 0.2) {
                     character.SwitchHelmet();
                 }
+
+                _wasHelmetClosedBefore = character.EnabledHelmet;
             }
         }
 

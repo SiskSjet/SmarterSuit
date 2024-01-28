@@ -447,8 +447,7 @@ namespace Sisk.SmarterSuit {
                 }
             }
 
-            // note: workaround because there is a small gap where is underwater check or depth < 0 check is false, but the player would receive damage.
-            if (info.Type == MyDamageType.Asphyxia && Static.Settings.AlwaysAutoHelmet && WaterModAvailable && WaterModAPI.Registered) {
+            if (info.Type == MyDamageType.Asphyxia && Static.Settings.AlwaysAutoHelmet) {
                 var character = target as IMyCharacter;
                 if (character != null) {
                     if (!character.EnabledHelmet) {
