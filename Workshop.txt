@@ -2,10 +2,6 @@
 The new suit update will now check some parameters when leaving a cockpit or after a respawn to eliminate potential sources of danger.
 In addition, the speed is adjusted relative to the ship.
 
-In update 1.188 we received a suit update from Keen, thank you by the way. 
-It introduces the relative inertia dampeners. This works great and because of that this mod will no longer change the dampener state when exiting a cockpit.
-It also seems to fix most issues with oxygen readouts. Now 'AlwaysAutoHelmet' option is enabled by default.
-
 [b]Helmet[/b] ([i]will check every 30 ticks[/i]) 
 * opened when enviroment with oxygen detected.
 * closed when enviroment without oxygen detected.
@@ -18,8 +14,7 @@ It also seems to fix most issues with oxygen readouts. Now 'AlwaysAutoHelmet' op
 * enabled when ship is not moving or when no ground in range and in an planetary gravity well.
 * disabled when ship is moving.
 
-[h1][b]➤⠀O⠀P⠀T⠀I⠀O⠀N⠀A⠀L[/b][/h1]
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
+[h2]🛠︰Options・─────────・・・[/h2]
 You can enable optional features by typing a command in your chat box.
 In multiplayer only server admins can set options. All options are synced.
 
@@ -119,28 +114,28 @@ In multiplayer only server admins can set options. All options are synced.
 [CODE]/ss enable afw[/CODE]
 [CODE]/ss set ft 0.5[/CODE]
 
-[h1][b]➤⠀M⠀O⠀D⠀ ⠀S⠀U⠀P⠀P⠀O⠀R⠀T[/b][/H1]
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
+[h2]🛠︰Mod Support ・────────・・・[/h2]
 [url=https://steamcommunity.com/sharedfiles/filedetails/?id=782845808] Remove all automatic jetpack activation [/url]. This mod will then not change the jetpack status.
 
-[h1][b]➤⠀C⠀R⠀E⠀D⠀I⠀T⠀S[/b][/H1]
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
+[h2]🛠︰Support ・──────────・・・[/h2]
+It would be nice if you could consider supporting me 
+
+[url=https://ko-fi.com/sisksjet][img]https://steamuserimages-a.akamaihd.net/ugc/2287333413738438809/074D2B10C793252F866EEB91EC748E0E8B3C3210/?imw=64&imh=64&ima=fit&impolicy=Letterbox&letterbox=false[/img][/url] [url=https://patreon.com/sisk][img]https://steamuserimages-a.akamaihd.net/ugc/2287333413738613768/8FE59EC78463E3EFA52D59347D83D3C9838BF6E6/?imw=64&imh=64&ima=fit&impolicy=Letterbox&letterbox=false[/img][/url] [url=https://paypal.me/sisksjet][img]https://steamuserimages-a.akamaihd.net/ugc/2287333413738619680/36B89C41163487AD5BFB13B2C673E0F153171D29/?imw=64&imh=64&ima=fit&impolicy=Letterbox&letterbox=true[/img][/url]
+
+or join my [url=https://discord.gg/2s22YCqSFg]Discord[/url] if you have suggestions, wishes, or just want to know what else I'm working on. My Discord is new, so there is not much going on yet.
+You can also check out my other mods in my [url=https://steamcommunity.com/id/sisksjet/myworkshopfiles/?appid=244850]Workshop[/url].
+
+[h2]🛠︰Github ・───────────・・・[/h2]
+The source for this mod can be found at [url=https://github.com/SiskSjet/SmarterSuit] SmarterSuit [/url] and is licensed under [url=https://github.com/SiskSjet/SmarterSuit/blob/master/LICENSE] MIT [/url]
+You can use my code as you like, just a license and a copyright notice is required, but please do not flood the workshop with copies of this mod.
+If you think some features are missing, try to ask first
+
+[h2]🛠︰Credits ・──────────・・・[/h2]
 Icons used in my mod:
 All icons were recreated as a vector icon.
 'helmet' icon from [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] by [url=https://www.keenswh.com] Keen Software House [/url]
 'jetpack' icon from [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] by [url=https://www.keenswh.com] Keen Software House [/url]
 'dampener' icon from [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] by [url=https://www.keenswh.com] Keen Software House [/url]
-
-[h1][b]➤⠀G⠀I⠀T⠀H⠀U⠀B[/b][/H1]
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
-The source for this mod can be found at [url=https://github.com/SiskSjet/SmarterSuit] SmarterSuit [/url] and is licensed under [url=https://github.com/SiskSjet/SmarterSuit/blob/master/LICENSE] MIT [/url]
-You can use my code as you like, just a license and a copyright notice is required, but please do not flood the workshop with copies of this mod.
-If you think some features are missing, try to ask first
-
-[h1][b]➤⠀S⠀U⠀P⠀P⠀O⠀R⠀T[/b][/H1]
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
-[img]https://steamuserimages-a.akamaihd.net/ugc/949586220823602248/339F6748C4155B2EC3EDD33FDAF04F1B12A4A500/[/img][url=https://steamcommunity.com/id/sisksjet/myworkshopfiles/?appid=244850][img]https://steamuserimages-a.akamaihd.net/ugc/949586220823603246/BA1A8E6272BE3863194FEDB79F68D3DEACBE0837/[/img][/url][url=https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4BUABNQCJ59CG][img]https://steamuserimages-a.akamaihd.net/ugc/949586220823604755/9492C8834824BCC7FE9EEACAD803F8BA99854E05/[/img][/url]
-
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -148,10 +143,6 @@ If you think some features are missing, try to ask first
 Ein kleines Anzug-Software-Update, dass den Tod durch Fehlfunktion des Anzugs verhindert.
 Das neue Anzug-Update überprüft nun beim Verlassen eines Cockpits oder nach einem Respawn einige Parameter, um mögliche Gefahrenquellen zu eliminieren.
 Außerdem wird die Geschwindigkeit relativ zum Schiff eingestellt.
-
-In Update 1.188 haben wir von Keen ein Anzug Update erhalten, danke übrigens.
-Es führt die relativen Trägheitsdämpfer ein. Das funktioniert super und dadurch wird diese Mod den Dämpferzustand beim Verlassen eines Cockpits nicht mehr ändern.
-Es scheint auch die meisten Probleme mit Sauerstoffanzeigen zu beheben. Jetzt ist die Option "AlwaysAutoHelmet" standardmäßig aktiviert.
 
 [b]Helm[/b] ([i]überprüft alle 30 Ticks[/i])
 * offen wenn Umgebung mit Sauerstoff erkannt wurde.
@@ -165,8 +156,7 @@ Es scheint auch die meisten Probleme mit Sauerstoffanzeigen zu beheben. Jetzt is
 * aktiviert, wenn das Shiff steht oder wenn kein Boden in Reichweite ist und Planetarische Schwerkraft festgestellt wurde.
 * deaktiviert, wenn sich das Schiff bewegt.
 
-[h1][b]➤⠀O⠀P⠀T⠀I⠀O⠀N⠀A⠀L[/b][/h1]
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
+[h2]🛠︰Optionen・─────────・・・[/h2]
 Sie können optionale Funktionen aktivieren, indem Sie einen Befehl in Ihre Chat-Box eingeben.
 Im Multiplayer können nur Serveradministratoren Optionen festlegen. Alle Optionen werden synchronisiert.
 
@@ -266,24 +256,26 @@ Im Multiplayer können nur Serveradministratoren Optionen festlegen. Alle Option
 [CODE]/ss enable afw[/CODE]
 [CODE]/ss set ft 0.5[/CODE]
 
-[h1][b]➤⠀M⠀O⠀D⠀ ⠀S⠀U⠀P⠀P⠀O⠀R⠀T[/b][/H1]
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
+[h2]🛠︰Mod Support ・────────・・・[/h2]
 [url=https://steamcommunity.com/sharedfiles/filedetails/?id=782845808] Entfernt jede Form von automatischer Jetpack aktivierung [/url]. Diese Mod ändert dann nicht den Jetpack-Status.
 
-[h1][b]➤⠀C⠀R⠀E⠀D⠀I⠀T⠀S[/b][/H1]
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
+[h2]🛠︰Support ・──────────・・・[/h2]
+Es wäre schön, wenn ihr mich unterstützen würdet
+
+[url=https://ko-fi.com/sisksjet][img]https://steamuserimages-a.akamaihd.net/ugc/2287333413738438809/074D2B10C793252F866EEB91EC748E0E8B3C3210/?imw=64&imh=64&ima=fit&impolicy=Letterbox&letterbox=false[/img][/url] [url=https://patreon.com/sisk][img]https://steamuserimages-a.akamaihd.net/ugc/2287333413738613768/8FE59EC78463E3EFA52D59347D83D3C9838BF6E6/?imw=64&imh=64&ima=fit&impolicy=Letterbox&letterbox=false[/img][/url] [url=https://paypal.me/sisksjet][img]https://steamuserimages-a.akamaihd.net/ugc/2287333413738619680/36B89C41163487AD5BFB13B2C673E0F153171D29/?imw=64&imh=64&ima=fit&impolicy=Letterbox&letterbox=true[/img][/url]
+
+oder meinem [url=https://discord.gg/2s22YCqSFg]Discord[/url] beitretet, wenn ihr Vorschläge oder Wünsche haben oder einfach nur wissen möchten, woran ich sonst noch arbeite. Mein Discord ist neu, daher ist noch nicht viel los.
+Ihr könnt euch auch meine anderen Mods in meinem [url=https://steamcommunity.com/id/sisksjet/myworkshopfiles/?appid=244850]Workshop[/url] ansehen.
+
+
+[h2]🛠︰Github ・───────────・・・[/h2]
+Den Source code dieser Mod kann unter [url=https://github.com/SiskSjet/SmarterSuit] SmarterSuit [/url] gefunden werden und ist lizenziert unter [url=https://github.com/SiskSjet/SmarterSuit/blob/master/LICENSE] MIT [/url]
+Du kannst meinen Code benutzen wie du magst, nur ein Lizenz und ein Copyright-Hinweis ist erforderlich, aber bitte überflute den Workshop nicht mit Kopien dieser Mod.
+Wenn ihr der Meinung seid, dass einige Funktionen fehlen, versucht sie zuerst anzufragen
+
+[h2]🛠︰Credits ・──────────・・・[/h2]
 Verwendete icons in meiner Mod:
 Alle Icons wurden als Vektor Icon neu erstellt.
 'helmet' icon aus [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] von [url=https://www.keenswh.com] Keen Software House [/url]
 'jetpack' icon aus [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] von [url=https://www.keenswh.com] Keen Software House [/url]
 'dampener' icon aus [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] von [url=https://www.keenswh.com] Keen Software House [/url]
-
-[h1][b]➤⠀G⠀I⠀T⠀H⠀U⠀B[/b][/H1]
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
-Den Source code dieser Mod kann unter [url=https://github.com/SiskSjet/SmarterSuit] SmarterSuit [/url] gefunden werden und ist lizenziert unter [url=https://github.com/SiskSjet/SmarterSuit/blob/master/LICENSE] MIT [/url]
-Du kannst meinen Code benutzen wie du magst, nur ein Lizenz und ein Copyright-Hinweis ist erforderlich, aber bitte überflute den Workshop nicht mit Kopien dieser Mod.
-Wenn ihr der Meinung seid, dass einige Funktionen fehlen, versucht sie zuerst anzufragen
-
-[h1][b]➤⠀S⠀U⠀P⠀P⠀O⠀R⠀T[/b][/H1]
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬⠀▬▬▬⠀▬▬⠀▬
-[img]https://steamuserimages-a.akamaihd.net/ugc/949586220823602248/339F6748C4155B2EC3EDD33FDAF04F1B12A4A500/[/img][url=https://steamcommunity.com/id/sisksjet/myworkshopfiles/?appid=244850][img]https://steamuserimages-a.akamaihd.net/ugc/949586220823603246/BA1A8E6272BE3863194FEDB79F68D3DEACBE0837/[/img][/url][url=https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4BUABNQCJ59CG][img]https://steamuserimages-a.akamaihd.net/ugc/949586220823604755/9492C8834824BCC7FE9EEACAD803F8BA99854E05/[/img][/url]

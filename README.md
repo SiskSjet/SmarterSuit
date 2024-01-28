@@ -1,19 +1,21 @@
 # Smarter Suit
 ![SmarterSuit](./Mod/thumb.png)
 
-* [Info](#info)
-* [Credits](#credits)
+- [Smarter Suit](#smarter-suit)
+  - [🛠︰Info](#info)
+  - [🛠︰Installation](#installation)
+  - [🛠︰Options](#options)
+  - [🛠︰Commands](#commands)
+  - [🛠︰Mod Support](#mod-support)
+  - [🛠︰Support](#support)
+  - [🛠︰Credits](#credits)
 
-## Info
+## 🛠︰Info
 
 A small suit software update that prevents death due to malfunction of the suit.
 
 The new suit update will now check some parameters when leaving a cockpit or after a respawn to eliminate potential sources of danger.
 In addition, the speed is adjusted relative to the ship.
-
-In update 1.188 we received a suit update from Keen, thank you by the way. 
-It introduces the relative inertia dampeners. This works great and because of that this mod will no longer change the dampener state when exiting a cockpit.
-It also seems to fix most issues with oxygen readouts. Now 'AlwaysAutoHelmet' option is enabled by default.
 
 **helmet** (*will check every 30 ticks*.) 
 * opened when enviroment with oxygen detected.
@@ -27,7 +29,13 @@ It also seems to fix most issues with oxygen readouts. Now 'AlwaysAutoHelmet' op
 * enabled when ship is not moving or when no ground in range and in planetary gravity well.
 * disabled when ship is moving.
 
-## Options
+## 🛠︰Installation
+
+The easiest way is to download it from [SteamWorkshop](https://steamcommunity.com/sharedfiles/filedetails/?id=1516827689).
+
+You can also download the latest zip from [releases](https://github.com/SiskSjet/SmarterSuit/releases) and extract it to your '%appdata%\SpaceEngineers\Mods' folder
+
+## 🛠︰Options
 
 * **AlwaysAutoHelmet/AAH** (*boolean*) - Will check everytime if helmet is needed. I don't recomend this setting for multiplayer with airthigness enabled, because of an bug with cockpits.
 * **DelayAfterManualHelmet/DAMH** (*integer*) - This will delay the auto helmet check for x ticks after the player toggled his helmet manualy.
@@ -36,7 +44,7 @@ It also seems to fix most issues with oxygen readouts. Now 'AlwaysAutoHelmet' op
 * **DisableAutoDampener/DAD** (*byte*) - Option to disable automatic dampener changes. *Default: 0 (Disabled)* 0 = Disabled | 1 = only mod changes disabled | 2 All dampener changes disabled.
 * **HaltedSpeedTolerance/HST** (*float*) - Option to adjust the speed tolerance that declares a ship specifies as not moving. *Default: 0.01*.
 
-## Commands
+## 🛠︰Commands
 
 `Usage: /ss [command] [arguments]`
 
@@ -47,11 +55,21 @@ It also seems to fix most issues with oxygen readouts. Now 'AlwaysAutoHelmet' op
 * **List** *- Lists all options.*
 * **Help** *- Shows a help window with all commands.*
 
-## Mod Support
+## 🛠︰Mod Support
 
 [Remove all automatic jetpack activation](https://steamcommunity.com/sharedfiles/filedetails/?id=782845808) This mod will then not change the jetpack status.
 
-## Credits
+## 🛠︰Support
+
+It would be nice if you could consider supporting me 
+
+[![Ko-fi](https://steamuserimages-a.akamaihd.net/ugc/2287333413738438809/074D2B10C793252F866EEB91EC748E0E8B3C3210/?imw=64&imh=64&ima=fit&impolicy=Letterbox&letterbox=false)](https://ko-fi.com/sisksjet) [![Patreon](https://steamuserimages-a.akamaihd.net/ugc/2287333413738613768/8FE59EC78463E3EFA52D59347D83D3C9838BF6E6/?imw=64&imh=64&ima=fit&impolicy=Letterbox&letterbox=false)](https://patreon.com/sisk) [![PayPal](https://steamuserimages-a.akamaihd.net/ugc/2287333413738619680/36B89C41163487AD5BFB13B2C673E0F153171D29/?imw=64&imh=64&ima=fit&impolicy=Letterbox&letterbox=true)](https://paypal.me/sisksjet)
+
+or join my [Discord](https://discord.gg/2s22YCqSFg) if you have suggestions, wishes, or just want to know what else I'm working on. My Discord is new, so there is not much going on yet.
+You can also check out my other mods in my [Workshop](https://steamcommunity.com/id/sisksjet/myworkshopfiles/?appid=244850).
+
+
+## 🛠︰Credits
 
 Icons used in this mod:
 * All icons were recreated as a vector icon.

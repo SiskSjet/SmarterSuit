@@ -59,11 +59,6 @@ namespace Sisk.SmarterSuit {
         public static Mod Static { get; private set; }
 
         /// <summary>
-        ///     Language used to localize this mod.
-        /// </summary>
-        public MyLanguagesEnum? Language { get; private set; }
-
-        /// <summary>
         ///     Logger used for logging.
         /// </summary>
         public ILogger Log { get; private set; }
@@ -189,7 +184,6 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         public override void LoadData() {
             InitializeLogging();
-            LoadLocalization();
             CheckSupportedMods();
 
             if (MyAPIGateway.Multiplayer.MultiplayerActive) {
@@ -201,20 +195,17 @@ namespace Sisk.SmarterSuit {
                         _networkHandler = new ServerHandler(Log, Network);
 
                         if (!Network.IsDedicated) {
-                            MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
                         }
 
                         if (Network.IsDedicated) {
                             return;
                         }
                     } else {
-                        MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
                         _networkHandler = new ClientHandler(Log, Network);
                         Network.SendToServer(new SettingsRequestMessage());
                     }
                 }
             } else {
-                MyAPIGateway.Gui.GuiControlRemoved += OnGuiControlRemoved;
                 LoadSettings();
             }
 
@@ -313,7 +304,6 @@ namespace Sisk.SmarterSuit {
             Log?.EnterMethod(nameof(UnloadData));
 
             MyAPIGateway.Session.OnSessionReady -= OnSessionReady;
-            MyAPIGateway.Gui.GuiControlRemoved -= OnGuiControlRemoved;
 
             if (_chatHandler != null) {
                 _chatHandler.Close();
@@ -411,29 +401,6 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
-        ///     Load localizations for this mod.
-        /// </summary>
-        private void LoadLocalization() {
-            var path = Path.Combine(ModContext.ModPathData, "Localization");
-            var supportedLanguages = new HashSet<MyLanguagesEnum>();
-            MyTexts.LoadSupportedLanguages(path, supportedLanguages);
-
-            var currentLanguage = supportedLanguages.Contains(MyAPIGateway.Session.Config.Language) ? MyAPIGateway.Session.Config.Language : MyLanguagesEnum.English;
-            if (Language != null && Language == currentLanguage) {
-                return;
-            }
-
-            Language = currentLanguage;
-            var languageDescription = MyTexts.Languages.Where(x => x.Key == currentLanguage).Select(x => x.Value).FirstOrDefault();
-            if (languageDescription != null) {
-                var cultureName = string.IsNullOrWhiteSpace(languageDescription.CultureName) ? null : languageDescription.CultureName;
-                var subcultureName = string.IsNullOrWhiteSpace(languageDescription.SubcultureName) ? null : languageDescription.SubcultureName;
-
-                MyTexts.LoadTexts(path, cultureName, subcultureName);
-            }
-        }
-
-        /// <summary>
         ///     Load mod settings.
         /// </summary>
         private void LoadSettings() {
@@ -480,8 +447,7 @@ namespace Sisk.SmarterSuit {
                 }
             }
 
-            // note: workaround because there is a small gap where is underwater check or depth < 0 check is false, but the player would receive damage.
-            if (info.Type == MyDamageType.Asphyxia && Static.Settings.AlwaysAutoHelmet && WaterModAvailable && WaterModAPI.Registered) {
+            if (info.Type == MyDamageType.Asphyxia && Static.Settings.AlwaysAutoHelmet) {
                 var character = target as IMyCharacter;
                 if (character != null) {
                     if (!character.EnabledHelmet) {
@@ -492,17 +458,6 @@ namespace Sisk.SmarterSuit {
                         info.Amount = 0;
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        ///     Event triggered on gui control removed.
-        ///     Used to detect if Option screen is closed and then to reload localization.
-        /// </summary>
-        /// <param name="obj"></param>
-        private void OnGuiControlRemoved(object obj) {
-            if (obj.ToString().EndsWith("ScreenOptionsSpace")) {
-                LoadLocalization();
             }
         }
 
