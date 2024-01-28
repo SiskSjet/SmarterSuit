@@ -144,10 +144,6 @@ Ein kleines Anzug-Software-Update, dass den Tod durch Fehlfunktion des Anzugs ve
 Das neue Anzug-Update überprüft nun beim Verlassen eines Cockpits oder nach einem Respawn einige Parameter, um mögliche Gefahrenquellen zu eliminieren.
 Außerdem wird die Geschwindigkeit relativ zum Schiff eingestellt.
 
-In Update 1.188 haben wir von Keen ein Anzug Update erhalten, danke übrigens.
-Es führt die relativen Trägheitsdämpfer ein. Das funktioniert super und dadurch wird diese Mod den Dämpferzustand beim Verlassen eines Cockpits nicht mehr ändern.
-Es scheint auch die meisten Probleme mit Sauerstoffanzeigen zu beheben. Jetzt ist die Option "AlwaysAutoHelmet" standardmäßig aktiviert.
-
 [b]Helm[/b] ([i]überprüft alle 30 Ticks[/i])
 * offen wenn Umgebung mit Sauerstoff erkannt wurde.
 * geschlossen wenn Umgebung ohne Sauerstoff erkannt wurde.
