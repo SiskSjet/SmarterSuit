@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mod", "Mod\Mod.csproj", "{22248921-6215-49D2-9B61-642B68393AEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mod", "Mod\Mod.csproj", "{22248921-6215-49D2-9B61-642B68393AEE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4393A9BF-E798-4B28-884B-1942E1E90C86}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,15 +19,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Workshop.txt = Workshop.txt
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scripts", "Scripts\Scripts.csproj", "{C3CAF348-3065-46B0-9D01-6057F7A63C28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scripts", "Scripts\Scripts.csproj", "{C3CAF348-3065-46B0-9D01-6057F7A63C28}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{229AEBE6-2EF2-4CD5-ACC1-1014A018CC00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net", "Utils\Net\Net.csproj", "{2285E3A1-63A2-4632-AA74-CAA8DAC96C71}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Net", "Utils\Net\Net.csproj", "{2285E3A1-63A2-4632-AA74-CAA8DAC96C71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging", "Utils\Logging\Logging.csproj", "{D8581C43-F65D-49EB-BFE3-75F185371512}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logging", "Utils\Logging\Logging.csproj", "{D8581C43-F65D-49EB-BFE3-75F185371512}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandHandler", "Utils\CommandHandler\CommandHandler.csproj", "{F3734666-0ACA-4CDC-B1B1-CD955FB6B4A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandHandler", "Utils\CommandHandler\CommandHandler.csproj", "{F3734666-0ACA-4CDC-B1B1-CD955FB6B4A8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Localization", "Utils\Localization\Localization.csproj", "{8E61A81A-C812-47B4-B6CF-3B802FB6BAEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,14 @@ Global
 		{F3734666-0ACA-4CDC-B1B1-CD955FB6B4A8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F3734666-0ACA-4CDC-B1B1-CD955FB6B4A8}.Release|x64.ActiveCfg = Release|Any CPU
 		{F3734666-0ACA-4CDC-B1B1-CD955FB6B4A8}.Release|x64.Build.0 = Release|Any CPU
+		{8E61A81A-C812-47B4-B6CF-3B802FB6BAEF}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{8E61A81A-C812-47B4-B6CF-3B802FB6BAEF}.Debug|Any CPU.Build.0 = Debug|x64
+		{8E61A81A-C812-47B4-B6CF-3B802FB6BAEF}.Debug|x64.ActiveCfg = Debug|x64
+		{8E61A81A-C812-47B4-B6CF-3B802FB6BAEF}.Debug|x64.Build.0 = Debug|x64
+		{8E61A81A-C812-47B4-B6CF-3B802FB6BAEF}.Release|Any CPU.ActiveCfg = Release|x64
+		{8E61A81A-C812-47B4-B6CF-3B802FB6BAEF}.Release|Any CPU.Build.0 = Release|x64
+		{8E61A81A-C812-47B4-B6CF-3B802FB6BAEF}.Release|x64.ActiveCfg = Release|x64
+		{8E61A81A-C812-47B4-B6CF-3B802FB6BAEF}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,6 +95,7 @@ Global
 		{2285E3A1-63A2-4632-AA74-CAA8DAC96C71} = {229AEBE6-2EF2-4CD5-ACC1-1014A018CC00}
 		{D8581C43-F65D-49EB-BFE3-75F185371512} = {229AEBE6-2EF2-4CD5-ACC1-1014A018CC00}
 		{F3734666-0ACA-4CDC-B1B1-CD955FB6B4A8} = {229AEBE6-2EF2-4CD5-ACC1-1014A018CC00}
+		{8E61A81A-C812-47B4-B6CF-3B802FB6BAEF} = {229AEBE6-2EF2-4CD5-ACC1-1014A018CC00}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9058DCCE-C302-414F-88FD-0F2A7ABE1BEE}
