@@ -155,6 +155,7 @@ You can use my code as you like, just a license and a copyright notice is requir
 If you think some features are missing, try to ask first
 
 [h2]🛠︰Credits ・──────────・・・[/h2]
+Thanks [url=https://steamcommunity.com/id/zigglegarf] Dark Helmet [/url] for the awesome UI library: [url=https://steamcommunity.com/workshop/filedetails/?id=1965654081] Rich HUD Master [/url] 
 Icons used in my mod:
 All icons were recreated as a vector icon.
 'helmet' icon from [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] by [url=https://www.keenswh.com] Keen Software House [/url]
@@ -322,6 +323,7 @@ Du kannst meinen Code benutzen wie du magst, nur ein Lizenz und ein Copyright-Hi
 Wenn ihr der Meinung seid, dass einige Funktionen fehlen, versucht sie zuerst anzufragen
 
 [h2]🛠︰Credits ・──────────・・・[/h2]
+Danke an [url=https://steamcommunity.com/id/zigglegarf] Dark Helmet [/url] für die fantastische UI Bibliothek: [url=https://steamcommunity.com/workshop/filedetails/?id=1965654081] Rich HUD Master [/url] 
 Verwendete icons in meiner Mod:
 Alle Icons wurden als Vektor Icon neu erstellt.
 'helmet' icon aus [url=https://www.spaceengineersgame.com] SpaceEngineers [/url] von [url=https://www.keenswh.com] Keen Software House [/url]

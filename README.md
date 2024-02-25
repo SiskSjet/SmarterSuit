@@ -78,6 +78,8 @@ You can also check out my other mods in my [Workshop](https://steamcommunity.com
 
 ## 🛠︰Credits
 
+* Thanks [Dark Helmet](https://steamcommunity.com/id/zigglegarf) for the awesome UI library: [Rich HUD Master](https://steamcommunity.com/workshop/filedetails/?id=1965654081)
+
 Icons used in this mod:
 * All icons were recreated as a vector icon.
 * helmet icon from [SpaceEngineers](https://www.spaceengineersgame.com) by [Keen Software House](https://www.keenswh.com)
