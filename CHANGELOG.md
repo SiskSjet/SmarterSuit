@@ -1,3 +1,21 @@
+# [1.9.6](https://github.com/SiskSjet/SmartSuit/compare/v1.9.5...v1.9.6) (2024-02-25)
+
+
+### Features
+
+* suit will now remember the broadcast state when respawned ([b2f895a](https://github.com/SiskSjet/SmartSuit/commit/b2f895a1dce5ff700f62315a70c12fe5b7caf37f))
+
+
+
+# [1.9.5](https://github.com/SiskSjet/SmartSuit/compare/v1.9.4...v1.9.5) (2024-02-25)
+
+
+### Features
+
+* improve helmet handling ([d8a29f1](https://github.com/SiskSjet/SmartSuit/commit/d8a29f1574c054ef53b6177fc95e1a2ec001feb8))
+
+
+
 # [1.9.4](https://github.com/SiskSjet/SmartSuit/compare/v1.9.3...v1.9.4) (2023-11-04)
 
 
