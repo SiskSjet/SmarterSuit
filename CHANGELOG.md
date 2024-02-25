@@ -1,3 +1,24 @@
+# [2.0.0](https://github.com/SiskSjet/SmartSuit/compare/v1.9.5...v2.0.0) (2024-02-25)
+
+
+### Code Refactoring
+
+* move settings file to global storage ([9b87f95](https://github.com/SiskSjet/SmartSuit/commit/9b87f95519f444ab71c4be8f1f7e32af6c7b814d))
+* remove network code ([63d6305](https://github.com/SiskSjet/SmartSuit/commit/63d6305995930708c8b0ffed3a7a860000406764))
+
+
+### Features
+
+* add ui for settings ([3b58347](https://github.com/SiskSjet/SmartSuit/commit/3b58347a8a157394fe68a020b0b43aa07ef7f82e))
+
+
+### BREAKING CHANGES
+
+* settings file moved from save to global storage. From `%appdata%\SpaceEngineers\Saves\{STEAM_ID}\{WORLD_NAME}\Storage\1516827689.sbm_SmarterSuit\settings.xml` TO `%appdata%\SpaceEngineers\Storage\SmarterSuit.xml`
+* removed settings sync from server. This mod is now fully client side
+
+
+
 # [1.9.6](https://github.com/SiskSjet/SmartSuit/compare/v1.9.5...v1.9.6) (2024-02-25)
 
 
