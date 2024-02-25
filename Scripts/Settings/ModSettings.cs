@@ -6,6 +6,7 @@ using Sisk.SmarterSuit.Data;
 // ReSharper disable ExplicitCallerInfoArgument
 
 namespace Sisk.SmarterSuit.Settings {
+
     [ProtoContract]
     public class ModSettings {
         public const int VERSION = 1;

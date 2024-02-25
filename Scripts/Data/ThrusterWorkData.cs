@@ -1,7 +1,9 @@
 ﻿using VRage.ModAPI;
 
 namespace Sisk.SmarterSuit.Data {
+
     public class ThrusterWorkData : Work.Data {
+
         public ThrusterWorkData(IMyEntity lastEntity, bool allowSwitchingDampeners = false, bool leavedLadder = false) {
             LastEntity = lastEntity;
             AllowSwitchingDampeners = allowSwitchingDampeners;

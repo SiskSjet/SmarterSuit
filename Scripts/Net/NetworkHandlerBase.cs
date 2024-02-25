@@ -4,7 +4,9 @@ using Sisk.Utils.Logging;
 using Sisk.Utils.Net;
 
 namespace Sisk.SmarterSuit.Net {
+
     public abstract class NetworkHandlerBase {
+
         protected NetworkHandlerBase(ILogger log, Network network) {
             Log = log;
             Network = network;

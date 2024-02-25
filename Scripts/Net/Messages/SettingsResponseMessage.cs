@@ -6,8 +6,10 @@ using Sisk.Utils.Net.Messages;
 // ReSharper disable ExplicitCallerInfoArgument
 
 namespace Sisk.SmarterSuit.Net.Messages {
+
     [ProtoContract]
     public class SettingsResponseMessage : IMessage {
+
         [ProtoMember(2)]
         public ModSettings Settings { get; set; }
 
