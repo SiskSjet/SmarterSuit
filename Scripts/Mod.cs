@@ -6,12 +6,10 @@ using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
-using Sisk.SmarterSuit.Net;
-using Sisk.SmarterSuit.Net.Messages;
 using Sisk.SmarterSuit.Settings;
+using Sisk.SmarterSuit.UI;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Logging.DefaultHandler;
-using Sisk.Utils.Net;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
@@ -27,14 +25,15 @@ namespace Sisk.SmarterSuit {
         private const string LOG_FILE_TEMPLATE = "{0}.log";
         private const ushort NETWORK_ID = 51501;
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
-        private const string SETTINGS_FILE = "settings.xml";
+        private const string SETTINGS_FILE = "SmarterSuit.xml";
         private const ulong WATER_MOD_ID = 2200451495;
 
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
         private static readonly MyDefinitionId OxygenId = new MyDefinitionId(typeof(MyObjectBuilder_GasProperties), "Oxygen");
         private ChatHandler _chatHandler;
-        private NetworkHandlerBase _networkHandler;
         private SuitComputer _suitComputer;
+
+        private SettingsUI _ui;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Mod" /> session component.
@@ -57,11 +56,6 @@ namespace Sisk.SmarterSuit {
         ///     Logger used for logging.
         /// </summary>
         public ILogger Log { get; private set; }
-
-        /// <summary>
-        ///     Network to handle syncing.
-        /// </summary>
-        public Network Network { get; private set; }
 
         /// <summary>
         ///     Indicates if the 'Remove all automatic jetpack activation' is available.
@@ -119,8 +113,14 @@ namespace Sisk.SmarterSuit {
         ///     Used to register a before damage handler.
         /// </summary>
         public override void BeforeStart() {
-            if (Network == null || Network.IsServer) {
+            if (!MyAPIGateway.Utilities.IsDedicated) {
                 MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(25, OnBeforeDamage);
+            }
+        }
+
+        public override void Draw() {
+            if (!MyAPIGateway.Utilities.IsDedicated) {
+                _ui.Draw();
             }
         }
 
@@ -175,37 +175,29 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     The static instance of this component.
+        /// </summary>
+        /// <param name="sessionComponent"></param>
+        public override void Init(MyObjectBuilder_SessionComponent sessionComponent) {
+            if (!MyAPIGateway.Utilities.IsDedicated) {
+                _ui = new SettingsUI();
+                _ui?.Init(NAME);
+            }
+        }
+
+        /// <summary>
         ///     Load mod settings, create localizations and initialize network handler.
         /// </summary>
         public override void LoadData() {
             InitializeLogging();
             CheckSupportedMods();
 
-            if (MyAPIGateway.Multiplayer.MultiplayerActive) {
-                InitializeNetwork();
-
-                if (Network != null) {
-                    if (Network.IsServer) {
-                        LoadSettings();
-                        _networkHandler = new ServerHandler(Log, Network);
-
-                        if (!Network.IsDedicated) {
-                        }
-
-                        if (Network.IsDedicated) {
-                            return;
-                        }
-                    } else {
-                        _networkHandler = new ClientHandler(Log, Network);
-                        Network.SendToServer(new SettingsRequestMessage());
-                    }
-                }
-            } else {
+            if (!MyAPIGateway.Utilities.IsDedicated) {
                 LoadSettings();
-            }
 
-            _chatHandler = new ChatHandler(Log, Network, _networkHandler);
-            MyAPIGateway.Session.OnSessionReady += OnSessionReady;
+                _chatHandler = new ChatHandler(Log);
+                MyAPIGateway.Session.OnSessionReady += OnSessionReady;
+            }
         }
 
         public void OnSettingsReceived(ModSettings settings) {
@@ -220,7 +212,7 @@ namespace Sisk.SmarterSuit {
         /// <typeparam name="TValue">The value type.</typeparam>
         /// <param name="option">Which option should be set.</param>
         /// <param name="value">The value for given option.</param>
-        public void SetOption<TValue>(Option option, TValue value) {
+        public void SetOption<TValue>(Option option, TValue value, bool showResult = true) {
             switch (option) {
                 case Option.AlwaysAutoHelmet:
                     Settings.AlwaysAutoHelmet = (bool)(object)value;
@@ -254,6 +246,10 @@ namespace Sisk.SmarterSuit {
                     Settings.DelayAfterManualHelmet = (int)(object)value;
                     break;
 
+                case Option.RememberBroadcast:
+                    Settings.RememberBroadcast = (bool)(object)value;
+                    break;
+
                 default:
                     using (Log.BeginMethod(nameof(SetOption))) {
                         Log.Error($"Unknown option '{nameof(option)}'");
@@ -262,8 +258,11 @@ namespace Sisk.SmarterSuit {
                     return;
             }
 
-            if (Network == null || Network.IsServer) {
-                ShowResultMessage(option, value, Result.Success);
+            if (!MyAPIGateway.Utilities.IsDedicated) {
+                if (showResult) {
+                    ShowResultMessage(option, value, Result.Success);
+                }
+
                 SaveSettings();
             }
         }
@@ -308,15 +307,6 @@ namespace Sisk.SmarterSuit {
             if (_suitComputer != null) {
                 _suitComputer.Close();
                 _suitComputer = null;
-            }
-
-            if (Network != null) {
-                _networkHandler.Close();
-                _networkHandler = null;
-
-                Log?.Info("Cap network connections");
-                Network.Close();
-                Network = null;
             }
 
             if (Log != null) {
@@ -384,25 +374,13 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
-        ///     Initialize the network system.
-        /// </summary>
-        private void InitializeNetwork() {
-            using (Log.BeginMethod(nameof(InitializeNetwork))) {
-                Log.Info("Initialize Network");
-                Network = new Network(NETWORK_ID);
-                Log.Info($"IsClient {Network.IsClient}, IsServer: {Network.IsServer}, IsDedicated: {Network.IsDedicated}");
-                Log.Info("Network initialized");
-            }
-        }
-
-        /// <summary>
         ///     Load mod settings.
         /// </summary>
         private void LoadSettings() {
             ModSettings settings = null;
             try {
-                if (MyAPIGateway.Utilities.FileExistsInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
-                    using (var reader = MyAPIGateway.Utilities.ReadFileInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
+                if (MyAPIGateway.Utilities.FileExistsInGlobalStorage(SETTINGS_FILE)) {
+                    using (var reader = MyAPIGateway.Utilities.ReadFileInGlobalStorage(SETTINGS_FILE)) {
                         settings = MyAPIGateway.Utilities.SerializeFromXML<ModSettings>(reader.ReadToEnd());
                     }
                 }
@@ -471,7 +449,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void SaveSettings() {
             try {
-                using (var writer = MyAPIGateway.Utilities.WriteFileInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
+                using (var writer = MyAPIGateway.Utilities.WriteFileInGlobalStorage(SETTINGS_FILE)) {
                     writer.Write(MyAPIGateway.Utilities.SerializeToXML(Settings));
                 }
             } catch (Exception exception) {

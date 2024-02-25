@@ -11,6 +11,7 @@ packages/
 
 Profiler/
 TerminalControls/
+Net/
 
 *.csproj
 *.git

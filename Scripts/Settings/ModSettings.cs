@@ -1,7 +1,7 @@
-using System.ComponentModel;
-using System.Xml.Serialization;
 using ProtoBuf;
 using Sisk.SmarterSuit.Data;
+using System.ComponentModel;
+using System.Xml.Serialization;
 
 // ReSharper disable ExplicitCallerInfoArgument
 
@@ -18,6 +18,7 @@ namespace Sisk.SmarterSuit.Settings {
         private const DisableAutoDampenerOption DISABLE_AUTO_DAMPENER = DisableAutoDampenerOption.Disable;
         private const float FUEL_THRESHOLD = 0.25f;
         private const float HALTED_SPEED_TOLERANCE = 0.01f;
+        private const bool REMEMBER_BROADCAST = true;
 
         [ProtoMember(3)]
         [DefaultValue(ADDITIONAL_FUEL_WARNING)]
@@ -58,6 +59,11 @@ namespace Sisk.SmarterSuit.Settings {
         [DefaultValue(HALTED_SPEED_TOLERANCE)]
         [XmlElement(Order = 6)]
         public float HaltedSpeedTolerance { get; set; } = HALTED_SPEED_TOLERANCE;
+
+        [ProtoMember(10)]
+        [DefaultValue(REMEMBER_BROADCAST)]
+        [XmlElement(Order = 10)]
+        public bool RememberBroadcast { get; set; } = REMEMBER_BROADCAST;
 
         [ProtoMember(1)]
         [XmlElement(Order = 1)]

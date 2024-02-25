@@ -29,6 +29,10 @@ In addition, the speed is adjusted relative to the ship.
 * enabled when ship is not moving or when no ground in range and in planetary gravity well.
 * disabled when ship is moving.
 
+**broadcast** (*only after respawn in the medical room*)
+* enabled when the suit was broadcasting before the respawn.
+* disabled when the suit was not broadcasting before the respawn.
+
 ## 🛠︰Installation
 
 The easiest way is to download it from [SteamWorkshop](https://steamcommunity.com/sharedfiles/filedetails/?id=1516827689).
@@ -43,6 +47,9 @@ You can also download the latest zip from [releases](https://github.com/SiskSjet
 * **FuelThreshold/FT** (*float*) - The fuel threshold used for additional fuel warnings. *Default: 0.25* Range is 0-1.
 * **DisableAutoDampener/DAD** (*byte*) - Option to disable automatic dampener changes. *Default: 0 (Disabled)* 0 = Disabled | 1 = only mod changes disabled | 2 All dampener changes disabled.
 * **HaltedSpeedTolerance/HST** (*float*) - Option to adjust the speed tolerance that declares a ship specifies as not moving. *Default: 0.01*.
+* **AlignToGravity/ATG** (*boolean*) - Option to align the player to the gravity vector when flying. *Default: false*.
+* **AlignToGravityDelay/ATGD** (*float*) - Delay, after which the suit tries to align to gravity. . *Default: 312*.
+* **RememberBroadcast/RB** (*boolean*) - Option to remember the broadcast state of the suit. *Default: true*.
 
 ## 🛠︰Commands
 

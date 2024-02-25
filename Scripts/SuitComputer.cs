@@ -345,7 +345,7 @@ namespace Sisk.SmarterSuit {
             var results = new List<IHitInfo>();
             var position = character.WorldAABB.Center;
             var matrix = character.WorldMatrix;
-            var from = Mod.Static.Network == null ? position : position + matrix.Forward * .5;
+            var from = position + matrix.Forward * .5;
             var to = from + matrix.Down * 2;
 
             if (gravity.Length() > 0) {
@@ -569,7 +569,7 @@ namespace Sisk.SmarterSuit {
                         _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(lastEntity, true)));
                     }
 
-                    if (workData != null) {
+                    if (workData != null && Mod.Static.Settings.RememberBroadcast) {
                         _workQueue.Enqueue(new Work(SetBroadcast, workData));
                     }
                 }

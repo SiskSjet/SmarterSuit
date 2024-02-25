@@ -14,9 +14,12 @@ In addition, the speed is adjusted relative to the ship.
 * enabled when ship is not moving or when no ground in range and in an planetary gravity well.
 * disabled when ship is moving.
 
+[b]Broadcast[/b] ([i]only after respawn in the medical room[/i])
+* enabled when the suit was broadcasting before the respawn.
+* disabled when the suit was not broadcasting before the respawn.
+
 [h2]🛠︰Options・─────────・・・[/h2]
-You can enable optional features by typing a command in your chat box.
-In multiplayer only server admins can set options. All options are synced.
+You can enable optional features by typing a command in your chat box or press F2 to open the UI.
 
 [b]Options[/b]:
 [table]
@@ -71,6 +74,27 @@ In multiplayer only server admins can set options. All options are synced.
 	[td]float[/td]
 	[td]Option to adjust the speed tolerance that declares a ship specifies as not moving. 
 	[b]Default: 0.01[/b][/td]
+[/tr]
+[tr]
+	[td]AlignToGravity[/td]
+	[td]ATG[/td]
+	[td]boolean[/td]
+	[td]When flying, the suit tries to align to gravity after the configured delay. 
+	[b]Default: false[/b][/td]
+[/tr]
+[tr]
+	[td]AlignToGravityDelay[/td]
+	[td]ATGD[/td]
+	[td]float[/td]
+	[td]Delay, after which the suit tries to align to gravity. 
+	[b]Default: 312 (5000/16 or roughly 5 sec)[/b][/td]
+[/tr]
+[tr]
+	[td]RememberBroadcast[/td]
+	[td]RB[/td]
+	[td]boolean[/td]
+	[td]The suit remembers the broadcasting state when respawning. 
+	[b]Default: true[/b][/td]
 [/tr]
 [/table]
 
@@ -156,9 +180,12 @@ Außerdem wird die Geschwindigkeit relativ zum Schiff eingestellt.
 * aktiviert, wenn das Shiff steht oder wenn kein Boden in Reichweite ist und Planetarische Schwerkraft festgestellt wurde.
 * deaktiviert, wenn sich das Schiff bewegt.
 
+[b]Broadcast[/b] ([i]nur nach einem respawn im Medical Room[/i])
+* aktiviert, wenn der Anzug vor dem Respawn gesendet hat.
+* deaktiviert, wenn der Anzug vor dem Respawn nicht gesendet hat.
+
 [h2]🛠︰Optionen・─────────・・・[/h2]
-Sie können optionale Funktionen aktivieren, indem Sie einen Befehl in Ihre Chat-Box eingeben.
-Im Multiplayer können nur Serveradministratoren Optionen festlegen. Alle Optionen werden synchronisiert.
+Sie können optionale Funktionen aktivieren, indem Sie einen Befehl in Ihre Chat-Box eingeben oder mit F2 die UI für die Einstellungen zu öffnen.
 
 [b]Options[/b]:
 [table]
@@ -213,6 +240,27 @@ Im Multiplayer können nur Serveradministratoren Optionen festlegen. Alle Option
 	[td]float[/td]
 	[td]Option zum Anpassen der Geschwindigkeitstoleranz, die angibt ob sich ein Shiff nicht bewegt.
 	[b]Standard: 0,01[/b][/td]
+[/tr]
+[tr]
+	[td]AlignToGravity[/td]
+	[td]ATG[/td]
+	[td]boolean[/td]
+	[td]Beim Fliegen versucht der Anzug nach der konfigurierten Verzögerung, sich der Schwerkraft anzupassen. 
+	[b]Standard: false[/b][/td]
+[/tr]
+[tr]
+	[td]AlignToGravityDelay[/td]
+	[td]ATGD[/td]
+	[td]float[/td]
+	[td]Verzögerung, nach der der Anzug versucht, sich der Schwerkraft anzupassen.
+	[b]Standard: 312 (5000/16 oder ungefähr 5 sec)[/b][/td]
+[/tr]
+[tr]
+	[td]RememberBroadcast[/td]
+	[td]RB[/td]
+	[td]boolean[/td]
+	[td]Der Anzug merkt sich beim Respawnen den Broadcaststatus.
+	[b]Standard: true[/b][/td]
 [/tr]
 [/table]
 

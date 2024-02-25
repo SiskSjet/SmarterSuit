@@ -9,5 +9,6 @@ namespace Sisk.SmarterSuit.Data {
         DelayAfterManualHelmet,
         AlignToGravity,
         AlignToGravityDelay,
+        RememberBroadcast
     }
 }
