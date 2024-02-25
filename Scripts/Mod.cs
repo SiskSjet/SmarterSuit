@@ -25,7 +25,7 @@ namespace Sisk.SmarterSuit {
         private const string LOG_FILE_TEMPLATE = "{0}.log";
         private const ushort NETWORK_ID = 51501;
         private const ulong REMOVE_AUTOMATIC_JETPACK_ACTIVATION_ID = 782845808;
-        private const string SETTINGS_FILE = "settings.xml";
+        private const string SETTINGS_FILE = "SmarterSuit.xml";
         private const ulong WATER_MOD_ID = 2200451495;
 
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
@@ -192,10 +192,12 @@ namespace Sisk.SmarterSuit {
             InitializeLogging();
             CheckSupportedMods();
 
-            LoadSettings();
+            if (!MyAPIGateway.Utilities.IsDedicated) {
+                LoadSettings();
 
-            _chatHandler = new ChatHandler(Log);
-            MyAPIGateway.Session.OnSessionReady += OnSessionReady;
+                _chatHandler = new ChatHandler(Log);
+                MyAPIGateway.Session.OnSessionReady += OnSessionReady;
+            }
         }
 
         public void OnSettingsReceived(ModSettings settings) {
@@ -377,8 +379,8 @@ namespace Sisk.SmarterSuit {
         private void LoadSettings() {
             ModSettings settings = null;
             try {
-                if (MyAPIGateway.Utilities.FileExistsInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
-                    using (var reader = MyAPIGateway.Utilities.ReadFileInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
+                if (MyAPIGateway.Utilities.FileExistsInGlobalStorage(SETTINGS_FILE)) {
+                    using (var reader = MyAPIGateway.Utilities.ReadFileInGlobalStorage(SETTINGS_FILE)) {
                         settings = MyAPIGateway.Utilities.SerializeFromXML<ModSettings>(reader.ReadToEnd());
                     }
                 }
@@ -447,7 +449,7 @@ namespace Sisk.SmarterSuit {
         /// </summary>
         private void SaveSettings() {
             try {
-                using (var writer = MyAPIGateway.Utilities.WriteFileInWorldStorage(SETTINGS_FILE, typeof(Mod))) {
+                using (var writer = MyAPIGateway.Utilities.WriteFileInGlobalStorage(SETTINGS_FILE)) {
                     writer.Write(MyAPIGateway.Utilities.SerializeToXML(Settings));
                 }
             } catch (Exception exception) {
