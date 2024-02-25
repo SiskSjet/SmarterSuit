@@ -6,13 +6,10 @@ using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
-using Sisk.SmarterSuit.Net;
-using Sisk.SmarterSuit.Net.Messages;
 using Sisk.SmarterSuit.Settings;
 using Sisk.SmarterSuit.UI;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Logging.DefaultHandler;
-using Sisk.Utils.Net;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
@@ -34,7 +31,6 @@ namespace Sisk.SmarterSuit {
         private static readonly string LogFile = string.Format(LOG_FILE_TEMPLATE, NAME);
         private static readonly MyDefinitionId OxygenId = new MyDefinitionId(typeof(MyObjectBuilder_GasProperties), "Oxygen");
         private ChatHandler _chatHandler;
-        private NetworkHandlerBase _networkHandler;
         private SuitComputer _suitComputer;
 
         private SettingsUI _ui;
@@ -60,11 +56,6 @@ namespace Sisk.SmarterSuit {
         ///     Logger used for logging.
         /// </summary>
         public ILogger Log { get; private set; }
-
-        /// <summary>
-        ///     Network to handle syncing.
-        /// </summary>
-        public Network Network { get; private set; }
 
         /// <summary>
         ///     Indicates if the 'Remove all automatic jetpack activation' is available.
@@ -122,7 +113,7 @@ namespace Sisk.SmarterSuit {
         ///     Used to register a before damage handler.
         /// </summary>
         public override void BeforeStart() {
-            if (Network == null || Network.IsServer) {
+            if (!MyAPIGateway.Utilities.IsDedicated) {
                 MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(25, OnBeforeDamage);
             }
         }
@@ -201,30 +192,9 @@ namespace Sisk.SmarterSuit {
             InitializeLogging();
             CheckSupportedMods();
 
-            if (MyAPIGateway.Multiplayer.MultiplayerActive) {
-                InitializeNetwork();
+            LoadSettings();
 
-                if (Network != null) {
-                    if (Network.IsServer) {
-                        LoadSettings();
-                        _networkHandler = new ServerHandler(Log, Network);
-
-                        if (!Network.IsDedicated) {
-                        }
-
-                        if (Network.IsDedicated) {
-                            return;
-                        }
-                    } else {
-                        _networkHandler = new ClientHandler(Log, Network);
-                        Network.SendToServer(new SettingsRequestMessage());
-                    }
-                }
-            } else {
-                LoadSettings();
-            }
-
-            _chatHandler = new ChatHandler(Log, Network, _networkHandler);
+            _chatHandler = new ChatHandler(Log);
             MyAPIGateway.Session.OnSessionReady += OnSessionReady;
         }
 
@@ -274,6 +244,10 @@ namespace Sisk.SmarterSuit {
                     Settings.DelayAfterManualHelmet = (int)(object)value;
                     break;
 
+                case Option.RememberBroadcast:
+                    Settings.RememberBroadcast = (bool)(object)value;
+                    break;
+
                 default:
                     using (Log.BeginMethod(nameof(SetOption))) {
                         Log.Error($"Unknown option '{nameof(option)}'");
@@ -282,10 +256,11 @@ namespace Sisk.SmarterSuit {
                     return;
             }
 
-            if (Network == null || Network.IsServer) {
+            if (!MyAPIGateway.Utilities.IsDedicated) {
                 if (showResult) {
                     ShowResultMessage(option, value, Result.Success);
                 }
+
                 SaveSettings();
             }
         }
@@ -330,15 +305,6 @@ namespace Sisk.SmarterSuit {
             if (_suitComputer != null) {
                 _suitComputer.Close();
                 _suitComputer = null;
-            }
-
-            if (Network != null) {
-                _networkHandler.Close();
-                _networkHandler = null;
-
-                Log?.Info("Cap network connections");
-                Network.Close();
-                Network = null;
             }
 
             if (Log != null) {
@@ -402,18 +368,6 @@ namespace Sisk.SmarterSuit {
 
             using (Log.BeginMethod(nameof(InitializeLogging))) {
                 Log.Info("Logging initialized");
-            }
-        }
-
-        /// <summary>
-        ///     Initialize the network system.
-        /// </summary>
-        private void InitializeNetwork() {
-            using (Log.BeginMethod(nameof(InitializeNetwork))) {
-                Log.Info("Initialize Network");
-                Network = new Network(NETWORK_ID);
-                Log.Info($"IsClient {Network.IsClient}, IsServer: {Network.IsServer}, IsDedicated: {Network.IsDedicated}");
-                Log.Info("Network initialized");
             }
         }
 

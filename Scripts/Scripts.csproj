@@ -23,7 +23,6 @@
       <ProjectReference Include="..\Utils\CommandHandler\CommandHandler.csproj" />
       <ProjectReference Include="..\Utils\Localization\Localization.csproj" />
       <ProjectReference Include="..\Utils\Logging\Logging.csproj" />
-      <ProjectReference Include="..\Utils\Net\Net.csproj" />
     </ItemGroup>
 
     <ItemGroup>

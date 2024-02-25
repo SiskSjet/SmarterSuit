@@ -7,10 +7,8 @@ using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Extensions;
 using Sisk.SmarterSuit.Localization;
-using Sisk.SmarterSuit.Net;
 using Sisk.Utils.CommandHandler;
 using Sisk.Utils.Logging;
-using Sisk.Utils.Net;
 
 // ReSharper disable InlineOutVariableDeclaration
 
@@ -27,6 +25,7 @@ namespace Sisk.SmarterSuit {
             { Acronym(nameof(Option.DelayAfterManualHelmet)), Option.DelayAfterManualHelmet },
             { Acronym(nameof(Option.AlignToGravity)), Option.AlignToGravity },
             { Acronym(nameof(Option.AlignToGravityDelay)), Option.AlignToGravityDelay },
+            { Acronym(nameof(Option.RememberBroadcast)), Option.AlignToGravityDelay },
         };
 
         private readonly CommandHandler _commandHandler;
@@ -40,12 +39,11 @@ namespace Sisk.SmarterSuit {
             { Option.DelayAfterManualHelmet, typeof(int) },
             { Option.AlignToGravity, typeof(bool) },
             { Option.AlignToGravityDelay, typeof(int) },
+            { Option.RememberBroadcast, typeof(bool) },
         };
 
-        public ChatHandler(ILogger log, Network network, NetworkHandlerBase networkHandler) {
+        public ChatHandler(ILogger log) {
             Log = log;
-            Network = network;
-            NetworkHandler = networkHandler;
 
             _commandHandler = new CommandHandler(Mod.NAME) { Prefix = $"/{Mod.Acronym}" };
             _commandHandler.Register(new Command { Name = "Enable", Description = ModText.Description_SS_Enable.GetString(), Execute = OnEnableOptionCommand });
@@ -63,20 +61,10 @@ namespace Sisk.SmarterSuit {
         private ILogger Log { get; set; }
 
         /// <summary>
-        ///     Network to handle syncing.
-        /// </summary>
-        private Network Network { get; set; }
-
-        private NetworkHandlerBase NetworkHandler { get; }
-
-        /// <summary>
         ///     Close the network message handler.
         /// </summary>
         public virtual void Close() {
             MyAPIGateway.Utilities.MessageEntered -= OnMessageEntered;
-            if (Network != null) {
-                Network = null;
-            }
 
             if (Log != null) {
                 Log = null;
@@ -206,11 +194,7 @@ namespace Sisk.SmarterSuit {
         /// <param name="option">Which option should be set.</param>
         /// <param name="value">The value for given option.</param>
         private void SetOption<TValue>(Option option, TValue value) {
-            if (Network == null) {
-                Mod.Static.SetOption(option, value);
-            } else {
-                NetworkHandler.SyncOption(option, value);
-            }
+            Mod.Static.SetOption(option, value);
         }
 
         /// <summary>
