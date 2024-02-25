@@ -4,3 +4,6 @@
 [submodule "SE-Water"]
 	path = SE-Water
 	url = https://github.com/jakarianstudios/SE-Water
+[submodule "RichHudFramework"]
+	path = RichHudFramework
+	url = https://github.com/ZachHembree/RichHudFramework.Client
