@@ -15,7 +15,9 @@ using Sisk.Utils.Net;
 // ReSharper disable InlineOutVariableDeclaration
 
 namespace Sisk.SmarterSuit {
+
     public class ChatHandler {
+
         private readonly Dictionary<string, Option> _alias = new Dictionary<string, Option>(StringComparer.CurrentCultureIgnoreCase) {
             { Acronym(nameof(Option.AlwaysAutoHelmet)), Option.AlwaysAutoHelmet },
             { Acronym(nameof(Option.AdditionalFuelWarning)), Option.AdditionalFuelWarning },
@@ -67,10 +69,6 @@ namespace Sisk.SmarterSuit {
 
         private NetworkHandlerBase NetworkHandler { get; }
 
-        private static string Acronym(string name) {
-            return string.Concat(name.Where(char.IsUpper));
-        }
-
         /// <summary>
         ///     Close the network message handler.
         /// </summary>
@@ -83,6 +81,10 @@ namespace Sisk.SmarterSuit {
             if (Log != null) {
                 Log = null;
             }
+        }
+
+        private static string Acronym(string name) {
+            return string.Concat(name.Where(char.IsUpper));
         }
 
         /// <summary>

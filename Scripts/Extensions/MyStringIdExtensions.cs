@@ -2,7 +2,9 @@
 using VRage.Utils;
 
 namespace Sisk.SmarterSuit.Extensions {
+
     public static class MyStringIdExtensions {
+
         /// <summary>
         ///     Get the localized <see cref="MyStringId" /> for given <paramref name="stringId" />.
         /// </summary>
