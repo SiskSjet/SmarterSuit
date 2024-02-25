@@ -19,6 +19,9 @@ using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
+// Sandbox.Game.Entities.IMyControllableEntity have to be the explicit type to not produce ambiguous call errors.
+using IMyControllableEntity = Sandbox.Game.Entities.IMyControllableEntity;
+
 namespace Sisk.SmarterSuit {
 
     public class SuitComputer {
@@ -457,15 +460,22 @@ namespace Sisk.SmarterSuit {
         /// <param name="newCharacter"></param>
         private void OnCharacterChanged(IMyCharacter oldCharacter, IMyCharacter newCharacter) {
             var isRespawn = oldCharacter != newCharacter;
+            var oldBroadcastState = false;
 
             if (oldCharacter != null) {
                 oldCharacter.MovementStateChanged -= OnMovementStateChanged;
+
+                // Sandbox.Game.Entities.IMyControllableEntity have to be the explicit type to not produce ambiguous call errors.
+                var control = oldCharacter as IMyControllableEntity;
+                if (control != null) {
+                    oldBroadcastState = control.EnabledBroadcasting;
+                }
             }
 
             newCharacter.MovementStateChanged += OnMovementStateChanged;
 
             if (isRespawn) {
-                _workQueue.Enqueue(new Work(Respawned));
+                _workQueue.Enqueue(new Work(Respawned, new BroadcastWorkData(oldBroadcastState)));
             }
         }
 
@@ -557,6 +567,35 @@ namespace Sisk.SmarterSuit {
                     _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
                     if (!Mod.Static.RemoveAutomaticJetpackActivationModAvailable) {
                         _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(lastEntity, true)));
+                    }
+
+                    if (workData != null) {
+                        _workQueue.Enqueue(new Work(SetBroadcast, workData));
+                    }
+                }
+            }
+        }
+
+        private void SetBroadcast(Work.Data workData) {
+            using (Log.BeginMethod(nameof(SetBroadcast))) {
+                var data = workData as BroadcastWorkData;
+                if (data == null) {
+                    Log.Warning("Invalid workData.");
+                    return;
+                }
+
+                var character = MyAPIGateway.Session.LocalHumanPlayer?.Character;
+                if (character == null) {
+                    Log.Warning("No character found for local player.");
+                    return;
+                }
+
+                // Sandbox.Game.Entities.IMyControllableEntity have to be the explicit type to not produce ambiguous call errors.
+                var control = character as IMyControllableEntity;
+                if (control != null) {
+                    // don't know why EnabledBroadcasting == data.State is working. I would expect EnabledBroadcasting != data.State to be correct but it would produce a reverse behavior.
+                    if (control.EnabledBroadcasting == data.State) {
+                        control.SwitchBroadcasting();
                     }
                 }
             }
