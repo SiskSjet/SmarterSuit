@@ -569,7 +569,7 @@ namespace Sisk.SmarterSuit {
                         _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(lastEntity, true)));
                     }
 
-                    if (workData != null) {
+                    if (workData != null && Mod.Static.Settings.RememberBroadcast) {
                         _workQueue.Enqueue(new Work(SetBroadcast, workData));
                     }
                 }

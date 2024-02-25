@@ -9,6 +9,7 @@ using Sisk.SmarterSuit.Localization;
 using Sisk.SmarterSuit.Net;
 using Sisk.SmarterSuit.Net.Messages;
 using Sisk.SmarterSuit.Settings;
+using Sisk.SmarterSuit.UI;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Logging.DefaultHandler;
 using Sisk.Utils.Net;
@@ -35,6 +36,8 @@ namespace Sisk.SmarterSuit {
         private ChatHandler _chatHandler;
         private NetworkHandlerBase _networkHandler;
         private SuitComputer _suitComputer;
+
+        private SettingsUI _ui;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Mod" /> session component.
@@ -124,6 +127,12 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        public override void Draw() {
+            if (!MyAPIGateway.Utilities.IsDedicated) {
+                _ui.Draw();
+            }
+        }
+
         /// <inheritdoc />
         public override void HandleInput() {
             if (Settings == null || _suitComputer == null || !(Settings.AlwaysAutoHelmet || Settings.AlignToGravity) || MyAPIGateway.Gui.ChatEntryVisible || MyAPIGateway.Gui.IsCursorVisible) {
@@ -175,6 +184,17 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
+        ///     The static instance of this component.
+        /// </summary>
+        /// <param name="sessionComponent"></param>
+        public override void Init(MyObjectBuilder_SessionComponent sessionComponent) {
+            if (!MyAPIGateway.Utilities.IsDedicated) {
+                _ui = new SettingsUI();
+                _ui?.Init(NAME);
+            }
+        }
+
+        /// <summary>
         ///     Load mod settings, create localizations and initialize network handler.
         /// </summary>
         public override void LoadData() {
@@ -220,7 +240,7 @@ namespace Sisk.SmarterSuit {
         /// <typeparam name="TValue">The value type.</typeparam>
         /// <param name="option">Which option should be set.</param>
         /// <param name="value">The value for given option.</param>
-        public void SetOption<TValue>(Option option, TValue value) {
+        public void SetOption<TValue>(Option option, TValue value, bool showResult = true) {
             switch (option) {
                 case Option.AlwaysAutoHelmet:
                     Settings.AlwaysAutoHelmet = (bool)(object)value;
@@ -263,7 +283,9 @@ namespace Sisk.SmarterSuit {
             }
 
             if (Network == null || Network.IsServer) {
-                ShowResultMessage(option, value, Result.Success);
+                if (showResult) {
+                    ShowResultMessage(option, value, Result.Success);
+                }
                 SaveSettings();
             }
         }
