@@ -1,3 +1,22 @@
+# [2.1.0](https://github.com/SiskSjet/SmarterSuit/compare/v2.0.0...v) (2025-10-06)
+
+
+### Code Refactoring
+
+* migrate project to mkd2. ([38d90b8](https://github.com/SiskSjet/SmartSuit/commit/38d90b8f3c8a880f5220b150471efc77922c7ba6))
+
+
+### Features
+
+* Added an option to switch the helmet light off when enter a cockpit. ([5f344eb](https://github.com/SiskSjet/SmartSuit/commit/5f344ebe421cabd7ac68c88d9309e9edba2d0d46))
+
+
+### Bug Fixes
+
+* Prevents a potential null reference exception when checking for oxygen component. ([3afacf3](https://github.com/SiskSjet/SmartSuit/commit/3afacf3422eadc965e385d449911b5a84e98af5d))
+
+
+
 # [2.0.0](https://github.com/SiskSjet/SmartSuit/compare/v1.9.5...v2.0.0) (2024-02-25)
 
 

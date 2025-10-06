@@ -277,6 +277,20 @@ Sie können optionale Funktionen aktivieren, indem Sie einen Befehl in Ihre Chat
 	[td]Der Anzug merkt sich beim Respawnen den Broadcaststatus.
 	[b]Standard: true[/b][/td]
 [/tr]
+[tr]
+	[td]SwitchHelmetLight[/td]
+	[td]SHL[/td]
+	[td]boolean[/td]
+	[td]Option, um das Helmlicht auszuschalten wenn ein Cockpit betreten wird.
+	[b]Standard: false[/b][/td]
+[/tr]
+[tr]
+	[td]TurnLightsBackOn[/td]
+	[td]TLBO[/td]
+	[td]boolean[/td]
+	[td]Option, um das Helmlicht wieder einzuschalten wenn ein Cockpit verlassen wird, falls es vorher an war.
+	[b]Standard: false[/b][/td]
+[/tr]
 [/table]
 
 [CODE]Usage: /ss [command] [arguments][/CODE]
