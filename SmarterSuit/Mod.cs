@@ -1,7 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Sandbox.Game;
+using Sandbox.Game.Entities.Character;
+using Sandbox.Game.Entities.Character.Components;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Extensions;
@@ -10,6 +9,9 @@ using Sisk.SmarterSuit.Settings;
 using Sisk.SmarterSuit.UI;
 using Sisk.Utils.Logging;
 using Sisk.Utils.Logging.DefaultHandler;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
@@ -248,6 +250,14 @@ namespace Sisk.SmarterSuit {
 
                 case Option.RememberBroadcast:
                     Settings.RememberBroadcast = (bool)(object)value;
+                    break;
+
+                case Option.SwitchHelmetLight:
+                    Settings.SwitchHelmetLight = (bool)(object)value;
+                    break;
+
+                case Option.TurnLightsBackOn:
+                    Settings.TurnLightsBackOn = (bool)(object)value;
                     break;
 
                 default:

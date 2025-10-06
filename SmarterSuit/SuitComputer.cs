@@ -34,6 +34,7 @@ namespace Sisk.SmarterSuit {
         private const string MEDICAL_ROOM = "MyObjectBuilder_MedicalRoom";
         private const string SURVIVAL_KIT = "MyObjectBuilder_SurvivalKit";
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
+        private const int TICKS_UNTIL_LIGHT_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 30;
         private readonly List<DelayedWork> _delayedWorkQueue = new List<DelayedWork>();
         private readonly IMyPlayer _player;
@@ -506,8 +507,9 @@ namespace Sisk.SmarterSuit {
                 _lastDampenerState = character.EnabledDamping;
             }
 
-            if (Mod.Static.Settings.SwitchHelmetLight && Mod.Static.Settings.TurnLightsBackOn && (newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
+            if (Mod.Static.Settings.SwitchHelmetLight && (newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
                 _lastLightState = character.EnabledLights;
+                _workQueue.Enqueue(new Work(ToggleHelmetLightIfNeeded));
             }
 
             _isFlying = newState == MyCharacterMovementEnum.Flying;
@@ -682,14 +684,16 @@ namespace Sisk.SmarterSuit {
                     Log.Warning("No character found for local player.");
                     return;
                 }
-                if (Mod.Static.Settings.SwitchHelmetLight) {
-                    if (character.EnabledHelmet && !character.EnabledLights) {
-                        character.SwitchLights();
-                    } else if (!character.EnabledHelmet && character.EnabledLights && Mod.Static.Settings.TurnLightsBackOn) {
-                        if (_lastLightState != character.EnabledLights) {
-                            character.SwitchLights();
-                        }
-                    }
+
+                if (character.EnabledLights && (character.CurrentMovementState == MyCharacterMovementEnum.Sitting)) {
+                    Log.Debug("Turning off helmet light because sitting down.");
+                    character.SwitchLights();
+                }
+
+                // turn lights back on when standing up if they were on before
+                if (Mod.Static.Settings.TurnLightsBackOn && _lastLightState != character.EnabledLights && (character.CurrentMovementState != MyCharacterMovementEnum.Sitting && character.CurrentMovementState != MyCharacterMovementEnum.Died)) {
+                    Log.Debug("Turning helmet light back on because standing up.");
+                    character.SwitchLights();
                 }
             }
         }

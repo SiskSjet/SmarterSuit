@@ -199,11 +199,33 @@ namespace Sisk.SmarterSuit.UI {
                 }
             };
 
+            var light = new ControlTile() {
+                new TerminalCheckbox() {
+                    Name = "Switch helmet light",
+                    Value = Mod.Static.Settings.SwitchHelmetLight,
+                    CustomValueGetter = () => Mod.Static.Settings.SwitchHelmetLight,
+                    ControlChangedHandler = (sender, args) => Mod.Static.SetOption(Option.SwitchHelmetLight, (sender as TerminalCheckbox).Value, false),
+                    ToolTip = new RichText(ToolTip.DefaultText) {
+                        "Will toggle the helmet light when toggling the helmet."
+                    },
+                },
+                new TerminalCheckbox() {
+                    Name = "Turn lights back on",
+                    Value = Mod.Static.Settings.TurnLightsBackOn,
+                    CustomValueGetter = () => Mod.Static.Settings.TurnLightsBackOn,
+                    ControlChangedHandler = (sender, args) => Mod.Static.SetOption(Option.TurnLightsBackOn, (sender as TerminalCheckbox).Value, false),
+                    ToolTip = new RichText(ToolTip.DefaultText) {
+                        "Will turn the helmet light back on if it was on before toggling the helmet."
+                    },
+                }
+            };
+
             return new ControlCategory() {
                 HeaderText = "Helmet",
                 SubheaderText = "Configure helmet behavior",
                 TileContainer = {
-                    helmet
+                    helmet,
+                    light
                 },
             };
         }

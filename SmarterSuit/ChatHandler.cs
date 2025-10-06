@@ -26,6 +26,8 @@ namespace Sisk.SmarterSuit {
             { Acronym(nameof(Option.AlignToGravity)), Option.AlignToGravity },
             { Acronym(nameof(Option.AlignToGravityDelay)), Option.AlignToGravityDelay },
             { Acronym(nameof(Option.RememberBroadcast)), Option.AlignToGravityDelay },
+            { Acronym(nameof(Option.SwitchHelmetLight)), Option.SwitchHelmetLight },
+            { Acronym(nameof(Option.TurnLightsBackOn)), Option.TurnLightsBackOn },
         };
 
         private readonly CommandHandler _commandHandler;
@@ -40,6 +42,8 @@ namespace Sisk.SmarterSuit {
             { Option.AlignToGravity, typeof(bool) },
             { Option.AlignToGravityDelay, typeof(int) },
             { Option.RememberBroadcast, typeof(bool) },
+            { Option.SwitchHelmetLight, typeof(bool) },
+            { Option.TurnLightsBackOn, typeof(bool) },
         };
 
         public ChatHandler(ILogger log) {
