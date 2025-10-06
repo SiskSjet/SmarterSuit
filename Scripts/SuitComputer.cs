@@ -535,7 +535,10 @@ namespace Sisk.SmarterSuit {
                     break;
 
                 case MyCharacterMovementEnum.Sitting:
-                    _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
+                    if (Mod.Static.Settings.AlwaysAutoHelmet) {
+                        _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
+                    }
+
                     if (!Mod.Static.RemoveAutomaticJetpackActivationModAvailable) {
                         var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
                         if (cockpit == null) {
