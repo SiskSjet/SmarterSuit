@@ -19,6 +19,8 @@ namespace Sisk.SmarterSuit.Settings {
         private const float FUEL_THRESHOLD = 0.25f;
         private const float HALTED_SPEED_TOLERANCE = 0.01f;
         private const bool REMEMBER_BROADCAST = true;
+        private const bool SWITCH_HELMET_LIGHT = false;
+        private const bool TURN_LIGHTS_BACK_ON = false;
 
         [ProtoMember(3)]
         [DefaultValue(ADDITIONAL_FUEL_WARNING)]
@@ -64,6 +66,16 @@ namespace Sisk.SmarterSuit.Settings {
         [DefaultValue(REMEMBER_BROADCAST)]
         [XmlElement(Order = 10)]
         public bool RememberBroadcast { get; set; } = REMEMBER_BROADCAST;
+
+        [ProtoMember(11)]
+        [DefaultValue(SWITCH_HELMET_LIGHT)]
+        [XmlElement(Order = 11)]
+        public bool SwitchHelmetLight { get; set; } = SWITCH_HELMET_LIGHT;
+
+        [ProtoMember(12)]
+        [DefaultValue(TURN_LIGHTS_BACK_ON)]
+        [XmlElement(Order = 12)]
+        public bool TurnLightsBackOn { get; set; } = TURN_LIGHTS_BACK_ON;
 
         [ProtoMember(1)]
         [XmlElement(Order = 1)]
