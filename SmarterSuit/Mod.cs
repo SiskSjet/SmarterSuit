@@ -414,7 +414,7 @@ namespace Sisk.SmarterSuit {
                         character.SwitchHelmet();
                     }
 
-                    if (character.GetSuitGasFillLevel(OxygenId) > 0) {
+                    if (character.Components.Has<MyCharacterOxygenComponent>() && character.GetSuitGasFillLevel(OxygenId) > 0) {
                         info.Amount = 0;
                     }
                 }
@@ -427,7 +427,7 @@ namespace Sisk.SmarterSuit {
                         character.SwitchHelmet();
                     }
 
-                    if (character.GetSuitGasFillLevel(OxygenId) > 0) {
+                    if (character.Components.Has<MyCharacterOxygenComponent>() && character.GetSuitGasFillLevel(OxygenId) > 0) {
                         info.Amount = 0;
                     }
                 }
