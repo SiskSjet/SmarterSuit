@@ -480,7 +480,7 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
-        ///     Called if local player identity changed (eg. died with permadeath on).
+        ///     Called if local player identity changed (e.g. died with permadeath on).
         ///     Used to remap CharacterChanged for the local player identity.
         /// </summary>
         /// <param name="player">The player which identity was changed.</param>
@@ -593,7 +593,7 @@ namespace Sisk.SmarterSuit {
                 // Sandbox.Game.Entities.IMyControllableEntity have to be the explicit type to not produce ambiguous call errors.
                 var control = character as IMyControllableEntity;
                 if (control != null) {
-                    // don't know why EnabledBroadcasting == data.State is working. I would expect EnabledBroadcasting != data.State to be correct but it would produce a reverse behavior.
+                    // don't know why EnabledBroadcasting == data.State is working. I would expect EnabledBroadcasting != data.State to be correct, but it would produce a reverse behavior.
                     if (control.EnabledBroadcasting == data.State) {
                         control.SwitchBroadcasting();
                     }
