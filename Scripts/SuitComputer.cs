@@ -10,6 +10,7 @@ using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.Localization;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
+using Sisk.SmarterSuit.Settings;
 using Sisk.Utils.Logging;
 using VRage;
 using VRage.Game;
@@ -46,6 +47,7 @@ namespace Sisk.SmarterSuit {
         private bool _isAutoAlignRunning;
         private bool _isFlying;
         private bool _lastDampenerState;
+        private bool _lastLightState;
         private bool _stopAutoAlign;
         private bool _wasFuelUnderThresholdBefore;
         private bool _wasHelmetClosedBefore;
@@ -504,6 +506,10 @@ namespace Sisk.SmarterSuit {
                 _lastDampenerState = character.EnabledDamping;
             }
 
+            if (Mod.Static.Settings.SwitchHelmetLight && Mod.Static.Settings.TurnLightsBackOn && (newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
+                _lastLightState = character.EnabledLights;
+            }
+
             _isFlying = newState == MyCharacterMovementEnum.Flying;
             switch (oldState) {
                 case MyCharacterMovementEnum.Ladder:
@@ -537,6 +543,10 @@ namespace Sisk.SmarterSuit {
                         }
 
                         _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(cockpit)));
+                    }
+
+                    if (Mod.Static.Settings.SwitchHelmetLight) {
+                        _workQueue.Enqueue(new Work(ToggleHelmetLightIfNeeded));
                     }
 
                     break;
