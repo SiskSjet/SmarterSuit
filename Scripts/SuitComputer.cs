@@ -10,6 +10,7 @@ using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.Localization;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
+using Sisk.SmarterSuit.Settings;
 using Sisk.Utils.Logging;
 using VRage;
 using VRage.Game;
@@ -46,6 +47,7 @@ namespace Sisk.SmarterSuit {
         private bool _isAutoAlignRunning;
         private bool _isFlying;
         private bool _lastDampenerState;
+        private bool _lastLightState;
         private bool _stopAutoAlign;
         private bool _wasFuelUnderThresholdBefore;
         private bool _wasHelmetClosedBefore;
@@ -480,7 +482,7 @@ namespace Sisk.SmarterSuit {
         }
 
         /// <summary>
-        ///     Called if local player identity changed (eg. died with permadeath on).
+        ///     Called if local player identity changed (e.g. died with permadeath on).
         ///     Used to remap CharacterChanged for the local player identity.
         /// </summary>
         /// <param name="player">The player which identity was changed.</param>
@@ -502,6 +504,10 @@ namespace Sisk.SmarterSuit {
         private void OnMovementStateChanged(IMyCharacter character, MyCharacterMovementEnum oldState, MyCharacterMovementEnum newState) {
             if (Mod.Static.Settings.DisableAutoDampener == DisableAutoDampenerOption.All && (newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
                 _lastDampenerState = character.EnabledDamping;
+            }
+
+            if (Mod.Static.Settings.SwitchHelmetLight && Mod.Static.Settings.TurnLightsBackOn && (newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
+                _lastLightState = character.EnabledLights;
             }
 
             _isFlying = newState == MyCharacterMovementEnum.Flying;
@@ -529,7 +535,10 @@ namespace Sisk.SmarterSuit {
                     break;
 
                 case MyCharacterMovementEnum.Sitting:
-                    _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
+                    if (Mod.Static.Settings.AlwaysAutoHelmet) {
+                        _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
+                    }
+
                     if (!Mod.Static.RemoveAutomaticJetpackActivationModAvailable) {
                         var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
                         if (cockpit == null) {
@@ -537,6 +546,10 @@ namespace Sisk.SmarterSuit {
                         }
 
                         _workQueue.Enqueue(new Work(ToggleJetpackAndDampenersIfNeeded, new ThrusterWorkData(cockpit)));
+                    }
+
+                    if (Mod.Static.Settings.SwitchHelmetLight) {
+                        _workQueue.Enqueue(new Work(ToggleHelmetLightIfNeeded));
                     }
 
                     break;
@@ -593,7 +606,7 @@ namespace Sisk.SmarterSuit {
                 // Sandbox.Game.Entities.IMyControllableEntity have to be the explicit type to not produce ambiguous call errors.
                 var control = character as IMyControllableEntity;
                 if (control != null) {
-                    // don't know why EnabledBroadcasting == data.State is working. I would expect EnabledBroadcasting != data.State to be correct but it would produce a reverse behavior.
+                    // don't know why EnabledBroadcasting == data.State is working. I would expect EnabledBroadcasting != data.State to be correct, but it would produce a reverse behavior.
                     if (control.EnabledBroadcasting == data.State) {
                         control.SwitchBroadcasting();
                     }
