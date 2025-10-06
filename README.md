@@ -50,6 +50,8 @@ You can also download the latest zip from [releases](https://github.com/SiskSjet
 * **AlignToGravity/ATG** (*boolean*) - Option to align the player to the gravity vector when flying. *Default: false*.
 * **AlignToGravityDelay/ATGD** (*float*) - Delay, after which the suit tries to align to gravity. . *Default: 312*.
 * **RememberBroadcast/RB** (*boolean*) - Option to remember the broadcast state of the suit. *Default: true*.
+* **SwitchHelmetLight/SHL** (*boolean*) - Option to switch the helmet light off when enter a cockpit. *Default: false*.
+* **TurnLightsBackOn/TLBO** (*boolean*) - Option to turn the helmet light back on when leaving a cockpit if it was on before. *Default: false*.
 
 ## 🛠︰Commands
 
