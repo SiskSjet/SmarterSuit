@@ -675,6 +675,25 @@ namespace Sisk.SmarterSuit {
             }
         }
 
+        private void ToggleHelmetLightIfNeeded(Work.Data data) {
+            using (Log.BeginMethod(nameof(ToggleHelmetLightIfNeeded))) {
+                var character = MyAPIGateway.Session.LocalHumanPlayer?.Character;
+                if (character == null) {
+                    Log.Warning("No character found for local player.");
+                    return;
+                }
+                if (Mod.Static.Settings.SwitchHelmetLight) {
+                    if (character.EnabledHelmet && !character.EnabledLights) {
+                        character.SwitchLights();
+                    } else if (!character.EnabledHelmet && character.EnabledLights && Mod.Static.Settings.TurnLightsBackOn) {
+                        if (_lastLightState != character.EnabledLights) {
+                            character.SwitchLights();
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         ///     Will enable jetpack when no gravity is present and no ground is in range.
         ///     Will enable dampeners when allowed and grid is not moving or planetary gravity is detected and no ground is in
