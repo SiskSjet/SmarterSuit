@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netframework48</TargetFramework>
+    <RootNamespace>Sisk.SmarterSuit</RootNamespace>
+    <LangVersion>6</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Release;Debug</Configurations>
+    <Platforms>x64</Platforms>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Mal.Mdk2.ModAnalyzers" Version="2.1.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.1.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Mal.Mdk2.References" Version="2.2.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="Content\*\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AdditionalFiles>
+    <AdditionalFiles Remove="Content\*\**\*.cs" />
+    <AdditionalFiles Remove="Content\Data\SBC files can go here" />
+  </ItemGroup>
+  <Import Project="..\RichHudFramework\RichHUDFramework.projitems" Label="Shared" />
+  <Import Project="..\Utils\CommandHandler\CommandHandler.projitems" Label="Shared" />
+  <Import Project="..\Utils\Localization\Localization.projitems" Label="Shared" />
+  <Import Project="..\Utils\Logging\Logging.projitems" Label="Shared" />
+  <Import Project="..\WaterAPI\WaterAPI.projitems" Label="Shared" />
+</Project>

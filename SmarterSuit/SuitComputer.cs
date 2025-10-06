@@ -34,6 +34,7 @@ namespace Sisk.SmarterSuit {
         private const string MEDICAL_ROOM = "MyObjectBuilder_MedicalRoom";
         private const string SURVIVAL_KIT = "MyObjectBuilder_SurvivalKit";
         private const int TICKS_UNTIL_FUEL_CHECK = 30;
+        private const int TICKS_UNTIL_LIGHT_CHECK = 30;
         private const int TICKS_UNTIL_OXYGEN_CHECK = 30;
         private readonly List<DelayedWork> _delayedWorkQueue = new List<DelayedWork>();
         private readonly IMyPlayer _player;
@@ -50,7 +51,6 @@ namespace Sisk.SmarterSuit {
         private bool _lastLightState;
         private bool _stopAutoAlign;
         private bool _wasFuelUnderThresholdBefore;
-        private bool _wasHelmetClosedBefore;
 
         /// <summary>
         ///     Creates a new instance of <see cref="SuitComputer" />.
@@ -138,7 +138,7 @@ namespace Sisk.SmarterSuit {
             }
 
             var startTime = DateTime.UtcNow;
-            if (MyAPIGateway.Session.ControlledObject != null && MyAPIGateway.Session.ControlledObject is IMyCharacter) {
+            if (MyAPIGateway.Session.ControlledObject != null) {
                 if (Mod.Static.Settings.AlwaysAutoHelmet && MyAPIGateway.Session.SessionSettings.EnableOxygen) {
                     _autoHelmetTicks++;
                     if (_autoHelmetTicks >= TICKS_UNTIL_OXYGEN_CHECK - 1) {
@@ -147,26 +147,28 @@ namespace Sisk.SmarterSuit {
                     }
                 }
 
-                if (Mod.Static.Settings.AdditionalFuelWarning) {
-                    _fuelCheckTicks++;
+                if (MyAPIGateway.Session.ControlledObject is IMyCharacter) {
+                    if (Mod.Static.Settings.AdditionalFuelWarning) {
+                        _fuelCheckTicks++;
 
-                    if (_fuelCheckTicks >= TICKS_UNTIL_FUEL_CHECK) {
-                        _fuelCheckTicks = 0;
-                        _workQueue.Enqueue(new Work(ShowFuelLowWarningIfNeeded));
-                    }
-                }
-
-                if (Mod.Static.Settings.AlignToGravity) {
-                    if (_isFlying) {
-                        _autoAlignTicks++;
-                        if (!_isAutoAlignRunning && _autoAlignTicks >= Mod.Static.Settings.AlignToGravityDelay) {
-                            _autoAlignTicks = 0;
-                            _workQueue.Enqueue(new Work(AutoAlign));
+                        if (_fuelCheckTicks >= TICKS_UNTIL_FUEL_CHECK) {
+                            _fuelCheckTicks = 0;
+                            _workQueue.Enqueue(new Work(ShowFuelLowWarningIfNeeded));
                         }
-                    } else if (_isAutoAlignRunning) {
-                        _autoAlignTicks = 0;
-                        _isAutoAlignRunning = false;
-                        _stopAutoAlign = true;
+                    }
+
+                    if (Mod.Static.Settings.AlignToGravity) {
+                        if (_isFlying) {
+                            _autoAlignTicks++;
+                            if (!_isAutoAlignRunning && _autoAlignTicks >= Mod.Static.Settings.AlignToGravityDelay) {
+                                _autoAlignTicks = 0;
+                                _workQueue.Enqueue(new Work(AutoAlign));
+                            }
+                        } else if (_isAutoAlignRunning) {
+                            _autoAlignTicks = 0;
+                            _isAutoAlignRunning = false;
+                            _stopAutoAlign = true;
+                        }
                     }
                 }
             }
@@ -502,12 +504,19 @@ namespace Sisk.SmarterSuit {
         /// <param name="oldState">The old movement state.</param>
         /// <param name="newState">The new movement state.</param>
         private void OnMovementStateChanged(IMyCharacter character, MyCharacterMovementEnum oldState, MyCharacterMovementEnum newState) {
-            if (Mod.Static.Settings.DisableAutoDampener == DisableAutoDampenerOption.All && (newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
-                _lastDampenerState = character.EnabledDamping;
-            }
+            if ((newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
+                if (Mod.Static.Settings.DisableAutoDampener == DisableAutoDampenerOption.All) {
+                    _lastDampenerState = character.EnabledDamping;
+                }
 
-            if (Mod.Static.Settings.SwitchHelmetLight && Mod.Static.Settings.TurnLightsBackOn && (newState == MyCharacterMovementEnum.Sitting || newState == MyCharacterMovementEnum.Died)) {
-                _lastLightState = character.EnabledLights;
+                if (Mod.Static.Settings.SwitchHelmetLight) {
+                    _lastLightState = character.EnabledLights;
+                    _workQueue.Enqueue(new Work(ToggleHelmetLightIfNeeded));
+                }
+
+                if (Mod.Static.Settings.AlwaysAutoHelmet) {
+                    _workQueue.Enqueue(new Work(ToggleHelmetIfNeeded));
+                }
             }
 
             _isFlying = newState == MyCharacterMovementEnum.Flying;
@@ -665,13 +674,36 @@ namespace Sisk.SmarterSuit {
                 var oxygen = GetOxygenLevel(character);
                 var suitOxy = character.GetSuitGasFillLevel(MyCharacterOxygenComponent.OxygenId);
                 var required = oxygen <= 0.5 || underwater;
-                var shouldOpen = _wasHelmetClosedBefore && oxygen > 0.6 && !underwater;
+                var shouldOpen = oxygen > 0.6 && !underwater;
+                if (character.CurrentMovementState == MyCharacterMovementEnum.Sitting) {
+                    var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
+                    if (cockpit != null) {
+                        required = cockpit.OxygenFilledRatio == 0 && oxygen <= 0.5;
+                        shouldOpen = !required;
+                    }
+                }
 
                 if (required && !character.EnabledHelmet || !required && character.EnabledHelmet && suitOxy > 0.2 && shouldOpen || !required && character.EnabledHelmet && suitOxy < 0.2) {
                     character.SwitchHelmet();
                 }
+            }
+        }
 
-                _wasHelmetClosedBefore = character.EnabledHelmet;
+        private void ToggleHelmetLightIfNeeded(Work.Data data) {
+            using (Log.BeginMethod(nameof(ToggleHelmetLightIfNeeded))) {
+                var character = MyAPIGateway.Session.LocalHumanPlayer?.Character;
+                if (character == null) {
+                    Log.Warning("No character found for local player.");
+                    return;
+                }
+
+                if (character.EnabledLights && (character.CurrentMovementState == MyCharacterMovementEnum.Sitting)) {
+                    character.SwitchLights();
+                }
+
+                if (Mod.Static.Settings.TurnLightsBackOn && _lastLightState != character.EnabledLights && (character.CurrentMovementState != MyCharacterMovementEnum.Sitting && character.CurrentMovementState != MyCharacterMovementEnum.Died)) {
+                    character.SwitchLights();
+                }
             }
         }
 
