@@ -1,4 +1,13 @@
-# [2.1.0](https://github.com/SiskSjet/SmarterSuit/compare/v2.0.0...v) (2025-10-06)
+# [2.1.1](https://github.com/SiskSjet/SmarterSuit/compare/v2.1.0...v2.1.1) (2025-10-06)
+
+
+### Bug Fixes
+
+* Fixes oxygen detection in cockpits when using remotes or turrets. ([8cb6b90](https://github.com/SiskSjet/SmartSuit/commit/8cb6b90067eec7cb0d6b51470040287acd83cad7))
+
+
+
+# [2.1.0](https://github.com/SiskSjet/SmarterSuit/compare/v2.0.0...v2.1.0) (2025-10-06)
 
 
 ### Code Refactoring
