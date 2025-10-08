@@ -1,17 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Jakaria.API;
+﻿using Jakaria.API;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.Definitions;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
 using Sandbox.Game.Entities.Character.Components;
+using Sandbox.Game.EntityComponents;
 using Sandbox.Game.Localization;
+using Sandbox.Game.Weapons;
 using Sandbox.ModAPI;
 using Sisk.SmarterSuit.Data;
 using Sisk.SmarterSuit.Settings;
 using Sisk.Utils.Logging;
+using SpaceEngineers.Game.Entities.Weapons;
+using SpaceEngineers.Game.ModAPI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using VRage;
 using VRage.Game;
 using VRage.Game.Entity;
@@ -676,7 +680,7 @@ namespace Sisk.SmarterSuit {
                 var required = oxygen <= 0.5 || underwater;
                 var shouldOpen = oxygen > 0.6 && !underwater;
                 if (character.CurrentMovementState == MyCharacterMovementEnum.Sitting) {
-                    var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
+                    var cockpit = character.Parent as IMyCockpit;
                     if (cockpit != null) {
                         required = cockpit.OxygenFilledRatio == 0 && oxygen <= 0.5;
                         shouldOpen = !required;
